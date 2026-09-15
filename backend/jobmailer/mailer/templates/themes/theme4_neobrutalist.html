@@ -1,0 +1,119 @@
+{% load email_filters %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>{{ subject }}</title>
+</head>
+<body style="margin:0;padding:0;background-color:#fafaf9;font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#fafaf9;min-height:100vh">
+    <tr>
+      <td align="center" style="padding:24px 16px">
+        <table role="presentation" width="680" cellpadding="0" cellspacing="0" style="width:100%;max-width:680px">
+          <!-- ROW 1 — Orange Top Stripe -->
+          <tr>
+            <td height="5" bgcolor="#f97316" style="background-color:#f97316;font-size:0;line-height:0;display:block"></td>
+          </tr>
+          
+          <!-- ROW 2 — Hero Section -->
+          <tr>
+            <td bgcolor="#ffffff" style="background-color:#ffffff;padding:32px 28px 20px">
+              <span style="display:inline-block;background-color:#fff7ed;color:#c2410c;border:1px solid #fed7aa;padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.05em;margin-bottom:16px">
+                AVAILABLE FOR HIRE
+              </span>
+              <span style="color:#0c0a09;font-size:32px;font-weight:900;letter-spacing:-0.03em;line-height:1.1;display:block;margin-bottom:6px">{{ profile.full_name }}</span>
+              <span style="color:#78716c;font-size:14px;display:block;margin-bottom:0">{{ profile.role }}</span>
+            </td>
+          </tr>
+          
+          <!-- ROW 3 — Bento Grid -->
+          <tr>
+            <td bgcolor="#ffffff" style="background-color:#ffffff;padding:0 28px 16px">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <!-- Top wide card -->
+                <tr>
+                  <td bgcolor="#0c0a09" style="background-color:#0c0a09;border-radius:10px;padding:20px 22px;margin-bottom:8px;display:block">
+                    <span style="color:#a8a29e;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;display:block;margin-bottom:8px">WHY {{ company_name|upper }}</span>
+                    <div id="editable_body" style="color:#fafaf9;font-size:14px;line-height:1.7;outline:none;display:block">
+                      {{ opening_paragraph|linebreaksbr }}
+                    </div>
+                  </td>
+                </tr>
+                <tr><td height="8" style="font-size:0;line-height:0">&nbsp;</td></tr>
+                <!-- Two equal cards side by side -->
+                <tr>
+                  <td>
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="8">
+                      <tr>
+                        <td width="50%" bgcolor="#fff7ed" style="background-color:#fff7ed;border-radius:10px;padding:16px 18px;display:block;width:100%;box-sizing:border-box">
+                          <span style="color:#c2410c;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;display:block;margin-bottom:8px">EDUCATION</span>
+                          <span style="color:#0c0a09;font-size:13px;font-weight:700;margin-top:4px;display:block">{{ profile.college }}</span>
+                          <span style="color:#78716c;font-size:11px;margin-top:2px;display:block">Class of {{ profile.grad_year }}</span>
+                        </td>
+                        <td width="50%" bgcolor="#fff7ed" style="background-color:#fff7ed;border-radius:10px;padding:16px 18px;display:block;width:100%;box-sizing:border-box">
+                          <span style="color:#c2410c;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;display:block;margin-bottom:8px">EXPERIENCE</span>
+                          <span style="color:#0c0a09;font-size:13px;font-weight:700;margin-top:4px;display:block">Projects Shipped</span>
+                          <span style="color:#78716c;font-size:11px;margin-top:2px;display:block">See GitHub for repos</span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- ROW 4 — Skills -->
+          <tr>
+            <td bgcolor="#ffffff" style="background-color:#ffffff;padding:0 28px 16px">
+              {% for skill in skills_list %}
+                <span style="display:inline-block;background-color:#fff7ed;color:#c2410c;border:1px solid #fed7aa;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600;margin:3px 5px 3px 0">{{ skill }}</span>
+              {% endfor %}
+            </td>
+          </tr>
+
+          <!-- ROW 5 — Action Row -->
+          <tr>
+            <td bgcolor="#ffffff" style="background-color:#ffffff;padding:4px 28px 24px">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td width="40%" style="display:block;width:100%;margin-bottom:6px">
+                    <a href="{{ profile.portfolio|default:'#' }}" style="display:block;background-color:#f97316;color:#ffffff;padding:12px 0;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none;text-align:center;width:100%;box-sizing:border-box">See My Work</a>
+                  </td>
+                  <td width="2%" style="display:block;width:100%"></td>
+                  <td width="28%" style="display:block;width:100%;margin-bottom:6px">
+                    <a href="{{ profile.linkedin|default:'#' }}" style="display:block;background-color:#ffffff;color:#44403c;border:1.5px solid #e7e5e4;padding:11px 0;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;text-align:center;width:100%;box-sizing:border-box">LinkedIn</a>
+                  </td>
+                  <td width="2%" style="display:block;width:100%"></td>
+                  <td width="28%" style="display:block;width:100%;margin-bottom:6px">
+                    <a href="{{ profile.github|default:'#' }}" style="display:block;background-color:#ffffff;color:#44403c;border:1.5px solid #e7e5e4;padding:11px 0;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;text-align:center;width:100%;box-sizing:border-box">GitHub</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- ROW 6 — Footer -->
+          <tr>
+            <td style="border-top:1px solid #e7e5e4;padding:16px 28px">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td width="50%" style="display:block;width:100%;margin-bottom:4px">
+                    <span style="color:#78716c;font-size:12px">{{ profile.full_name }} · Resume attached</span>
+                  </td>
+                  <td width="50%" align="right" style="display:block;width:100%;text-align:left">
+                    <span style="color:#a8a29e;font-size:12px">{{ profile.phone }}</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

@@ -1,0 +1,681 @@
+{% extends 'base.html' %}
+{% block title %}JobMailer - Compose{% endblock %}
+{% block page_title %}<h1 class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">Compose Email</h1>{% endblock %}
+
+{% block content %}
+<div class="flex flex-col lg:flex-row gap-6 h-full relative">
+    
+    <!-- Left Column (Grid) -->
+    <div class="w-full lg:w-[45%] flex flex-col gap-5">
+        
+        {% if not has_smtp %}
+        <!-- Setup Warning -->
+        <div class="bento-card bento-delay-1 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700/50 text-yellow-800 dark:text-yellow-400 p-4 rounded-2xl flex items-start gap-3 shadow-sm">
+            <svg class="w-6 h-6 flex-shrink-0 text-yellow-600 dark:text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            <div>
+                <strong class="font-bold block mb-0.5">SMTP not configured</strong>
+                <span class="text-sm opacity-90">Preview features are active, but you cannot send emails yet.</span>
+                <a href="{% url 'settings' %}" class="block mt-1 font-bold hover:underline text-sm opacity-100">Configure in Settings →</a>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Recipient Bento -->
+        <div class="bento-card bento-delay-1 bg-white dark:bg-darkcard shadow-3d rounded-[1.5rem] shadow-sm hover:shadow-xl hover:shadow-purple-900/5 dark:hover:shadow-purple-900/20 border border-gray-200 dark:border-darkborder hover:border-purple-200 dark:hover:border-purple-500/30 p-6 transition-all duration-500">
+            <div class="mb-5">
+                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">To</label>
+                <input type="email" id="receiver_email" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-darkborder text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all outline-none" placeholder="hr@company.com">
+                
+                {% if companies %}
+                <select id="company_select" class="w-full mt-2.5 px-4 py-2.5 border border-gray-200 dark:border-darkborder rounded-xl text-sm bg-gray-50 dark:bg-[#1a1a1a] text-gray-600 dark:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all">
+                    <option value="">Or pick from saved companies...</option>
+                    {% for c in companies %}
+                        <option value="{{ c.email }}|||{{ c.name }}">{{ c.name }} ({{ c.email }})</option>
+                    {% endfor %}
+                </select>
+                {% endif %}
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Company Name</label>
+                <input type="text" id="company_name" class="w-full px-4 py-2.5 border border-blue-200 dark:border-blue-900/50 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-blue-50/50 dark:bg-blue-900/10 text-gray-900 dark:text-white transition-all outline-none" placeholder="e.g. Google, Apple, Startup Inc">
+                <p class="text-xs text-blue-600 dark:text-blue-400 mt-2 flex items-center gap-1.5 font-medium">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    Typing auto-triggers Gemini AI personalization
+                </p>
+            </div>
+            
+            <label class="flex items-center gap-3 cursor-pointer mt-5 group p-2 -ml-2 rounded-lg hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors w-max">
+                <div class="relative flex items-center">
+                    <input type="checkbox" id="add_to_book" class="peer sr-only" checked>
+                    <div class="w-5 h-5 border-2 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-darkcard peer-checked:bg-purple-500 peer-checked:border-purple-500 transition-all"></div>
+                    <svg class="absolute w-3.5 h-3.5 text-white left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <span class="text-sm font-medium text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Save to Address Book</span>
+            </label>
+        </div>
+
+        <!-- AI DRAFTING STUDIO CARD -->
+        <div class="bento-card bento-delay-2 bg-white dark:bg-darkcard shadow-3d rounded-[1.5rem] shadow-sm hover:shadow-xl hover:shadow-purple-900/5 dark:hover:shadow-purple-900/20 border border-gray-200 dark:border-darkborder hover:border-purple-200 dark:hover:border-purple-500/30 transition-all duration-500 mb-5 overflow-hidden flex flex-col group">
+        
+          <!-- Card Header -->
+          <div class="bg-gray-50 dark:bg-[#1a1a1a] px-6 py-4 border-b border-gray-200 dark:border-darkborder flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <!-- Gemini star icon (SVG inline) -->
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" class="text-purple-600 dark:text-purple-500">
+                <path d="M12 2L9.09 8.26L2 9.27L7 14.14L5.82 21.02L12 17.77L18.18 21.02L17 14.14L22 9.27L14.91 8.26L12 2Z" fill="currentColor"/>
+              </svg>
+              <h3 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wide">AI Drafting Engine</h3>
+              <span id="ai_mode_badge" class="ml-2 bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400 text-[9px] px-2 py-0.5 rounded-full uppercase font-bold tracking-wider border border-purple-200 dark:border-purple-800">
+                QUICK MODE
+              </span>
+            </div>
+            <!-- Gemini configured indicator -->
+            {% if has_gemini %}
+              <span class="text-[10px] font-bold text-green-600 dark:text-green-500 flex items-center gap-1.5 uppercase tracking-wider">
+                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span>
+                Gemini Active
+              </span>
+            {% else %}
+              <a href="{% url 'settings' %}" class="text-[10px] font-bold text-yellow-600 dark:text-yellow-500 hover:underline flex items-center gap-1 uppercase tracking-wider">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                Add API Key →
+              </a>
+            {% endif %}
+          </div>
+        
+          <!-- Mode Tabs -->
+          <div class="flex border-b border-gray-200 dark:border-darkborder bg-white dark:bg-darkcard">
+            <button id="tab_quick" onclick="switchAIMode('quick')" class="flex-1 py-3 text-xs font-bold transition-all border-b-2 border-purple-600 text-purple-600 dark:border-purple-500 dark:text-purple-400 bg-gray-50/50 dark:bg-[#1a1a1a]/50 focus:outline-none">
+              Lightning Pitch
+            </button>
+            <button id="tab_jd" onclick="switchAIMode('jd')" class="flex-1 py-3 text-xs font-bold transition-all border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-50/50 dark:hover:bg-[#1a1a1a]/50 focus:outline-none">
+              Deep JD Draft
+            </button>
+          </div>
+        
+          <div class="p-6">
+            <!-- Quick Mode Panel -->
+            <div id="panel_quick">
+              <div class="text-center py-4 bg-gray-50/50 dark:bg-[#1a1a1a]/50 rounded-xl border border-gray-100 dark:border-gray-800/50">
+                <svg class="w-6 h-6 text-gray-400 dark:text-gray-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
+                  Type the <strong class="text-gray-900 dark:text-white">Company Name</strong> above and wait 1s.<br>
+                  Gemini will auto-generate a targeted pitch based on its knowledge.
+                </p>
+              </div>
+            </div>
+          
+            <!-- JD Mode Panel -->
+            <div id="panel_jd" style="display:none">
+              <!-- Job Description -->
+              <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 mt-1">
+                Paste Job Description <span class="text-red-500">*</span>
+              </label>
+              <!-- Hidden completely, user asked to remove duplicate "about company" details since JD holds this context -->
+              <input type="hidden" id="about_company" value="">
+              <textarea id="job_description"
+                        class="w-full px-4 py-3 bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-darkborder text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm leading-relaxed transition-all outline-none resize-y min-h-[140px]"
+                        placeholder="Paste the full JD...&#10;&#10;Gemini will:&#10;• Analyze actual requirements&#10;• Cross-reference your skills&#10;• Choose the best psychological angle&#10;• Write a completely personalized email"></textarea>
+              
+              <div class="flex justify-between items-center mt-2.5">
+                <span id="jd_quality_hint" class="text-xs font-bold"></span>
+                <div class="text-[11px] font-bold tracking-wider text-gray-400 dark:text-gray-500 uppercase">
+                  <span id="jd_char_count" class="text-gray-600 dark:text-gray-300 ml-1">0</span> chars
+                </div>
+              </div>
+              <label class="flex items-center gap-3 mt-4 mb-2 cursor-pointer group w-max">
+                  <div class="relative flex items-center">
+                      <input type="checkbox" id="extract_resume" class="sr-only peer" checked>
+                      <div class="w-9 h-5 bg-gray-200 dark:bg-gray-700 rounded-full peer peer-checked:bg-purple-600 transition-colors"></div>
+                      <div class="absolute left-1 w-3 h-3 bg-white rounded-full transition-transform peer-checked:translate-x-4 shadow-sm"></div>
+                  </div>
+                  <span class="text-[11px] font-bold text-gray-700 dark:text-gray-300 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors uppercase tracking-widest">Extract From Resume</span>
+              </label>
+
+              <button id="btn_draft_email" onclick="triggerJDDraft(document.getElementById('extract_resume').checked)" class="w-full justify-center flex items-center gap-2 mt-2 py-3.5 bg-purple-600 text-white rounded-xl font-bold text-sm hover:bg-purple-700 hover:shadow-lg hover:-translate-y-0.5 transition-all outline-none relative overflow-hidden group">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"><path d="M12 2L9.09 8.26L2 9.27L7 14.14L5.82 21.02L12 17.77L18.18 21.02L17 14.14L22 9.27L14.91 8.26L12 2Z" fill="currentColor"/></svg>
+                Generate JD Draft
+              </button>
+          
+              <div id="draft_status" class="mt-4 hidden shadow-inner rounded-xl"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Content Editor Bento -->
+        <div class="bento-card bento-delay-2 bg-white dark:bg-darkcard shadow-3d rounded-[1.5rem] shadow-sm hover:shadow-xl hover:shadow-purple-900/5 dark:hover:shadow-purple-900/20 border border-gray-200 dark:border-darkborder hover:border-purple-200 dark:hover:border-purple-500/30 p-6 space-y-5 transition-all duration-500">
+            <div>
+                <label class="flex text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 items-center gap-2">
+                    Subject Line <span class="ai-badge hidden bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-[10px] px-2 py-0.5 rounded-full uppercase font-bold tracking-wider shadow-sm">AI Generated</span>
+                </label>
+                <input type="text" id="subject_line" value="{{ default_subject }}" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-darkborder text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all outline-none">
+            </div>
+            
+            <div>
+                <label class="flex text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 items-center gap-2">
+                    Email Body Content <span class="ai-badge hidden bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-[10px] px-2 py-0.5 rounded-full uppercase font-bold tracking-wider shadow-sm">AI Generated</span>
+                    <span class="text-[10px] font-normal text-purple-600 dark:text-purple-400 ml-2 tracking-wide uppercase hidden lg:inline">✨ Editable directly in Preview!</span>
+                </label>
+                <textarea id="opening_para" rows="12" class="w-full px-4 py-3 bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-darkborder text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm leading-relaxed transition-all outline-none resize-y min-h-[250px]">{{ default_opening }}</textarea>
+                <p class="text-[11px] text-gray-500 dark:text-gray-500 mt-2 font-medium">Accepts automatic line breaks and HTML tags.</p>
+            </div>
+        </div>
+
+        <!-- Theme Picker Bento -->
+        <div class="bento-card bento-delay-3 bg-white dark:bg-darkcard shadow-3d rounded-[1.5rem] shadow-sm hover:shadow-xl hover:shadow-purple-900/5 dark:hover:shadow-purple-900/20 border border-gray-200 dark:border-darkborder hover:border-purple-200 dark:hover:border-purple-500/30 p-6 transition-all duration-500">
+            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-4">Aesthetic Theme</label>
+            <div class="grid grid-cols-2 lg:grid-cols-3 gap-3">
+                {% for t in themes %}
+                <div class="theme-card relative cursor-pointer border border-gray-200 dark:border-darkborder bg-gray-50/50 dark:bg-[#1a1a1a]/50 rounded-xl p-3.5 hover:border-purple-400 dark:hover:border-purple-500 hover:shadow-md transition-all duration-300 {% if forloop.first %}selected ring-2 ring-purple-500 border-purple-500 bg-white dark:bg-darkcard shadow-sm{% endif %}" data-theme-id="{{ t.id }}">
+                    <div class="absolute inset-y-0 left-0 w-1 rounded-l-xl" style="background-color: {{ t.color }}"></div>
+                    <div class="check-icon hidden absolute -top-2 -right-2 w-6 h-6 bg-purple-600 rounded-full text-white items-center justify-center shadow-md scale-110 transition-transform">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                    <div class="font-bold text-gray-900 dark:text-white text-sm mb-1 pl-2">{{ t.name }}</div>
+                    <div class="text-[11px] text-gray-500 dark:text-gray-400 leading-snug pl-2">{{ t.desc }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Action Bento -->
+        <div class="bento-card bento-delay-4 bg-white dark:bg-darkcard shadow-3d rounded-[1.5rem] shadow-md hover:shadow-xl hover:shadow-purple-900/10 dark:hover:shadow-purple-900/30 border border-gray-200 dark:border-darkborder hover:border-indigo-200 dark:hover:border-indigo-500/30 p-6 mt-2 relative overflow-hidden group transition-all duration-500">
+            <div class="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-indigo-500/5 dark:from-purple-500/10 dark:to-indigo-500/10 z-0 pointer-events-none"></div>
+            
+            <div class="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4 mb-5">
+                <div class="text-xs font-medium text-gray-500 dark:text-gray-400">Sending from:<br><span class="font-bold text-gray-900 dark:text-white text-sm">{{ sender_email }}</span></div>
+                
+                {% if resume_uploaded %}
+                    <div class="flex items-center gap-1.5 text-xs font-bold text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-lg border border-green-200 dark:border-green-800">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+                        Resume Attached
+                    </div>
+                {% else %}
+                    <a href="{% url 'profile' %}" class="flex items-center gap-1.5 text-xs font-bold text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 px-3 py-1.5 rounded-lg border border-yellow-200 dark:border-yellow-800 hover:bg-yellow-100 dark:hover:bg-yellow-900/40 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        Upload Resume
+                    </a>
+                {% endif %}
+            </div>
+            
+            <button id="send_btn" class="relative z-10 w-full flex items-center justify-center gap-2 py-4 bg-gray-900 dark:bg-purple-600 text-white rounded-xl font-bold text-base hover:bg-black dark:hover:bg-purple-500 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+                <span>Dispatch Email</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+            </button>
+        </div>
+        
+    </div>
+
+    <!-- Right Column (Sticky Preview Bento) -->
+    <div class="bento-card bento-delay-3 w-full lg:w-[55%] lg:sticky lg:top-[90px] h-[calc(100vh-120px)] flex flex-col pt-1">
+        
+        <div class="bg-gray-900 dark:bg-darkcard rounded-t-2xl px-5 py-3 flex justify-between items-center border border-gray-800 border-b-0 shadow-lg z-10">
+            <div class="flex items-center gap-2">
+                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+            </div>
+            <h3 class="font-bold text-white text-xs tracking-wider flex items-center gap-2 uppercase">
+                <span class="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span>
+                Live Rendering
+            </h3>
+        </div>
+        
+        <iframe id="preview_frame" class="w-full flex-1 bg-white dark:bg-[#ececec] border border-gray-300 dark:border-gray-800 rounded-b-2xl shadow-xl transition-all duration-500 origin-top"></iframe>
+        
+        <div class="mt-3 text-center text-[10px] text-gray-500 dark:text-gray-400 font-bold tracking-widest uppercase flex items-center justify-center gap-4">
+            <span id="preview_info_theme" class="bg-white/90 dark:bg-darkcard px-2 py-1 rounded-md border border-gray-200 dark:border-darkborder">Theme: Dark Coder</span>
+            <span id="preview_info_to" class="bg-white/90 dark:bg-darkcard px-2 py-1 rounded-md border border-gray-200 dark:border-darkborder truncate max-w-[200px]">To: —</span>
+        </div>
+    </div>
+</div>
+
+<style type="text/tailwindcss">
+    /* Custom Scrollbar for iframe parent if needed, handled organically by Tailwind */
+    .theme-card.selected { @apply ring-2 ring-purple-600 border-purple-600 bg-purple-50/50 dark:bg-purple-900/20 dark:ring-purple-500 dark:border-purple-500; }
+    .theme-card.selected .check-icon { @apply flex; }
+</style>
+
+<script>
+    const state = {
+        themeId: 'theme1',
+        themeName: 'Dark Coder',
+        previewTimer: null,
+    };
+
+    const aiState = {
+        mode: 'quick',           // 'quick' | 'jd'
+        drafting: false,
+        drafted: false,
+        jdResult: null,
+        aiUsed: false,
+        angleUsed: '',
+        jdSkillsMatched: [],
+    };
+
+    document.addEventListener('DOMContentLoaded', () => { refreshPreview(); });
+
+    document.querySelectorAll('.theme-card').forEach(card => {
+        card.addEventListener('click', function() {
+            document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('selected', 'bg-white', 'dark:bg-darkcard', 'shadow-sm'));
+            document.querySelectorAll('.theme-card').forEach(c => c.classList.add('bg-gray-50/50', 'dark:bg-[#1a1a1a]/50'));
+            
+            this.classList.remove('bg-gray-50/50', 'dark:bg-[#1a1a1a]/50');
+            this.classList.add('selected', 'bg-white', 'dark:bg-darkcard', 'shadow-sm');
+            
+            state.themeId = this.dataset.themeId;
+            state.themeName = this.querySelector('.font-bold').textContent;
+            
+            // Pop animation on frame
+            const frame = document.getElementById('preview_frame');
+            frame.style.transform = 'scale(0.98)';
+            setTimeout(() => { frame.style.transform = 'scale(1)'; }, 150);
+            
+            refreshPreview();
+            updatePreviewInfo();
+        });
+    });
+
+    document.getElementById('company_select')?.addEventListener('change', function() {
+        if(!this.value) return;
+        const [email, name] = this.value.split('|||');
+        document.getElementById('receiver_email').value = email;
+        document.getElementById('company_name').value = name;
+        document.getElementById('company_name').dispatchEvent(new Event('input'));
+        updatePreviewInfo();
+    });
+
+    document.getElementById('receiver_email').addEventListener('input', updatePreviewInfo);
+
+    // ── MODE SWITCHING ────────────────────────────────────────────────
+    function switchAIMode(mode) {
+      aiState.mode = mode;
+
+      document.getElementById('panel_quick').style.display = mode === 'quick' ? 'block' : 'none';
+      document.getElementById('panel_jd').style.display   = mode === 'jd'    ? 'block' : 'none';
+
+      const tabQuick = document.getElementById('tab_quick');
+      const tabJD    = document.getElementById('tab_jd');
+      const badge    = document.getElementById('ai_mode_badge');
+      
+      const activeTabClass = "flex-1 py-3 text-xs font-bold transition-all border-b-2 border-purple-600 text-purple-600 dark:border-purple-500 dark:text-purple-400 bg-gray-50/50 dark:bg-[#1a1a1a]/50 focus:outline-none";
+      const inactiveTabClass = "flex-1 py-3 text-xs font-bold transition-all border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-50/50 dark:hover:bg-[#1a1a1a]/50 focus:outline-none";
+
+      if (mode === 'quick') {
+        tabQuick.className = activeTabClass;
+        tabJD.className = inactiveTabClass;
+        badge.textContent = 'QUICK MODE';
+        badge.className = "ml-2 bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400 text-[9px] px-2 py-0.5 rounded-full uppercase font-bold tracking-wider border border-purple-200 dark:border-purple-800";
+      } else {
+        tabJD.className = activeTabClass;
+        tabQuick.className = inactiveTabClass;
+        badge.textContent = 'DEEP MODE';
+        badge.className = "ml-2 bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-500 text-[9px] px-2 py-0.5 rounded-full uppercase font-bold tracking-wider border border-yellow-200 dark:border-yellow-800";
+      }
+    }
+
+    // ── JD QUALITY HINT ───────────────────────────────────────────────
+    document.getElementById('job_description').addEventListener('input', function() {
+      const len  = this.value.length;
+      const hint = document.getElementById('jd_quality_hint');
+      const count = document.getElementById('jd_char_count');
+      count.textContent = len.toLocaleString();
+
+      if (len === 0) {
+        hint.textContent = '';
+      } else if (len < 100) {
+        hint.innerHTML = '<span class="text-red-500">Too short — paste the full JD</span>';
+      } else if (len < 300) {
+        hint.innerHTML = '<span class="text-amber-500">Getting there — more detail helps</span>';
+      } else if (len < 800) {
+        hint.innerHTML = '<span class="text-green-500">Good — Gemini will work with this</span>';
+      } else {
+        hint.innerHTML = '<span class="text-purple-600 dark:text-purple-400">Excellent length for Gemini</span>';
+      }
+    });
+
+    // ── QUICK MODE TRIGGER ────────────────────────────────────────────
+    let quickTimer = null;
+    document.getElementById('company_name').addEventListener('input', function() {
+      if (aiState.mode !== 'quick') return;
+      clearTimeout(quickTimer);
+      const company = this.value.trim();
+      
+      clearTimeout(state.previewTimer);
+      state.previewTimer = setTimeout(refreshPreview, 300);
+
+      if (company.length < 2) return;
+      quickTimer = setTimeout(() => triggerQuickMode(company), 1000);
+    });
+
+    async function triggerQuickMode(companyName) {
+      setAIStatus('loading', 'Gemini is researching ' + companyName + '...');
+      try {
+        const res  = await csrfFetch('/api/personalize/', {
+          method: 'POST',
+          body: JSON.stringify({
+            company_name:  companyName,
+            about_company: '',
+          })
+        });
+        const data = await res.json();
+        if (data.subject) {
+          applyAIResult(data);
+          setAIStatus('success_quick', null, data);
+        }
+      } catch (e) {
+        setAIStatus('error', 'AI unavailable — using defaults');
+      }
+    }
+
+    // ── JD MODE TRIGGER ───────────────────────────────────────────────
+    async function triggerJDDraft() {
+      const company = document.getElementById('company_name').value.trim();
+      const jd      = document.getElementById('job_description').value.trim();
+      const about   = document.getElementById('about_company')?.value?.trim() || '';
+      const extract = document.getElementById('extract_resume').checked;
+
+      if (!company) {
+        showToast('Enter the company name first', 'warning');
+        document.getElementById('company_name').focus();
+        return;
+      }
+      if (jd.length < 50) {
+        showToast('Paste a job description (at least a few lines)', 'warning');
+        document.getElementById('job_description').focus();
+        return;
+      }
+
+      if (aiState.drafting) return;
+      aiState.drafting = true;
+
+      const btn = document.getElementById('btn_draft_email');
+      btn.disabled = true;
+      btn.textContent = 'Drafting...';
+      btn.style.background = '#6d28d9';
+
+      setDraftStatus('thinking');
+
+      try {
+        const res  = await csrfFetch('/api/draft-email/', {
+          method: 'POST',
+          body: JSON.stringify({
+            company_name:    company,
+            job_description: jd,
+            about_company:   about,
+            extract_resume:  extract,
+          })
+        });
+        const data = await res.json();
+
+        if (data.error) {
+          showToast(data.hint || data.error, 'error');
+          setDraftStatus('error', data.hint || data.error);
+        } else {
+          applyAIResult(data);
+          setDraftStatus('success', null, data);
+          showToast('Email drafted by AI — review and send!', 'success');
+        }
+
+      } catch (e) {
+        setDraftStatus('error', 'Connection error — please try again');
+        showToast('AI drafting failed', 'error');
+      } finally {
+        aiState.drafting = false;
+        btn.disabled = false;
+        btn.textContent = 'Re-Draft Email';
+        btn.style.background = '#7c3aed';
+      }
+    }
+
+    // ── APPLY AI RESULT ───────────────────────────────────────────────
+    function applyAIResult(data) {
+      if (data.subject) {
+        const sLine = document.getElementById('subject_line');
+        sLine.style.opacity = '0';
+        setTimeout(() => { sLine.value = data.subject; sLine.style.opacity = '1'; }, 200);
+      }
+      
+      const content = data.full_body || data.hook || data.opening_paragraph || '';
+      if (content) {
+        const oPara = document.getElementById('opening_para');
+        oPara.style.opacity = '0';
+        setTimeout(() => { oPara.value = content; oPara.style.opacity = '1'; }, 200);
+      }
+
+      aiState.jdResult       = data;
+      aiState.aiUsed         = data.ai_used !== false;
+      aiState.angleUsed      = data.angle_used || '';
+      aiState.jdSkillsMatched = data.jd_skills_matched || [];
+
+      showAIBadges(true);
+      refreshPreview();
+    }
+
+    ['subject_line', 'opening_para'].forEach(id => {
+        document.getElementById(id).addEventListener('input', () => {
+            clearTimeout(state.previewTimer);
+            state.previewTimer = setTimeout(refreshPreview, 600);
+        });
+    });
+
+
+
+    async function refreshPreview() {
+        const frame = document.getElementById('preview_frame');
+        frame.style.opacity = '0.4';
+        
+        const body = new FormData();
+        body.append('theme_id', state.themeId);
+        body.append('company_name', document.getElementById('company_name').value || 'the Company');
+        body.append('subject', document.getElementById('subject_line').value);
+        body.append('opening_paragraph', document.getElementById('opening_para').value);
+        body.append('csrfmiddlewaretoken', getCsrf());
+        
+        try {
+            const res = await fetch('/preview/', { method: 'POST', body });
+            const html = await res.text();
+            
+            frame.onload = function() {
+                const doc = frame.contentDocument;
+                if (!doc) return;
+                const editArea = doc.getElementById('editable_body');
+                if (editArea) {
+                    editArea.contentEditable = "true";
+                    editArea.style.cursor = "text";
+                    editArea.title = "You can edit this text directly!";
+                    
+                    editArea.addEventListener('mouseenter', () => editArea.style.boxShadow = 'inset 4px 0 0 0 rgba(139, 92, 246, 0.4)');
+                    editArea.addEventListener('mouseleave', () => editArea.style.boxShadow = 'none');
+                    
+                    editArea.addEventListener('input', function() {
+                        const ta = document.getElementById('opening_para');
+                        if (ta.value !== editArea.innerText) {
+                            ta.value = editArea.innerText;
+                        }
+                    });
+                }
+            };
+            
+            frame.srcdoc = html;
+        } catch(e) {
+            console.error("Preview failed", e);
+        } finally {
+            setTimeout(() => { frame.style.opacity = '1'; }, 100);
+        }
+    }
+
+    function updatePreviewInfo() {
+        document.getElementById('preview_info_theme').textContent = `Theme: ${state.themeName}`;
+        const email = document.getElementById('receiver_email').value;
+        document.getElementById('preview_info_to').textContent = `To: ${email || '—'}`;
+    }
+
+    // ── DRAFT STATUS UI ───────────────────────────────────────────────
+    function setDraftStatus(state, message, data) {
+      const el = document.getElementById('draft_status');
+      el.style.display = 'block';
+
+      const states = {
+        thinking: `
+          <div class="flex items-center gap-3 p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800/50 rounded-xl">
+            <div class="w-5 h-5 border-2 border-purple-300 dark:border-purple-700 border-t-purple-600 dark:border-t-purple-400 rounded-full animate-spin flex-shrink-0"></div>
+            <div>
+              <div class="text-sm font-bold text-gray-900 dark:text-white">Gemini is reading the JD...</div>
+              <div class="text-[11px] text-purple-700 dark:text-purple-400 font-medium mt-0.5 tracking-wide">
+                Analysing → Matching Skills → Choosing Angle → Drafting
+              </div>
+            </div>
+          </div>`,
+
+        success: data ? `
+          <div class="p-4 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-900/50 rounded-xl">
+            <div class="text-xs font-bold text-green-800 dark:text-green-400 mb-2 flex items-center gap-1.5 uppercase tracking-wide">
+              <span class="text-sm">✓</span> Email Drafted
+            </div>
+            ${data.angle_used ? `
+              <div class="text-[11px] text-green-700 dark:text-green-500 font-medium mb-1.5 tracking-wide">
+                Angle Base: <strong class="text-green-900 dark:text-green-300 ml-1 bg-green-200 dark:bg-green-800/60 px-1.5 py-0.5 rounded">${formatAngle(data.angle_used)}</strong>
+              </div>` : ''}
+            ${data.jd_skills_matched && data.jd_skills_matched.length > 0 ? `
+              <div class="text-[10px] uppercase font-bold text-green-600 dark:text-green-600/80 mb-1 tracking-widest mt-3">Matched JD Skills:</div>
+              <div class="flex flex-wrap gap-1.5 mt-1">
+                ${data.jd_skills_matched.map(s =>
+                  `<span class="bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 px-2 py-1 rounded-md text-[10px] font-bold border border-green-200 dark:border-green-800/60">${s}</span>`
+                ).join('')}
+              </div>` : ''}
+          </div>` : '',
+
+        error: `
+          <div class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 rounded-xl text-xs text-red-700 dark:text-red-400 flex items-center gap-2 font-medium">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            <span class="font-bold">Draft failed</span>${message ? ` — ${message}` : ''}
+          </div>`,
+      };
+
+      el.innerHTML = states[state] || '';
+    }
+
+    function setAIStatus(state, message, data) {
+      if (state === 'loading') {
+        showToast(message || 'Gemini thinking...', 'info');
+      } else if (state === 'success_quick') {
+        showToast('AI content applied', 'success');
+      } else if (state === 'error') {
+        showToast(message || 'AI unavailable', 'error');
+      }
+    }
+
+    function formatAngle(angle) {
+      const map = {
+        'domain_expert':   'Domain Expert',
+        'builder':         'Builder',
+        'problem_solver':  'Problem Solver',
+        'fast_learner':    'Fast Learner',
+        'culture_fit':     'Culture Fit',
+        'company_research':'Company Research',
+        'default':         'Default Pattern',
+      };
+      return map[angle] || angle;
+    }
+
+    // CSS for spinner (inject into page head or inline)
+    const spinStyle = document.createElement('style');
+    spinStyle.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+    document.head.appendChild(spinStyle);
+
+    function showAIBadges(show) {
+        document.querySelectorAll('.ai-badge').forEach(el => {
+            if(show) { el.classList.remove('hidden'); el.classList.add('inline-flex'); }
+            else { el.classList.add('hidden'); el.classList.remove('inline-flex'); }
+        });
+    }
+
+    function setSendLoading(isLoading) {
+        const btn = document.getElementById('send_btn');
+        if(isLoading) {
+            btn.disabled = true;
+            btn.innerHTML = `<div class="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin"></div> <span>Deploying...</span>`;
+            btn.classList.add('opacity-80', 'cursor-not-allowed', 'scale-95');
+        } else {
+            btn.disabled = false;
+            btn.innerHTML = `<span>Dispatch Email</span><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>`;
+            btn.classList.remove('opacity-80', 'cursor-not-allowed', 'scale-95');
+        }
+    }
+
+    document.getElementById('send_btn').addEventListener('click', async () => {
+        const receiver = document.getElementById('receiver_email').value.trim();
+        const company  = document.getElementById('company_name').value.trim();
+        
+        if (!receiver) { 
+            showToast('Please enter a recipient email address', 'error'); 
+            document.getElementById('receiver_email').focus();
+            return; 
+        }
+
+        const payload = {
+            receiver_email: receiver,
+            company_name: company,
+            theme_id: state.themeId,
+            subject: document.getElementById('subject_line').value,
+            opening_paragraph: document.getElementById('opening_para').value,
+            full_body: aiState.jdResult?.full_body || '',
+            add_to_book: document.getElementById('add_to_book').checked,
+            ai_used: aiState.aiUsed,
+            angle_used: aiState.angleUsed,
+            jd_skills_matched: aiState.jdSkillsMatched,
+            force_send: false,
+        };
+
+        setSendLoading(true);
+
+        try {
+            const res = await csrfFetch('/send/', { method: 'POST', body: JSON.stringify(payload) });
+            const data = await res.json();
+            
+            setSendLoading(false);
+
+            if (data.duplicate) {
+                const confirmed = await confirmDialog(data.message);
+                if (confirmed) {
+                    payload.force_send = true;
+                    setSendLoading(true);
+                    const res2 = await csrfFetch('/send/', { method: 'POST', body: JSON.stringify(payload) });
+                    const data2 = await res2.json();
+                    setSendLoading(false);
+                    
+                    if (data2.success) { showToast(data2.message, 'success'); resetForm(); }
+                    else showToast(data2.message, 'error');
+                }
+                return;
+            }
+
+            if (data.success) { 
+                showToast(data.message, 'success'); 
+                resetForm(); 
+            } else { 
+                showToast(data.message, 'error'); 
+            }
+        } catch(e) {
+            setSendLoading(false);
+            showToast("Network error occurred", 'error');
+        }
+    });
+
+    function resetForm() {
+        if(document.getElementById('company_select')) { document.getElementById('company_select').value = ''; }
+        document.getElementById('subject_line').value = '{{ default_subject|escapejs }}';
+        document.getElementById('opening_para').value = '{{ default_opening|escapejs }}';
+        
+        aiState.aiUsed = false;
+        aiState.jdResult = null;
+        if(document.getElementById('draft_status')) document.getElementById('draft_status').style.display = 'none';
+        setAIStatus('idle');
+        showAIBadges(false);
+        updatePreviewInfo();
+        refreshPreview();
+    }
+</script>
+{% endblock %}

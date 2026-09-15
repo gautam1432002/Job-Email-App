@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% block title %}Company Book - JobMailer{% endblock %}
+{% block page_title %}<h1 class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">Entity Network</h1>{% endblock %}
+
+{% block page_action %}
+    <a href="{% url 'compose' %}" class="px-5 py-2.5 bg-gray-900 dark:bg-purple-600 hover:bg-black dark:hover:bg-purple-500 text-white rounded-xl text-sm font-bold shadow-lg transition-transform hover:-translate-y-0.5 inline-flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path></svg>
+        New Node
+    </a>
+{% endblock %}
+
+{% block content %}
+<div class="h-full flex flex-col max-w-7xl mx-auto pb-10">
+
+    <div class="mb-8 flex flex-col sm:flex-row gap-4 items-center justify-between">
+        <div class="relative w-full sm:w-96">
+            <svg class="w-5 h-5 text-gray-400 absolute left-4 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            <input type="text" id="search_input" placeholder="Query network nodes..." class="w-full pl-11 pr-4 py-3 bg-white dark:bg-darkcard border border-gray-200 dark:border-darkborder rounded-xl text-sm focus:ring-2 focus:ring-purple-500 shadow-sm text-gray-900 dark:text-white outline-none">
+        </div>
+        <div class="text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-darkcard px-4 py-2 rounded-lg border border-gray-200 dark:border-darkborder shadow-sm">
+            <span class="font-black text-gray-900 dark:text-white" id="count_display">{{ companies|length }}</span> Active Nodes
+        </div>
+    </div>
+
+    {% if not companies %}
+    <div class="bento-card bento-delay-1 bg-white dark:bg-darkcard shadow-3d rounded-[2rem] shadow-sm hover:shadow-xl hover:shadow-purple-900/5 dark:hover:shadow-purple-900/20 border border-gray-200 dark:border-darkborder p-16 text-center transition-all duration-500">
+        <div class="w-20 h-20 bg-gray-50 dark:bg-[#1a1a1a] rounded-full flex items-center justify-center mx-auto mb-6 border border-gray-100 dark:border-[#333]">
+            <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Network Empty</h3>
+        <p class="text-gray-500 dark:text-gray-400 text-sm max-w-sm mx-auto mb-8 font-medium">
+            When initiating communication, authorize "Save to Address Book" to index targeted entities here.
+        </p>
+        <a href="{% url 'compose' %}" class="inline-flex items-center justify-center px-6 py-3 text-sm font-bold text-white bg-gray-900 dark:bg-purple-600 rounded-xl hover:-translate-y-0.5 shadow-lg transition-all">Initialize Connect</a>
+    </div>
+    {% else %}
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5" id="company_grid">
+        {% for c in companies %}
+        <div class="company-card bento-card bento-delay-{{ forloop.counter|slice:':1' }} bg-white dark:bg-darkcard shadow-3d rounded-[1.5rem] shadow-sm hover:shadow-xl hover:shadow-purple-900/5 dark:hover:shadow-purple-900/20 border border-gray-200 dark:border-darkborder hover:border-purple-200 dark:hover:border-purple-500/30 p-6 hover:-translate-y-1 transition-all duration-300 relative group overflow-hidden">
+            
+            <div class="absolute top-5 right-5 z-20">
+                <button onclick="deleteCompany({{ c.id }}, this)" class="text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors bg-white dark:bg-[#1a1a1a] rounded-full p-2 opacity-0 group-hover:opacity-100 shadow-sm border border-gray-100 dark:border-[#222]" title="Terminate Node">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+            </div>
+
+            <div class="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-50 dark:from-purple-900/30 dark:to-indigo-900/10 text-gray-800 dark:text-purple-400 rounded-xl flex items-center justify-center text-xl font-black border border-gray-200 dark:border-purple-800/30 mb-4 shadow-sm relative z-10">
+                {{ c.name|slice:":1"|upper }}
+            </div>
+            
+            <h3 class="font-extrabold text-lg text-gray-900 dark:text-white truncate pr-6 mb-2 company-name relative z-10">{{ c.name }}</h3>
+            
+            <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-5 bg-gray-50 dark:bg-[#1a1a1a] px-3 py-2 rounded-lg border border-gray-100 dark:border-[#222] company-email font-mono text-xs relative z-10">
+                <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                <span class="truncate block w-full" title="{{ c.email }}">{{ c.email }}</span>
+            </div>
+            
+            <div class="flex items-center justify-between border-t border-gray-100 dark:border-darkborder pt-4 mt-2 relative z-10">
+                <span class="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-600">Idx: {{ c.created_at|date:"ymd" }}</span>
+                <a href="{% url 'compose' %}?company={{ c.name|urlencode }}&email={{ c.email|urlencode }}" class="text-xs font-bold text-gray-900 dark:text-white hover:text-white bg-gray-100 dark:bg-[#1a1a1a] hover:bg-gray-900 dark:hover:bg-purple-600 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-[#333] transition-all">
+                    Re-link
+                </a>
+            </div>
+            
+            <!-- Bento hover accent -->
+            <div class="absolute -bottom-1 -right-1 w-24 h-24 bg-gradient-to-tl from-purple-500/5 to-transparent rounded-tl-full pointer-events-none group-hover:from-purple-500/10 transition-colors"></div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Empty State for Search -->
+    <div id="no_results" class="hidden py-20 text-center">
+        <svg class="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        <p class="text-gray-500 dark:text-gray-400 text-sm font-bold">No nodes match your query.</p>
+    </div>
+
+    {% endif %}
+
+</div>
+
+<script>
+    document.getElementById('search_input')?.addEventListener('input', function(e) {
+        const query = e.target.value.toLowerCase();
+        let visibleCount = 0;
+        
+        document.querySelectorAll('.company-card').forEach(card => {
+            const name = card.querySelector('.company-name').textContent.toLowerCase();
+            const email = card.querySelector('.company-email').textContent.toLowerCase();
+            
+            if(name.includes(query) || email.includes(query)) {
+                card.style.display = 'block';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        document.getElementById('count_display').textContent = visibleCount;
+        
+        const noResults = document.getElementById('no_results');
+        if(visibleCount === 0) noResults?.classList.remove('hidden');
+        else noResults?.classList.add('hidden');
+    });
+
+    async function deleteCompany(id, btnEl) {
+        const confirmed = await confirmDialog("Confirm termination of this node? Ledger history will remain intact.");
+        if (!confirmed) return;
+
+        const card = btnEl.closest('.company-card');
+        card.style.opacity = '0.3';
+        card.style.transform = 'scale(0.95)';
+        card.style.pointerEvents = 'none';
+
+        try {
+            const res = await csrfFetch(`/company/${id}/delete/`, { method: 'POST' });
+            const data = await res.json();
+            
+            if (data.success) {
+                showToast("Node terminated", "success");
+                card.remove();
+                
+                const currentCount = parseInt(document.getElementById('count_display').textContent);
+                document.getElementById('count_display').textContent = currentCount - 1;
+                
+                if(document.querySelectorAll('.company-card').length === 0) { window.location.reload(); }
+            } else {
+                showToast(data.message, "error");
+                card.style.opacity = '1';
+                card.style.transform = 'scale(1)';
+                card.style.pointerEvents = 'auto';
+            }
+        } catch (e) {
+            showToast("Server fault", "error");
+            card.style.opacity = '1';
+        }
+    }
+</script>
+{% endblock %}

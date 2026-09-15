@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+{% block title %}Bulk Send - JobMailer{% endblock %}
+{% block page_title %}<h1 class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">Batch Dispatcher</h1>{% endblock %}
+
+{% block content %}
+<div class="max-w-[850px] mx-auto space-y-6 pb-20">
+
+    <div class="bento-card bento-delay-1 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 border border-blue-100 dark:border-blue-800/30 text-blue-900 dark:text-blue-200 p-6 rounded-[1.5rem] shadow-sm flex gap-4 items-start">
+        <svg class="w-7 h-7 flex-shrink-0 text-blue-600 dark:text-blue-400 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <div>
+            <h3 class="font-bold mb-2 text-lg">Mass Deployment Protocol</h3>
+            <p class="text-sm font-medium opacity-90 leading-relaxed mb-4">
+                Execute multi-target dispatches seamlessly. To prevent SMTP rate-limiting and ensure 100% deliverability, the system injects a systematic 4,000ms delay between dispatches. Due to speed constraints, AI personalization is bypassed in favor of unified static content during batch jobs.
+            </p>
+            <a href="https://support.google.com/mail/answer/81126" target="_blank" class="text-xs font-black uppercase tracking-wider bg-white/50 dark:bg-black/20 hover:bg-white/80 dark:hover:bg-black/40 px-4 py-2 rounded-lg transition-all inline-block border border-blue-200 dark:border-blue-800">Review Compliance Specs</a>
+        </div>
+    </div>
+
+    <!-- Main Config Bento -->
+    <div class="bento-card bento-delay-2 bg-white dark:bg-darkcard shadow-3d rounded-[2rem] shadow-sm hover:shadow-xl hover:shadow-purple-900/5 dark:hover:shadow-purple-900/20 border border-gray-200 dark:border-darkborder overflow-hidden transition-all duration-500">
+        <div class="px-8 py-5 border-b border-gray-100 dark:border-darkborder bg-gray-50/50 dark:bg-[#1a1a1a]/50">
+            <h2 class="font-bold text-gray-900 dark:text-white text-lg flex items-center gap-2">
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0..."></path><path d="M4 6h16M4 12h16M4 18h7"></path></svg>
+                Payload Configuration
+            </h2>
+        </div>
+        
+        <div class="p-8 space-y-7">
+            
+            <div>
+                <label class="flex justify-between items-center text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                    <span>Target Matrix (CSV structure)</span>
+                    <button type="button" onclick="insertSample()" class="text-[11px] font-bold text-purple-600 dark:text-purple-400 uppercase tracking-widest hover:text-purple-800 bg-purple-50 dark:bg-purple-900/20 px-2 py-1 rounded">Inject Scaffold Data</button>
+                </label>
+                <div class="bg-gray-900 dark:bg-black rounded-t-xl px-5 py-2.5 text-[11px] font-mono text-gray-400 border-b border-gray-800 flex justify-between font-bold tracking-wider">
+                    <span>SCHEMA: <span class="text-gray-200">company_name,email</span></span>
+                    <span>LIMIT: 50 NODES</span>
+                </div>
+                <textarea id="csv_input" rows="8" class="w-full px-5 py-4 bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-darkborder rounded-b-xl focus:ring-2 focus:ring-purple-500 font-mono text-sm dark:text-gray-300 leading-relaxed whitespace-pre outline-none resize-y" spellcheck="false" placeholder="Acme Corp,hr@acmecorp.com&#10;Stark Ind,jobs@stark.com&#10;Wayne Ent,careers@wayne.com"></textarea>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-5 border-t border-gray-100 dark:border-darkborder">
+                
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Unified Subject Layer</label>
+                    <input type="text" id="subject_line" value="{{ default_subject }}" class="w-full px-4 py-3 bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-darkborder text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-purple-500 outline-none">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Architectural Theme</label>
+                    <select id="theme_id" class="w-full px-4 py-3 bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-darkborder text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-purple-500 outline-none appearance-none">
+                        {% for t in themes %}
+                            <option value="{{ t.id }}">{{ t.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+            </div>
+            
+            <div>
+                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Static Pitch Payload</label>
+                <textarea id="opening_para" rows="4" class="w-full px-4 py-3 bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-darkborder text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-purple-500 text-sm leading-relaxed outline-none">{{ default_opening }}</textarea>
+            </div>
+
+        </div>
+
+        <div class="px-8 py-5 bg-gray-50/50 dark:bg-[#1a1a1a]/50 border-t border-gray-100 dark:border-darkborder flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="text-[11px] font-bold tracking-widest uppercase text-gray-500 dark:text-gray-400" id="batch_estimate">Status: Awaiting Data.</div>
+            <button id="start_btn" class="w-full md:w-auto px-8 py-3.5 bg-gray-900 dark:bg-purple-600 hover:bg-black dark:hover:bg-purple-500 text-white rounded-xl text-sm font-bold shadow-lg transition-transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                Execute Batch
+            </button>
+        </div>
+    </div>
+
+    <!-- Execution Interface Bento (Hidden initially) -->
+    <div id="progress_card" class="hidden bento-card bg-white dark:bg-darkcard shadow-3d rounded-[2rem] shadow-2xl shadow-purple-900/10 dark:shadow-purple-900/30 border border-purple-200 dark:border-purple-900/50 overflow-hidden relative transition-all duration-500">
+        <div class="absolute top-0 left-0 h-1.5 bg-gray-100 dark:bg-[#1a1a1a] w-full">
+            <div id="progress_bar" class="h-full bg-gradient-to-r from-purple-500 to-indigo-500 transition-all duration-300 w-[0%]"></div>
+        </div>
+        
+        <div class="p-8 pt-10">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="font-extrabold text-xl text-gray-900 dark:text-white flex items-center gap-3">
+                    <div id="spinner" class="w-5 h-5 rounded-full border-[3px] border-purple-200 dark:border-gray-700 border-t-purple-600 dark:border-t-purple-400 animate-spin"></div>
+                    Executing Operations
+                </h3>
+                <span id="progress_text" class="text-sm font-bold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-[#1a1a1a] px-4 py-1.5 rounded-full border border-gray-200 dark:border-darkborder block font-mono">0 / 0</span>
+            </div>
+
+            <!-- Terminal Window -->
+            <div id="log_window" class="bg-[#0f172a] dark:bg-black rounded-xl p-5 h-80 overflow-y-auto font-mono text-xs leading-relaxed space-y-1 shadow-inner border border-slate-800">
+                <div class="text-blue-400 opacity-80">> INIT BATCH DISPATCHER CORE</div>
+                <div class="text-blue-400 opacity-80">> PARSING SCALAR MATRIX</div>
+            </div>
+            
+            <div class="mt-6 flex justify-end hidden" id="done_actions">
+                <a href="{% url 'history' %}" class="px-6 py-3 bg-gray-100 dark:bg-[#1a1a1a] hover:bg-gray-200 dark:hover:bg-[#222] text-gray-900 dark:text-white border border-gray-200 dark:border-darkborder rounded-xl text-sm font-bold transition-all shadow-sm">Review Immutable Ledger</a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function insertSample() {
+        document.getElementById('csv_input').value = `Google,hr@google.com\nApple,jobs@apple.com\nMicrosoft,careers@microsoft.com\nAmazon,recruiting@amazon.com`;
+        document.getElementById('csv_input').dispatchEvent(new Event('input'));
+    }
+
+    const logWindow = document.getElementById('log_window');
+    
+    function addLog(msg, type='info') {
+        const div = document.createElement('div');
+        const time = new Date().toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit'});
+        
+        let colorClass = "text-gray-400";
+        if(type === 'success') colorClass = "text-green-400 font-bold";
+        if(type === 'error')   colorClass = "text-red-400 font-bold";
+        if(type === 'system')  colorClass = "text-blue-400 opacity-80";
+        if(type === 'warning') colorClass = "text-yellow-400 font-bold";
+
+        div.className = colorClass;
+        div.textContent = `[${time}] > ${msg}`;
+        
+        logWindow.appendChild(div);
+        logWindow.scrollTop = logWindow.scrollHeight;
+    }
+
+    document.getElementById('csv_input').addEventListener('input', function() {
+        const lines = this.value.trim().split('\n').filter(l => l.includes(','));
+        const lCount = lines.length;
+        const eLabel = document.getElementById('batch_estimate');
+        if(lCount > 0){
+            const sec = lCount * 4;
+            eLabel.innerHTML = `SCAN: <strong class="text-gray-900 dark:text-white">${lCount}</strong> ROWS. ETA: <strong class="text-gray-900 dark:text-white">${sec}s</strong>`;
+            if (lCount > 50) eLabel.innerHTML += ` <span class="text-red-500 font-bold ml-2">(TRUNCATED AT 50)</span>`;
+        } else {
+            eLabel.textContent = "Status: Awaiting Data.";
+        }
+    });
+
+    document.getElementById('start_btn').addEventListener('click', async function() {
+        const rawText = document.getElementById('csv_input').value.trim();
+        if(!rawText) return showToast("Matrix empty", "error");
+
+        const lines = rawText.split('\n').filter(l => l.trim() !== '');
+        const validLines = [];
+        for (let l of lines) {
+            const parts = l.split(',');
+            if(parts.length >= 2) {
+                validLines.push({ company: parts[0].trim(), email: parts[1].trim() });
+            }
+        }
+
+        if(validLines.length === 0) return showToast("Invalid schema (require: entity,email)", "error");
+        
+        const toProcess = validLines.slice(0, 50);
+        const total = toProcess.length;
+
+        document.getElementById('start_btn').disabled = true;
+        document.getElementById('start_btn').classList.add('opacity-50', 'scale-95');
+        document.getElementById('csv_input').disabled = true;
+        
+        document.getElementById('progress_card').classList.remove('hidden');
+        document.getElementById('progress_text').textContent = `0 / ${total}`;
+        document.getElementById('progress_bar').style.width = '0%';
+        logWindow.innerHTML = '';
+        addLog(`ALLOCATING BATCH DISPATCH FOR ${total} NODES`, 'system');
+
+        const theme = document.getElementById('theme_id').value;
+        const subj  = document.getElementById('subject_line').value;
+        const para  = document.getElementById('opening_para').value;
+
+        let successCount = 0;
+
+        for (let i = 0; i < total; i++) {
+            const row = toProcess[i];
+            addLog(`PRCS [${i+1}/${total}]: Targeting ${row.company} (${row.email})`, 'info');
+            
+            try {
+                const res = await csrfFetch('/send/', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        receiver_email: row.email,
+                        company_name: row.company,
+                        theme_id: theme,
+                        subject: subj,
+                        opening_paragraph: para,
+                        add_to_book: true,
+                        ai_used: false,
+                        force_send: true
+                    })
+                });
+                const data = await res.json();
+                
+                if (data.success) {
+                    addLog(`TX_OK: Payload delivered to ${row.company}`, 'success');
+                    successCount++;
+                } else {
+                    addLog(`TX_ERR: ${data.message}`, 'error');
+                }
+
+            } catch(e) {
+                addLog(`CRIT_ERR: Connection lost at ${row.company}`, 'error');
+            }
+
+            const pct = Math.round(((i + 1) / total) * 100);
+            document.getElementById('progress_bar').style.width = `${pct}%`;
+            document.getElementById('progress_text').textContent = `${i+1} / ${total}`;
+
+            if (i < total - 1) {
+                addLog(`SLEEP_TIMEOUT: 4000ms allocated for SMTP cooling...`, 'system');
+                await new Promise(r => setTimeout(r, 4000));
+            }
+        }
+
+        document.getElementById('spinner').classList.add('hidden');
+        document.getElementById('done_actions').classList.remove('hidden');
+        
+        let finalStyle = 'success';
+        if(successCount === 0) finalStyle = 'error';
+        else if(successCount < total) finalStyle = 'warning';
+
+        addLog(`=== BATCH DEPLOYMENT CONCLUDED ===`, 'system');
+        addLog(`REPORT: ${successCount}/${total} Payloads Executed.`, finalStyle);
+        showToast("Mass deployment finalized", "info");
+
+        document.getElementById('csv_input').disabled = false;
+        document.getElementById('start_btn').disabled = false;
+        document.getElementById('start_btn').classList.remove('opacity-50', 'scale-95');
+    });
+</script>
+{% endblock %}

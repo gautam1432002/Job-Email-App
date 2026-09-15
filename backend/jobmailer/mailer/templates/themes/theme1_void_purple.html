@@ -1,0 +1,129 @@
+{% load email_filters %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>{{ subject }}</title>
+</head>
+<body style="margin:0;padding:0;background-color:#0a0a0f;font-family:Arial,Helvetica,sans-serif;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%">
+  <!-- Outer wrapper table -->
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#0a0a0f;min-height:100vh">
+    <tr>
+      <td align="center" style="padding:24px 16px">
+        <!-- Inner content table -->
+        <table role="presentation" width="680" cellpadding="0" cellspacing="0" style="width:100%;max-width:680px">
+          <!-- ROW 1 — Header Card -->
+          <tr>
+            <td bgcolor="#0f0f1a" style="background-color:#0f0f1a;border:1px solid #6d28d9;border-radius:10px;padding:28px 28px 24px">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td width="70%" style="display:block;width:100%">
+                    <div style="color:#6d28d9;font-size:12px;font-family:'Courier New',Courier,monospace;margin-bottom:10px">// application.py</div>
+                    <div style="color:#ffffff;font-size:28px;font-weight:700;font-family:'Courier New',Courier,monospace;margin-bottom:4px">{{ profile.full_name }}</div>
+                    <div style="color:#a78bfa;font-size:14px;font-family:'Courier New',Courier,monospace">{{ profile.role }}</div>
+                  </td>
+                  <td width="30%" align="right" valign="top" style="display:block;width:100%">
+                    <span style="display:inline-block;width:8px;height:8px;background-color:#a78bfa;border-radius:50%;margin-right:4px"></span>
+                    <span style="color:#a78bfa;font-size:11px;font-family:'Courier New',Courier,monospace">open_to_work = True</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <!-- Spacer (ROW 2 above) -->
+          <tr><td height="16" style="font-size:0;line-height:0">&nbsp;</td></tr>
+
+          <!-- ROW 2 — Code Block -->
+          <tr>
+            <td bgcolor="#080810" style="background-color:#080810;border:1px solid #1e1b4b;border-radius:8px;padding:20px 24px">
+              <span style="display:block;line-height:1.8;font-family:'Courier New',Courier,monospace;color:#6d28d9;font-size:13px;word-break:break-word">const developer = {</span>
+              <span style="display:block;line-height:1.8;font-family:'Courier New',Courier,monospace;color:#d4d4d8;font-size:13px;word-break:break-word">&nbsp;&nbsp;name: '{{ profile.full_name }}',</span>
+              <span style="display:block;line-height:1.8;font-family:'Courier New',Courier,monospace;color:#d4d4d8;font-size:13px;word-break:break-word">&nbsp;&nbsp;role: '{{ profile.role }}',</span>
+              <span style="display:block;line-height:1.8;font-family:'Courier New',Courier,monospace;color:#d4d4d8;font-size:13px;word-break:break-word">&nbsp;&nbsp;college: '{{ profile.college }}',</span>
+              <span style="display:block;line-height:1.8;font-family:'Courier New',Courier,monospace;color:#d4d4d8;font-size:13px;word-break:break-word">&nbsp;&nbsp;year: {{ profile.grad_year }},</span>
+              <span style="display:block;line-height:1.8;font-family:'Courier New',Courier,monospace;color:#a78bfa;font-size:13px;word-break:break-word">&nbsp;&nbsp;status: 'open_to_work'</span>
+              <span style="display:block;line-height:1.8;font-family:'Courier New',Courier,monospace;color:#6d28d9;font-size:13px;word-break:break-word">};</span>
+            </td>
+          </tr>
+
+          <!-- Spacer (ROW 3 above) -->
+          <tr><td height="20" style="font-size:0;line-height:0">&nbsp;</td></tr>
+
+          <!-- ROW 3 — Body Text -->
+          <tr>
+            <td style="color:#d4d4d8;font-size:15px;line-height:1.8;font-family:Arial,Helvetica,sans-serif">
+              Dear Hiring Team at {{ company_name }},
+              <br><br>
+              <div id="editable_body" style="outline:none">
+                {{ opening_paragraph|linebreaksbr }}
+              </div>
+            </td>
+          </tr>
+
+          <!-- Spacer (ROW 4 above) -->
+          <tr><td height="20" style="font-size:0;line-height:0">&nbsp;</td></tr>
+
+          <!-- ROW 4 — Skills Section -->
+          <tr>
+            <td>
+              <span style="color:#6d28d9;font-size:12px;font-family:'Courier New',Courier,monospace;display:block;margin-bottom:10px">// tech_stack = [</span>
+              {% for skill in skills_list %}
+                <span style="display:inline-block;background-color:#1e1b4b;color:#a78bfa;border:1px solid #4c1d95;padding:5px 14px;border-radius:4px;font-family:'Courier New',monospace;font-size:12px;margin:3px 4px 3px 0">{{ skill }}</span>
+              {% endfor %}
+              <span style="color:#6d28d9;font-size:12px;font-family:'Courier New',Courier,monospace;display:block;margin-top:8px">]</span>
+            </td>
+          </tr>
+
+          <!-- Spacer (ROW 5 above) -->
+          <tr><td height="20" style="font-size:0;line-height:0">&nbsp;</td></tr>
+
+          <!-- ROW 5 — Links -->
+          <tr>
+            <td>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td width="32%" style="display:block;width:100%;margin-bottom:6px">
+                    <a href="{{ profile.github|default:'#' }}" style="border:1px solid #3b0764;color:#a78bfa;padding:8px 0;border-radius:4px;text-decoration:none;font-size:13px;font-family:'Courier New',Courier,monospace;text-align:center;display:block;width:100%">github.com</a>
+                  </td>
+                  <td width="2%" style="display:block;width:100%"></td>
+                  <td width="32%" style="display:block;width:100%;margin-bottom:6px">
+                    <a href="{{ profile.linkedin|default:'#' }}" style="border:1px solid #3b0764;color:#a78bfa;padding:8px 0;border-radius:4px;text-decoration:none;font-size:13px;font-family:'Courier New',Courier,monospace;text-align:center;display:block;width:100%">linkedin.com</a>
+                  </td>
+                  <td width="2%" style="display:block;width:100%"></td>
+                  <td width="32%" style="display:block;width:100%;margin-bottom:6px">
+                    <a href="{{ profile.portfolio|default:'#' }}" style="border:1px solid #3b0764;color:#a78bfa;padding:8px 0;border-radius:4px;text-decoration:none;font-size:13px;font-family:'Courier New',Courier,monospace;text-align:center;display:block;width:100%">portfolio</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Spacer (ROW 6 above) -->
+          <tr><td height="20" style="font-size:0;line-height:0">&nbsp;</td></tr>
+
+          <!-- ROW 6 — Footer -->
+          <tr>
+            <td style="border-top:1px solid #1e1b4b;padding-top:16px">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td width="70%" style="display:block;width:100%">
+                    <span style="color:#a78bfa;font-size:13px;font-family:'Courier New',Courier,monospace">— {{ profile.full_name }}</span>
+                    <div style="color:#3b1f6b;font-size:11px;font-family:'Courier New',Courier,monospace;margin-top:6px">Built with Python & Django</div>
+                  </td>
+                  <td width="30%" align="right" valign="top" style="display:block;width:100%">
+                    <span style="color:#52525b;font-size:11px">Resume attached</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

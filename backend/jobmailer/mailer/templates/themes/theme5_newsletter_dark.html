@@ -1,0 +1,114 @@
+{% load email_filters %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>{{ subject }}</title>
+</head>
+<body style="margin:0;padding:0;background-color:#0f0f0f;font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#0f0f0f;min-height:100vh">
+    <tr>
+      <td align="center" style="padding:24px 16px">
+        <table role="presentation" width="680" cellpadding="0" cellspacing="0" style="width:100%;max-width:680px">
+          <!-- ROW 1 — Newsletter Header -->
+          <tr>
+            <td bgcolor="#0f0f0f" style="background-color:#0f0f0f;padding:28px 28px 20px;border-bottom:1px solid #1a1a1a">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td width="60%" valign="middle" style="display:block;width:100%;margin-bottom:12px">
+                    <span style="color:#525252;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;display:block;margin-bottom:6px">JOB APPLICATION</span>
+                    <span style="color:#ffffff;font-size:26px;font-weight:800;letter-spacing:-0.03em;display:block">{{ profile.full_name }}</span>
+                  </td>
+                  <td width="40%" align="right" valign="bottom" style="display:block;width:100%;text-align:left">
+                    <span style="color:#525252;font-size:12px;display:block;line-height:2">{{ profile.email|default:'Available in Resume' }}</span>
+                    <span style="color:#525252;font-size:12px;display:block;line-height:2">github.com</span>
+                    <span style="color:#525252;font-size:12px;display:block;line-height:2">{{ profile.grad_year }} Graduate</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <!-- ROW 2 — Section Label -->
+          <tr>
+            <td style="padding:20px 28px 10px">
+              <span style="color:#525252;font-size:10px;text-transform:uppercase;letter-spacing:0.15em">FEATURED</span>
+            </td>
+          </tr>
+          
+          <!-- ROW 3 — Featured Card -->
+          <tr>
+            <td style="padding:0 28px 16px">
+              <div style="background-color:#141414;border:1px solid #1f1f1f;border-radius:8px;padding:22px">
+                <span style="color:#ef4444;font-size:11px;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;display:block;margin-bottom:8px">WHY {{ company_name|upper }}</span>
+                <span style="color:#ffffff;font-size:17px;font-weight:700;display:block;margin-bottom:10px">Applying for {{ profile.role }}</span>
+                <div id="editable_body" style="color:#737373;font-size:14px;line-height:1.7;outline:none">
+                  {{ opening_paragraph|linebreaksbr }}
+                </div>
+              </div>
+            </td>
+          </tr>
+          
+          <!-- ROW 4 — Stats Section -->
+          <tr>
+            <td style="padding:0 28px 16px">
+              <span style="color:#525252;font-size:10px;text-transform:uppercase;letter-spacing:0.15em;display:block;margin-bottom:10px">STATS</span>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="8">
+                <tr>
+                  <td width="50%" bgcolor="#141414" style="background-color:#141414;border:1px solid #1f1f1f;border-radius:8px;padding:14px 16px;display:block;width:100%;box-sizing:border-box">
+                    <span style="color:#525252;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:4px">PRIMARY SKILL</span>
+                    <span style="color:#d4d4d4;font-size:13px;font-weight:600">{{ skills_list.0|default:'Software Development' }}</span>
+                  </td>
+                  <td width="50%" bgcolor="#141414" style="background-color:#141414;border:1px solid #1f1f1f;border-radius:8px;padding:14px 16px;display:block;width:100%;box-sizing:border-box">
+                    <span style="color:#525252;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:4px">EDUCATION</span>
+                    <span style="color:#d4d4d4;font-size:13px;font-weight:600">{{ profile.college }}</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td width="50%" bgcolor="#141414" style="background-color:#141414;border:1px solid #1f1f1f;border-radius:8px;padding:14px 16px;display:block;width:100%;box-sizing:border-box">
+                    <span style="color:#525252;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:4px">GRADUATION YR</span>
+                    <span style="color:#d4d4d4;font-size:13px;font-weight:600">{{ profile.grad_year }}</span>
+                  </td>
+                  <td width="50%" bgcolor="#141414" style="background-color:#141414;border:1px solid #1f1f1f;border-radius:8px;padding:14px 16px;display:block;width:100%;box-sizing:border-box">
+                    <span style="color:#525252;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:4px">AVAILABILITY</span>
+                    <span style="color:#d4d4d4;font-size:13px;font-weight:600">Immediate</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- ROW 5 — Skills -->
+          <tr>
+            <td style="padding:0 28px 16px">
+              <span style="color:#525252;font-size:10px;text-transform:uppercase;letter-spacing:0.15em;display:block;margin-bottom:10px">TECHNOLOGIES</span>
+              {% for skill in skills_list %}
+                <span style="display:inline-block;background-color:#1a1a1a;color:#a3a3a3;border:1px solid #262626;padding:5px 12px;border-radius:4px;font-size:12px;margin:3px 4px 3px 0">{{ skill }}</span>
+              {% endfor %}
+            </td>
+          </tr>
+
+          <!-- ROW 6 — CTA -->
+          <tr>
+            <td style="padding:0 28px 24px">
+              <a href="{{ profile.portfolio|default:'#' }}" style="display:block;background-color:#ffffff;color:#0f0f0f;padding:14px 0;border-radius:6px;font-size:14px;font-weight:700;text-decoration:none;text-align:center;width:100%;box-sizing:border-box">
+                View Portfolio & Resume
+              </a>
+            </td>
+          </tr>
+
+          <!-- ROW 7 — Footer -->
+          <tr>
+            <td style="border-top:1px solid #1a1a1a;padding:16px 28px;text-align:center">
+              <span style="color:#404040;font-size:11px;text-align:center">Resume attached · {{ profile.portfolio }} · Sent via JobMailer</span>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
