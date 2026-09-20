@@ -1,7 +1,7 @@
 from django.urls import path
 from .api_views import (
     ProfileCreateView, ProfileView, CompanyListCreateView, CompanyRetrieveUpdateDestroyView,
-    EmailLogListView, GeneratePitchView, SendEmailView
+    EmailLogListView, GeneratePitchView, SendEmailView, PreviewEmailView
 )
 
 urlpatterns = [
@@ -14,5 +14,6 @@ urlpatterns = [
     path('history/', EmailLogListView.as_view(), name='api-email-history'),
     
     path('compose/generate/', GeneratePitchView.as_view(), name='api-generate-pitch'),
+    path('compose/preview/', PreviewEmailView.as_view(), name='api-preview-email'),
     path('compose/send/', SendEmailView.as_view(), name='api-send-email'),
 ]

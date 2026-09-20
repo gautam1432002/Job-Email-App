@@ -13,6 +13,18 @@ from .api_serializers import (
 from .gemini import draft_email
 from .smtp_send import send_job_email
 from .encryption import get_credential, set_credential
+from django.template.loader import render_to_string
+
+THEMES = [
+    {'id': 'theme1', 'name': 'Void Purple', 'template': 'themes/theme1_void_purple.html'},
+    {'id': 'theme2', 'name': 'Editorial Ink', 'template': 'themes/theme2_editorial_ink.html'},
+    {'id': 'theme3', 'name': 'Soft Bento', 'template': 'themes/theme3_soft_bento.html'},
+    {'id': 'theme4', 'name': 'Neobrutalist', 'template': 'themes/theme4_neobrutalist.html'},
+    {'id': 'theme5', 'name': 'Newsletter Dark', 'template': 'themes/theme5_newsletter_dark.html'},
+    {'id': 'theme6', 'name': 'Minimal Resume', 'template': 'themes/theme6_minimal_resume.html'},
+]
+THEME_MAP = {t['id']: t for t in THEMES}
+
 
 
 class ProfileAuthentication(BaseAuthentication):
@@ -159,11 +171,26 @@ class SendEmailView(views.APIView):
 
             resume_path = profile.resume.path if (profile.resume and hasattr(profile.resume, 'path')) else None
 
+            # Render HTML Theme if selected
+            theme_used = serializer.validated_data.get('theme_used', 'none')
+            html_body = serializer.validated_data['html_body']
+            theme = THEME_MAP.get(theme_used)
+            
+            if theme:
+                html_body = render_to_string(theme['template'], {
+                    'profile': profile,
+                    'company_name': serializer.validated_data['company_name'],
+                    'subject': serializer.validated_data['subject'],
+                    'opening_paragraph': html_body,
+                    'skills_list': profile.skills_list,
+                })
+
             success, msg = send_job_email(
                 receiver_email=serializer.validated_data['receiver_email'],
                 subject=serializer.validated_data['subject'],
-                html_body=serializer.validated_data['html_body'],
+                html_body=html_body,
                 sender_gmail=sender_gmail,
+
                 app_password=app_password,
                 resume_path=resume_path
             )
@@ -187,3 +214,35 @@ class SendEmailView(views.APIView):
             
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class PreviewEmailView(views.APIView):
+    authentication_classes = [ProfileAuthentication]
+    permission_classes = [IsProfileAuthenticated]
+
+    def post(self, request):
+        serializer = SendEmailSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        try:
+            profile = request.profile
+            theme_used = serializer.validated_data.get('theme_used', 'none')
+            html_body = serializer.validated_data['html_body']
+            theme = THEME_MAP.get(theme_used)
+            
+            if theme:
+                # To make it render responsively on mobile WebView, we could inject a meta tag
+                # but the template might already have one. We just render to string here.
+                html_body = render_to_string(theme['template'], {
+                    'profile': profile,
+                    'company_name': serializer.validated_data['company_name'],
+                    'subject': serializer.validated_data['subject'],
+                    'opening_paragraph': html_body,
+                    'skills_list': profile.skills_list,
+                })
+                
+            return Response({"html": html_body})
+            
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
