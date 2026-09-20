@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.permissions import BasePermission
 from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.shortcuts import get_object_or_404
 from .models import Profile, Company, EmailLog
 from .api_serializers import (
@@ -74,6 +75,7 @@ class ProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = ProfileSerializer
     authentication_classes = [ProfileAuthentication]
     permission_classes = [IsProfileAuthenticated]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_object(self):
         return self.request.profile

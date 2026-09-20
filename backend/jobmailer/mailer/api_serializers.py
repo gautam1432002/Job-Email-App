@@ -14,13 +14,17 @@ class ProfileSerializer(serializers.ModelSerializer):
     portfolio = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     linkedin = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     github = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    
+    experience_years = serializers.IntegerField(required=False, allow_null=True)
+    location = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    about_me = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
     class Meta:
         model = Profile
         fields = [
             'id', 'profile_name', 'full_name', 'phone', 'role', 'skills', 'experience_years',
             'location', 'college', 'grad_year', 'linkedin', 'github', 'portfolio',
-            'about_me', 'gmail_configured', 'gemini_configured',
+            'about_me', 'resume', 'gmail_configured', 'gemini_configured',
             'gmail', 'app_password', 'gemini_key'
         ]
         read_only_fields = ['id', 'gmail_configured', 'gemini_configured']
