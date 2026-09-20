@@ -19,12 +19,12 @@
                 <tr>
                   <td width="60%" valign="middle" style="display:block;width:100%;margin-bottom:12px">
                     <span style="color:#525252;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;display:block;margin-bottom:6px">JOB APPLICATION</span>
-                    <span style="color:#ffffff;font-size:26px;font-weight:800;letter-spacing:-0.03em;display:block">{{ profile.full_name }}</span>
+                    <span style="color:#ffffff;font-size:26px;font-weight:800;letter-spacing:-0.03em;display:block">{% if profile.full_name %}{{ profile.full_name }}{% else %}Applicant{% endif %}</span>
                   </td>
                   <td width="40%" align="right" valign="bottom" style="display:block;width:100%;text-align:left">
                     <span style="color:#525252;font-size:12px;display:block;line-height:2">{{ profile.email|default:'Available in Resume' }}</span>
                     <span style="color:#525252;font-size:12px;display:block;line-height:2">github.com</span>
-                    <span style="color:#525252;font-size:12px;display:block;line-height:2">{{ profile.grad_year }} Graduate</span>
+{% if profile.grad_year %}                    <span style="color:#525252;font-size:12px;display:block;line-height:2">{{ profile.grad_year }} Graduate</span>{% endif %}
                   </td>
                 </tr>
               </table>
@@ -43,7 +43,7 @@
             <td style="padding:0 28px 16px">
               <div style="background-color:#141414;border:1px solid #1f1f1f;border-radius:8px;padding:22px">
                 <span style="color:#ef4444;font-size:11px;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;display:block;margin-bottom:8px">WHY {{ company_name|upper }}</span>
-                <span style="color:#ffffff;font-size:17px;font-weight:700;display:block;margin-bottom:10px">Applying for {{ profile.role }}</span>
+{% if profile.role %}                <span style="color:#ffffff;font-size:17px;font-weight:700;display:block;margin-bottom:10px">Applying for {{ profile.role }}</span>{% endif %}
                 <div id="editable_body" style="color:#737373;font-size:14px;line-height:1.7;outline:none">
                   {{ opening_paragraph|linebreaksbr }}
                 </div>
@@ -63,13 +63,13 @@
                   </td>
                   <td width="50%" bgcolor="#141414" style="background-color:#141414;border:1px solid #1f1f1f;border-radius:8px;padding:14px 16px;display:block;width:100%;box-sizing:border-box">
                     <span style="color:#525252;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:4px">EDUCATION</span>
-                    <span style="color:#d4d4d4;font-size:13px;font-weight:600">{{ profile.college }}</span>
+{% if profile.college %}                    <span style="color:#d4d4d4;font-size:13px;font-weight:600">{{ profile.college }}</span>{% endif %}
                   </td>
                 </tr>
                 <tr>
                   <td width="50%" bgcolor="#141414" style="background-color:#141414;border:1px solid #1f1f1f;border-radius:8px;padding:14px 16px;display:block;width:100%;box-sizing:border-box">
                     <span style="color:#525252;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:4px">GRADUATION YR</span>
-                    <span style="color:#d4d4d4;font-size:13px;font-weight:600">{{ profile.grad_year }}</span>
+{% if profile.grad_year %}                    <span style="color:#d4d4d4;font-size:13px;font-weight:600">{{ profile.grad_year }}</span>{% endif %}
                   </td>
                   <td width="50%" bgcolor="#141414" style="background-color:#141414;border:1px solid #1f1f1f;border-radius:8px;padding:14px 16px;display:block;width:100%;box-sizing:border-box">
                     <span style="color:#525252;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:4px">AVAILABILITY</span>
@@ -93,7 +93,7 @@
           <!-- ROW 6 — CTA -->
           <tr>
             <td style="padding:0 28px 24px">
-              <a href="{{ profile.portfolio|default:'#' }}" style="display:block;background-color:#ffffff;color:#0f0f0f;padding:14px 0;border-radius:6px;font-size:14px;font-weight:700;text-decoration:none;text-align:center;width:100%;box-sizing:border-box">
+{% if profile.portfolio %}              <a href="{{ profile.portfolio|default:'#' }}" style="display:block;background-color:#ffffff;color:#0f0f0f;padding:14px 0;border-radius:6px;font-size:14px;font-weight:700;text-decoration:none;text-align:center;width:100%;box-sizing:border-box">{% endif %}
                 View Portfolio & Resume
               </a>
             </td>

@@ -2,9 +2,18 @@ from rest_framework import serializers
 from .models import Profile, Company, EmailLog
 
 class ProfileSerializer(serializers.ModelSerializer):
-    gmail = serializers.CharField(write_only=True, required=False, allow_blank=True)
-    app_password = serializers.CharField(write_only=True, required=False, allow_blank=True)
-    gemini_key = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    gmail = serializers.CharField(write_only=True, required=False, allow_blank=True, allow_null=True)
+    app_password = serializers.CharField(write_only=True, required=False, allow_blank=True, allow_null=True)
+    gemini_key = serializers.CharField(write_only=True, required=False, allow_blank=True, allow_null=True)
+    
+    full_name = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    role = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    college = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    grad_year = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    skills = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    portfolio = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    linkedin = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    github = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
     class Meta:
         model = Profile

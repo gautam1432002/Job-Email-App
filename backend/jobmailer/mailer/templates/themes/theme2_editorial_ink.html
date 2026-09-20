@@ -16,8 +16,8 @@
           <tr>
             <td bgcolor="#1c1917" style="background-color:#1c1917;padding:40px 36px 36px">
               <span style="color:#a8a29e;font-size:11px;letter-spacing:0.12em;font-family:Arial,sans-serif;display:block;margin-bottom:14px">SOFTWARE DEVELOPER APPLICATION</span>
-              <span style="color:#fafaf9;font-size:34px;font-weight:700;font-family:Georgia,serif;line-height:1.15;margin-bottom:6px;display:block">{{ profile.full_name }}</span>
-              <span style="color:#78716c;font-size:15px;font-family:Arial,sans-serif;display:block">{{ profile.role }}</span>
+              <span style="color:#fafaf9;font-size:34px;font-weight:700;font-family:Georgia,serif;line-height:1.15;margin-bottom:6px;display:block">{% if profile.full_name %}{{ profile.full_name }}{% else %}Applicant{% endif %}</span>
+{% if profile.role %}              <span style="color:#78716c;font-size:15px;font-family:Arial,sans-serif;display:block">{{ profile.role }}</span>{% endif %}
             </td>
           </tr>
           
@@ -66,12 +66,12 @@
                 <tr>
                   <td width="50%" valign="top" style="display:block;width:100%;margin-bottom:12px">
                     <span style="color:#a8a29e;font-size:11px;letter-spacing:0.1em;font-family:Arial,sans-serif;display:block;margin-bottom:4px">EDUCATION</span>
-                    <span style="color:#44403c;font-size:13px;font-family:Arial,sans-serif">{{ profile.college }}, {{ profile.grad_year }}</span>
+{% if profile.college %}                    <span style="color:#44403c;font-size:13px;font-family:Arial,sans-serif">{{ profile.college }}, {{ profile.grad_year }}</span>{% endif %}
                   </td>
                   <td width="50%" valign="top" style="display:block;width:100%">
-                    <a href="{{ profile.github|default:'#' }}" style="color:#44403c;font-size:13px;text-decoration:none;font-family:Arial,sans-serif;display:block;line-height:1.8">GitHub</a>
-                    <a href="{{ profile.linkedin|default:'#' }}" style="color:#44403c;font-size:13px;text-decoration:none;font-family:Arial,sans-serif;display:block;line-height:1.8">LinkedIn</a>
-                    <a href="{{ profile.portfolio|default:'#' }}" style="color:#44403c;font-size:13px;text-decoration:none;font-family:Arial,sans-serif;display:block;line-height:1.8">Portfolio</a>
+{% if profile.github %}                    <a href="{{ profile.github|default:'#' }}" style="color:#44403c;font-size:13px;text-decoration:none;font-family:Arial,sans-serif;display:block;line-height:1.8">GitHub</a>{% endif %}
+{% if profile.linkedin %}                    <a href="{{ profile.linkedin|default:'#' }}" style="color:#44403c;font-size:13px;text-decoration:none;font-family:Arial,sans-serif;display:block;line-height:1.8">LinkedIn</a>{% endif %}
+{% if profile.portfolio %}                    <a href="{{ profile.portfolio|default:'#' }}" style="color:#44403c;font-size:13px;text-decoration:none;font-family:Arial,sans-serif;display:block;line-height:1.8">Portfolio</a>{% endif %}
                   </td>
                 </tr>
               </table>
@@ -84,7 +84,7 @@
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                   <td width="50%" style="display:block;width:100%;margin-bottom:6px">
-                    <span style="color:#292524;font-style:italic;font-family:Georgia,serif;font-size:14px">— {{ profile.full_name }}</span>
+                    <span style="color:#292524;font-style:italic;font-family:Georgia,serif;font-size:14px">— {% if profile.full_name %}{{ profile.full_name }}{% else %}Applicant{% endif %}</span>
                   </td>
                   <td width="50%" align="right" style="display:block;width:100%;text-align:left">
                     <span style="color:#78716c;font-size:12px;font-family:Arial,sans-serif">Resume attached · {{ profile.phone }}</span>

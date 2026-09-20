@@ -25,6 +25,15 @@ THEMES = [
 ]
 THEME_MAP = {t['id']: t for t in THEMES}
 
+def get_template_context(profile, serializer, html_body):
+    return {
+        'profile': profile,
+        'company_name': serializer.validated_data['company_name'],
+        'subject': serializer.validated_data['subject'],
+        'opening_paragraph': html_body,
+        'skills_list': profile.skills_list,
+    }
+
 
 
 class ProfileAuthentication(BaseAuthentication):
@@ -177,13 +186,8 @@ class SendEmailView(views.APIView):
             theme = THEME_MAP.get(theme_used)
             
             if theme:
-                html_body = render_to_string(theme['template'], {
-                    'profile': profile,
-                    'company_name': serializer.validated_data['company_name'],
-                    'subject': serializer.validated_data['subject'],
-                    'opening_paragraph': html_body,
-                    'skills_list': profile.skills_list,
-                })
+                context = get_template_context(profile, serializer, html_body)
+                html_body = render_to_string(theme['template'], context)
 
             success, msg = send_job_email(
                 receiver_email=serializer.validated_data['receiver_email'],
@@ -233,13 +237,8 @@ class PreviewEmailView(views.APIView):
             if theme:
                 # To make it render responsively on mobile WebView, we could inject a meta tag
                 # but the template might already have one. We just render to string here.
-                html_body = render_to_string(theme['template'], {
-                    'profile': profile,
-                    'company_name': serializer.validated_data['company_name'],
-                    'subject': serializer.validated_data['subject'],
-                    'opening_paragraph': html_body,
-                    'skills_list': profile.skills_list,
-                })
+                context = get_template_context(profile, serializer, html_body)
+                html_body = render_to_string(theme['template'], context)
                 
             return Response({"html": html_body})
             

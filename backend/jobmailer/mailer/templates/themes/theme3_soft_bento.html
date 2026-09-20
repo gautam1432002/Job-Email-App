@@ -24,8 +24,8 @@
                           {{ profile.initials }}
                         </td>
                         <td style="padding-left:14px">
-                          <span style="color:#0f172a;font-size:18px;font-weight:700;display:block">{{ profile.full_name }}</span>
-                          <span style="color:#6366f1;font-size:13px;font-weight:600;display:block;margin-top:2px">{{ profile.role }}</span>
+                          <span style="color:#0f172a;font-size:18px;font-weight:700;display:block">{% if profile.full_name %}{{ profile.full_name }}{% else %}Applicant{% endif %}</span>
+{% if profile.role %}                          <span style="color:#6366f1;font-size:13px;font-weight:600;display:block;margin-top:2px">{{ profile.role }}</span>{% endif %}
                           <div style="margin-top:4px">
                             <span style="display:inline-block;background-color:#dcfce7;color:#166534;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600">Open to Work</span>
                           </div>
@@ -34,9 +34,9 @@
                     </table>
                   </td>
                   <td width="30%" align="right" valign="middle" style="display:block;width:100%;text-align:left">
-                    <a href="{{ profile.github|default:'#' }}" style="color:#6366f1;font-size:12px;display:block;text-decoration:none;margin-bottom:4px">GitHub</a>
-                    <a href="{{ profile.linkedin|default:'#' }}" style="color:#6366f1;font-size:12px;display:block;text-decoration:none;margin-bottom:4px">LinkedIn</a>
-                    <a href="{{ profile.portfolio|default:'#' }}" style="color:#6366f1;font-size:12px;display:block;text-decoration:none">Portfolio</a>
+{% if profile.github %}                    <a href="{{ profile.github|default:'#' }}" style="color:#6366f1;font-size:12px;display:block;text-decoration:none;margin-bottom:4px">GitHub</a>{% endif %}
+{% if profile.linkedin %}                    <a href="{{ profile.linkedin|default:'#' }}" style="color:#6366f1;font-size:12px;display:block;text-decoration:none;margin-bottom:4px">LinkedIn</a>{% endif %}
+{% if profile.portfolio %}                    <a href="{{ profile.portfolio|default:'#' }}" style="color:#6366f1;font-size:12px;display:block;text-decoration:none">Portfolio</a>{% endif %}
                   </td>
                 </tr>
               </table>
@@ -59,11 +59,11 @@
                 <tr>
                   <td width="50%" bgcolor="#f8fafc" style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px 16px;display:block;width:100%;box-sizing:border-box">
                     <span style="color:#94a3b8;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:4px">EDUCATION</span>
-                    <span style="color:#0f172a;font-size:13px;font-weight:600">{{ profile.college }}, {{ profile.grad_year }}</span>
+{% if profile.college %}                    <span style="color:#0f172a;font-size:13px;font-weight:600">{{ profile.college }}, {{ profile.grad_year }}</span>{% endif %}
                   </td>
                   <td width="50%" bgcolor="#f8fafc" style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px 16px;display:block;width:100%;box-sizing:border-box">
                     <span style="color:#94a3b8;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:4px">ROLE</span>
-                    <span style="color:#0f172a;font-size:13px;font-weight:600">{{ profile.role }}</span>
+{% if profile.role %}                    <span style="color:#0f172a;font-size:13px;font-weight:600">{{ profile.role }}</span>{% endif %}
                   </td>
                 </tr>
                 <tr>
@@ -93,7 +93,7 @@
           <!-- ROW 5 — CTA Button -->
           <tr>
             <td bgcolor="#ffffff" align="center" style="background-color:#ffffff;padding:4px 28px 28px;text-align:center">
-              <a href="{{ profile.portfolio|default:'#' }}" style="display:block;background-color:#6366f1;color:#ffffff;padding:12px 32px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;font-family:Arial,sans-serif;width:100%;box-sizing:border-box">
+{% if profile.portfolio %}              <a href="{{ profile.portfolio|default:'#' }}" style="display:block;background-color:#6366f1;color:#ffffff;padding:12px 32px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;font-family:Arial,sans-serif;width:100%;box-sizing:border-box">{% endif %}
                 View Portfolio & Projects
               </a>
             </td>
@@ -108,7 +108,7 @@
                     <span style="color:#94a3b8;font-size:12px">{{ profile.phone }} · Resume attached</span>
                   </td>
                   <td width="50%" align="right" style="display:block;width:100%;text-align:left">
-                    <a href="{{ profile.portfolio|default:'#' }}" style="color:#6366f1;font-size:12px;text-decoration:none">{{ profile.portfolio }}</a>
+{% if profile.portfolio %}                    <a href="{{ profile.portfolio|default:'#' }}" style="color:#6366f1;font-size:12px;text-decoration:none">{{ profile.portfolio }}</a>{% endif %}
                   </td>
                 </tr>
               </table>

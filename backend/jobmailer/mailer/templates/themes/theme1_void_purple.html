@@ -21,8 +21,8 @@
                 <tr>
                   <td width="70%" style="display:block;width:100%">
                     <div style="color:#6d28d9;font-size:12px;font-family:'Courier New',Courier,monospace;margin-bottom:10px">// application.py</div>
-                    <div style="color:#ffffff;font-size:28px;font-weight:700;font-family:'Courier New',Courier,monospace;margin-bottom:4px">{{ profile.full_name }}</div>
-                    <div style="color:#a78bfa;font-size:14px;font-family:'Courier New',Courier,monospace">{{ profile.role }}</div>
+                    <div style="color:#ffffff;font-size:28px;font-weight:700;font-family:'Courier New',Courier,monospace;margin-bottom:4px">{% if profile.full_name %}{{ profile.full_name }}{% else %}Applicant{% endif %}</div>
+{% if profile.role %}                    <div style="color:#a78bfa;font-size:14px;font-family:'Courier New',Courier,monospace">{% if profile.role %}{{ profile.role }}{% endif %}</div>{% endif %}
                   </td>
                   <td width="30%" align="right" valign="top" style="display:block;width:100%">
                     <span style="display:inline-block;width:8px;height:8px;background-color:#a78bfa;border-radius:50%;margin-right:4px"></span>
@@ -40,10 +40,10 @@
           <tr>
             <td bgcolor="#080810" style="background-color:#080810;border:1px solid #1e1b4b;border-radius:8px;padding:20px 24px">
               <span style="display:block;line-height:1.8;font-family:'Courier New',Courier,monospace;color:#6d28d9;font-size:13px;word-break:break-word">const developer = {</span>
-              <span style="display:block;line-height:1.8;font-family:'Courier New',Courier,monospace;color:#d4d4d8;font-size:13px;word-break:break-word">&nbsp;&nbsp;name: '{{ profile.full_name }}',</span>
-              <span style="display:block;line-height:1.8;font-family:'Courier New',Courier,monospace;color:#d4d4d8;font-size:13px;word-break:break-word">&nbsp;&nbsp;role: '{{ profile.role }}',</span>
-              <span style="display:block;line-height:1.8;font-family:'Courier New',Courier,monospace;color:#d4d4d8;font-size:13px;word-break:break-word">&nbsp;&nbsp;college: '{{ profile.college }}',</span>
-              <span style="display:block;line-height:1.8;font-family:'Courier New',Courier,monospace;color:#d4d4d8;font-size:13px;word-break:break-word">&nbsp;&nbsp;year: {{ profile.grad_year }},</span>
+              <span style="display:block;line-height:1.8;font-family:'Courier New',Courier,monospace;color:#d4d4d8;font-size:13px;word-break:break-word">&nbsp;&nbsp;name: '{% if profile.full_name %}{{ profile.full_name }}{% else %}Applicant{% endif %}',</span>
+{% if profile.role %}              <span style="display:block;line-height:1.8;font-family:'Courier New',Courier,monospace;color:#d4d4d8;font-size:13px;word-break:break-word">&nbsp;&nbsp;role: '{{ profile.role }}',</span>{% endif %}
+{% if profile.college %}              <span style="display:block;line-height:1.8;font-family:'Courier New',Courier,monospace;color:#d4d4d8;font-size:13px;word-break:break-word">&nbsp;&nbsp;college: '{{ profile.college }}',</span>{% endif %}
+{% if profile.grad_year %}              <span style="display:block;line-height:1.8;font-family:'Courier New',Courier,monospace;color:#d4d4d8;font-size:13px;word-break:break-word">&nbsp;&nbsp;year: {{ profile.grad_year }},</span>{% endif %}
               <span style="display:block;line-height:1.8;font-family:'Courier New',Courier,monospace;color:#a78bfa;font-size:13px;word-break:break-word">&nbsp;&nbsp;status: 'open_to_work'</span>
               <span style="display:block;line-height:1.8;font-family:'Courier New',Courier,monospace;color:#6d28d9;font-size:13px;word-break:break-word">};</span>
             </td>
@@ -86,15 +86,15 @@
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                   <td width="32%" style="display:block;width:100%;margin-bottom:6px">
-                    <a href="{{ profile.github|default:'#' }}" style="border:1px solid #3b0764;color:#a78bfa;padding:8px 0;border-radius:4px;text-decoration:none;font-size:13px;font-family:'Courier New',Courier,monospace;text-align:center;display:block;width:100%">github.com</a>
+{% if profile.github %}                    <a href="{{ profile.github|default:'#' }}" style="border:1px solid #3b0764;color:#a78bfa;padding:8px 0;border-radius:4px;text-decoration:none;font-size:13px;font-family:'Courier New',Courier,monospace;text-align:center;display:block;width:100%">github.com</a>{% endif %}
                   </td>
                   <td width="2%" style="display:block;width:100%"></td>
                   <td width="32%" style="display:block;width:100%;margin-bottom:6px">
-                    <a href="{{ profile.linkedin|default:'#' }}" style="border:1px solid #3b0764;color:#a78bfa;padding:8px 0;border-radius:4px;text-decoration:none;font-size:13px;font-family:'Courier New',Courier,monospace;text-align:center;display:block;width:100%">linkedin.com</a>
+{% if profile.linkedin %}                    <a href="{{ profile.linkedin|default:'#' }}" style="border:1px solid #3b0764;color:#a78bfa;padding:8px 0;border-radius:4px;text-decoration:none;font-size:13px;font-family:'Courier New',Courier,monospace;text-align:center;display:block;width:100%">linkedin.com</a>{% endif %}
                   </td>
                   <td width="2%" style="display:block;width:100%"></td>
                   <td width="32%" style="display:block;width:100%;margin-bottom:6px">
-                    <a href="{{ profile.portfolio|default:'#' }}" style="border:1px solid #3b0764;color:#a78bfa;padding:8px 0;border-radius:4px;text-decoration:none;font-size:13px;font-family:'Courier New',Courier,monospace;text-align:center;display:block;width:100%">portfolio</a>
+{% if profile.portfolio %}                    <a href="{{ profile.portfolio|default:'#' }}" style="border:1px solid #3b0764;color:#a78bfa;padding:8px 0;border-radius:4px;text-decoration:none;font-size:13px;font-family:'Courier New',Courier,monospace;text-align:center;display:block;width:100%">portfolio</a>{% endif %}
                   </td>
                 </tr>
               </table>
@@ -110,7 +110,7 @@
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                   <td width="70%" style="display:block;width:100%">
-                    <span style="color:#a78bfa;font-size:13px;font-family:'Courier New',Courier,monospace">— {{ profile.full_name }}</span>
+                    <span style="color:#a78bfa;font-size:13px;font-family:'Courier New',Courier,monospace">— {% if profile.full_name %}{{ profile.full_name }}{% else %}Applicant{% endif %}</span>
                     <div style="color:#3b1f6b;font-size:11px;font-family:'Courier New',Courier,monospace;margin-top:6px">Built with Python & Django</div>
                   </td>
                   <td width="30%" align="right" valign="top" style="display:block;width:100%">
