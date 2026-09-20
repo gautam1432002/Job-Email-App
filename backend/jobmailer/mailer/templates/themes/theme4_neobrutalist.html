@@ -47,11 +47,13 @@
                   <td>
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="8">
                       <tr>
+{% if profile.college %}
                         <td width="50%" bgcolor="#fff7ed" style="background-color:#fff7ed;border-radius:10px;padding:16px 18px;display:block;width:100%;box-sizing:border-box">
                           <span style="color:#c2410c;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;display:block;margin-bottom:8px">EDUCATION</span>
-{% if profile.college %}                          <span style="color:#0c0a09;font-size:13px;font-weight:700;margin-top:4px;display:block">{{ profile.college }}</span>{% endif %}
+                          <span style="color:#0c0a09;font-size:13px;font-weight:700;margin-top:4px;display:block">{{ profile.college }}</span>
 {% if profile.grad_year %}                          <span style="color:#78716c;font-size:11px;margin-top:2px;display:block">Class of {{ profile.grad_year }}</span>{% endif %}
                         </td>
+{% endif %}
                         <td width="50%" bgcolor="#fff7ed" style="background-color:#fff7ed;border-radius:10px;padding:16px 18px;display:block;width:100%;box-sizing:border-box">
                           <span style="color:#c2410c;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;display:block;margin-bottom:8px">EXPERIENCE</span>
                           <span style="color:#0c0a09;font-size:13px;font-weight:700;margin-top:4px;display:block">Projects Shipped</span>

@@ -61,16 +61,20 @@
                     <span style="color:#525252;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:4px">PRIMARY SKILL</span>
                     <span style="color:#d4d4d4;font-size:13px;font-weight:600">{{ skills_list.0|default:'Software Development' }}</span>
                   </td>
+{% if profile.college %}
                   <td width="50%" bgcolor="#141414" style="background-color:#141414;border:1px solid #1f1f1f;border-radius:8px;padding:14px 16px;display:block;width:100%;box-sizing:border-box">
                     <span style="color:#525252;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:4px">EDUCATION</span>
-{% if profile.college %}                    <span style="color:#d4d4d4;font-size:13px;font-weight:600">{{ profile.college }}</span>{% endif %}
+                    <span style="color:#d4d4d4;font-size:13px;font-weight:600">{{ profile.college }}</span>
                   </td>
+{% endif %}
                 </tr>
                 <tr>
+{% if profile.grad_year %}
                   <td width="50%" bgcolor="#141414" style="background-color:#141414;border:1px solid #1f1f1f;border-radius:8px;padding:14px 16px;display:block;width:100%;box-sizing:border-box">
                     <span style="color:#525252;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:4px">GRADUATION YR</span>
-{% if profile.grad_year %}                    <span style="color:#d4d4d4;font-size:13px;font-weight:600">{{ profile.grad_year }}</span>{% endif %}
+                    <span style="color:#d4d4d4;font-size:13px;font-weight:600">{{ profile.grad_year }}</span>
                   </td>
+{% endif %}
                   <td width="50%" bgcolor="#141414" style="background-color:#141414;border:1px solid #1f1f1f;border-radius:8px;padding:14px 16px;display:block;width:100%;box-sizing:border-box">
                     <span style="color:#525252;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:4px">AVAILABILITY</span>
                     <span style="color:#d4d4d4;font-size:13px;font-weight:600">Immediate</span>
@@ -91,13 +95,15 @@
           </tr>
 
           <!-- ROW 6 — CTA -->
+{% if profile.portfolio %}
           <tr>
             <td style="padding:0 28px 24px">
-{% if profile.portfolio %}              <a href="{{ profile.portfolio|default:'#' }}" style="display:block;background-color:#ffffff;color:#0f0f0f;padding:14px 0;border-radius:6px;font-size:14px;font-weight:700;text-decoration:none;text-align:center;width:100%;box-sizing:border-box">{% endif %}
+              <a href="{{ profile.portfolio }}" style="display:block;background-color:#ffffff;color:#0f0f0f;padding:14px 0;border-radius:6px;font-size:14px;font-weight:700;text-decoration:none;text-align:center;width:100%;box-sizing:border-box">
                 View Portfolio & Resume
               </a>
             </td>
           </tr>
+{% endif %}
 
           <!-- ROW 7 — Footer -->
           <tr>

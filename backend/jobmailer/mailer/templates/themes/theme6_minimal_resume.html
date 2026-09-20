@@ -58,10 +58,12 @@
                     <span style="color:#18181b;font-size:22px;font-weight:900;display:block">3+</span>
                     <span style="color:#a1a1aa;font-size:11px;display:block;margin-top:2px">Projects</span>
                   </td>
+{% if profile.grad_year %}
                   <td width="33.3%" bgcolor="#ffffff" align="center" style="background-color:#ffffff;border:1px solid #e4e4e7;border-radius:8px;padding:16px;text-align:center;display:block;width:100%;box-sizing:border-box;margin-bottom:8px">
-{% if profile.grad_year %}                    <span style="color:#18181b;font-size:22px;font-weight:900;display:block">{{ profile.grad_year }}</span>{% endif %}
+                    <span style="color:#18181b;font-size:22px;font-weight:900;display:block">{{ profile.grad_year }}</span>
                     <span style="color:#a1a1aa;font-size:11px;display:block;margin-top:2px">Graduate</span>
                   </td>
+{% endif %}
                   <td width="33.3%" bgcolor="#ffffff" align="center" style="background-color:#ffffff;border:1px solid #e4e4e7;border-radius:8px;padding:16px;text-align:center;display:block;width:100%;box-sizing:border-box">
                     <span style="color:#18181b;font-size:22px;font-weight:900;display:block">100%</span>
                     <span style="color:#a1a1aa;font-size:11px;display:block;margin-top:2px">Committed</span>
@@ -72,13 +74,15 @@
           </tr>
           
           <!-- ROW 4 — CTA -->
+{% if profile.portfolio %}
           <tr>
             <td bgcolor="#ffffff" style="background-color:#ffffff;padding:4px 32px 28px">
-{% if profile.portfolio %}              <a href="{{ profile.portfolio|default:'#' }}" style="display:block;background-color:#18181b;color:#fafafa;padding:14px 0;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none;text-align:center;width:100%;box-sizing:border-box">{% endif %}
+              <a href="{{ profile.portfolio }}" style="display:block;background-color:#18181b;color:#fafafa;padding:14px 0;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none;text-align:center;width:100%;box-sizing:border-box">
                 Explore My Full Portfolio &rarr;
               </a>
             </td>
           </tr>
+{% endif %}
           
           <!-- ROW 5 — Footer -->
           <tr>
