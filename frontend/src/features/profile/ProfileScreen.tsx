@@ -4,10 +4,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import * as DocumentPicker from 'expo-document-picker';
 import api from '../../services/api';
-import { useTheme } from '../../theme/ThemeContext';
+import { useAppTheme, typography, spacing } from '../../utils/theme';
+import BentoCard from '../../components/BentoCard';
+import { UploadCloud, CheckCircle } from 'lucide-react-native';
 
 export default function ProfileScreen() {
-  const { themeColors, typography, spacing } = useTheme();
+  const { colors, isDark } = useAppTheme();
   const queryClient = useQueryClient();
 
   const [fullName, setFullName] = useState('');
@@ -100,66 +102,78 @@ export default function ProfileScreen() {
 
   if (isLoading) {
     return (
-      <View style={[styles.center, { backgroundColor: themeColors.background }]}>
-        <ActivityIndicator size="large" color={themeColors.aiAccent} />
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.accent} />
       </View>
     );
   }
 
+  const dividerStyle = [styles.divider, { backgroundColor: isDark ? '#38383A' : '#E5E5EA' }];
+  const inputStyle = [styles.input, { color: colors.textPrimary, backgroundColor: colors.cardSurface }];
+
   return (
-    <KeyboardAvoidingView style={[styles.container, { backgroundColor: themeColors.background }]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <KeyboardAvoidingView style={[styles.container, { backgroundColor: colors.background }]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={{ padding: spacing.md, paddingTop: 60, paddingBottom: 100 }}>
         <Animated.View entering={FadeIn.duration(400)}>
-          <Text style={[typography.h1, { color: themeColors.textPrimary, marginBottom: spacing.lg }]}>My Profile</Text>
+          <Text style={[typography.h1, { color: colors.textPrimary, marginBottom: spacing.lg, paddingHorizontal: spacing.sm }]}>Profile</Text>
           
-          <View style={[styles.card, { backgroundColor: themeColors.elevatedSurface, borderColor: themeColors.border }]}>
-            <Text style={[typography.h2, { color: themeColors.textPrimary, marginBottom: spacing.sm }]}>Personal Info</Text>
-            <TextInput style={[styles.input, { backgroundColor: themeColors.background, color: themeColors.textPrimary, borderColor: themeColors.border }]} placeholderTextColor={themeColors.textSecondary} placeholder="Full Name" value={fullName} onChangeText={setFullName} />
-            <TextInput style={[styles.input, { backgroundColor: themeColors.background, color: themeColors.textPrimary, borderColor: themeColors.border }]} placeholderTextColor={themeColors.textSecondary} placeholder="Current Role / Headline" value={role} onChangeText={setRole} />
-          </View>
+          <Text style={[styles.sectionHeader, { color: colors.textSecondary }]}>PERSONAL INFO</Text>
+          <BentoCard style={styles.groupCard}>
+            <TextInput style={inputStyle} placeholderTextColor={colors.textSecondary} placeholder="Full Name" value={fullName} onChangeText={setFullName} />
+            <View style={dividerStyle} />
+            <TextInput style={inputStyle} placeholderTextColor={colors.textSecondary} placeholder="Current Role / Headline" value={role} onChangeText={setRole} />
+          </BentoCard>
 
-          <View style={[styles.card, { backgroundColor: themeColors.elevatedSurface, borderColor: themeColors.border }]}>
-            <Text style={[typography.h2, { color: themeColors.textPrimary, marginBottom: spacing.sm }]}>Professional Details</Text>
-            <TextInput style={[styles.input, { backgroundColor: themeColors.background, color: themeColors.textPrimary, borderColor: themeColors.border }]} placeholderTextColor={themeColors.textSecondary} placeholder="Location (e.g. Indore, India)" value={location} onChangeText={setLocation} />
-            <TextInput style={[styles.input, { backgroundColor: themeColors.background, color: themeColors.textPrimary, borderColor: themeColors.border }]} placeholderTextColor={themeColors.textSecondary} placeholder="Years of Experience" value={experienceYears} onChangeText={setExperienceYears} keyboardType="numeric" />
-          </View>
+          <Text style={[styles.sectionHeader, { color: colors.textSecondary }]}>PROFESSIONAL DETAILS</Text>
+          <BentoCard style={styles.groupCard}>
+            <TextInput style={inputStyle} placeholderTextColor={colors.textSecondary} placeholder="Location (e.g. Indore, India)" value={location} onChangeText={setLocation} />
+            <View style={dividerStyle} />
+            <TextInput style={inputStyle} placeholderTextColor={colors.textSecondary} placeholder="Years of Experience" value={experienceYears} onChangeText={setExperienceYears} keyboardType="numeric" />
+          </BentoCard>
 
-          <View style={[styles.card, { backgroundColor: themeColors.elevatedSurface, borderColor: themeColors.border }]}>
-            <Text style={[typography.h2, { color: themeColors.textPrimary, marginBottom: spacing.sm }]}>Education</Text>
-            <TextInput style={[styles.input, { backgroundColor: themeColors.background, color: themeColors.textPrimary, borderColor: themeColors.border }]} placeholderTextColor={themeColors.textSecondary} placeholder="College / University" value={college} onChangeText={setCollege} />
-            <TextInput style={[styles.input, { backgroundColor: themeColors.background, color: themeColors.textPrimary, borderColor: themeColors.border }]} placeholderTextColor={themeColors.textSecondary} placeholder="Graduation Year (e.g. 2026)" value={gradYear} onChangeText={setGradYear} keyboardType="numeric" />
-          </View>
+          <Text style={[styles.sectionHeader, { color: colors.textSecondary }]}>EDUCATION</Text>
+          <BentoCard style={styles.groupCard}>
+            <TextInput style={inputStyle} placeholderTextColor={colors.textSecondary} placeholder="College / University" value={college} onChangeText={setCollege} />
+            <View style={dividerStyle} />
+            <TextInput style={inputStyle} placeholderTextColor={colors.textSecondary} placeholder="Graduation Year (e.g. 2026)" value={gradYear} onChangeText={setGradYear} keyboardType="numeric" />
+          </BentoCard>
 
-          <View style={[styles.card, { backgroundColor: themeColors.elevatedSurface, borderColor: themeColors.border }]}>
-            <Text style={[typography.h2, { color: themeColors.textPrimary, marginBottom: spacing.sm }]}>Resume & Documents</Text>
-            <TouchableOpacity style={[styles.outlineBtn, { borderColor: themeColors.aiAccent }]} onPress={handlePickResume}>
-              <Text style={{ color: themeColors.aiAccent, fontWeight: 'bold' }}>SELECT PDF RESUME</Text>
+          <Text style={[styles.sectionHeader, { color: colors.textSecondary }]}>RESUME & DOCUMENTS</Text>
+          <BentoCard style={styles.groupCard}>
+            <TouchableOpacity style={styles.uploadBtn} onPress={handlePickResume}>
+              <UploadCloud color={colors.accent} size={24} style={{ marginRight: 12 }} />
+              <View style={{ flex: 1 }}>
+                <Text style={[typography.body1, { color: colors.textPrimary }]}>Upload PDF Resume</Text>
+                {resumeFile ? (
+                  <Text style={[typography.caption, { color: colors.textSecondary, marginTop: 2 }]}>{resumeFile.name}</Text>
+                ) : existingResume ? (
+                  <Text style={[typography.caption, { color: '#34d399', marginTop: 2 }]}>Resume previously uploaded</Text>
+                ) : null}
+              </View>
+              {existingResume && !resumeFile && <CheckCircle color="#34d399" size={20} />}
             </TouchableOpacity>
-            {resumeFile ? (
-              <Text style={[typography.caption, { color: themeColors.textPrimary, marginTop: 8 }]}>Selected: {resumeFile.name}</Text>
-            ) : existingResume ? (
-              <Text style={[typography.caption, { color: themeColors.success, marginTop: 8 }]}>📎 Resume previously uploaded</Text>
-            ) : null}
-          </View>
+          </BentoCard>
 
-          <View style={[styles.card, { backgroundColor: themeColors.elevatedSurface, borderColor: themeColors.border }]}>
-            <Text style={[typography.h2, { color: themeColors.textPrimary, marginBottom: spacing.sm }]}>Tech Stack</Text>
-            <TextInput style={[styles.input, { backgroundColor: themeColors.background, color: themeColors.textPrimary, borderColor: themeColors.border }]} placeholderTextColor={themeColors.textSecondary} placeholder="Skills (comma separated)" value={skills} onChangeText={setSkills} />
-          </View>
+          <Text style={[styles.sectionHeader, { color: colors.textSecondary }]}>TECH STACK</Text>
+          <BentoCard style={styles.groupCard}>
+            <TextInput style={inputStyle} placeholderTextColor={colors.textSecondary} placeholder="Skills (comma separated)" value={skills} onChangeText={setSkills} />
+          </BentoCard>
 
-          <View style={[styles.card, { backgroundColor: themeColors.elevatedSurface, borderColor: themeColors.border }]}>
-            <Text style={[typography.h2, { color: themeColors.textPrimary, marginBottom: spacing.sm }]}>Links</Text>
-            <TextInput style={[styles.input, { backgroundColor: themeColors.background, color: themeColors.textPrimary, borderColor: themeColors.border }]} placeholderTextColor={themeColors.textSecondary} placeholder="Portfolio URL" value={portfolio} onChangeText={setPortfolio} autoCapitalize="none" />
-            <TextInput style={[styles.input, { backgroundColor: themeColors.background, color: themeColors.textPrimary, borderColor: themeColors.border }]} placeholderTextColor={themeColors.textSecondary} placeholder="LinkedIn URL" value={linkedin} onChangeText={setLinkedin} autoCapitalize="none" />
-            <TextInput style={[styles.input, { backgroundColor: themeColors.background, color: themeColors.textPrimary, borderColor: themeColors.border }]} placeholderTextColor={themeColors.textSecondary} placeholder="GitHub URL" value={github} onChangeText={setGithub} autoCapitalize="none" />
-          </View>
+          <Text style={[styles.sectionHeader, { color: colors.textSecondary }]}>LINKS</Text>
+          <BentoCard style={styles.groupCard}>
+            <TextInput style={inputStyle} placeholderTextColor={colors.textSecondary} placeholder="Portfolio URL" value={portfolio} onChangeText={setPortfolio} autoCapitalize="none" />
+            <View style={dividerStyle} />
+            <TextInput style={inputStyle} placeholderTextColor={colors.textSecondary} placeholder="LinkedIn URL" value={linkedin} onChangeText={setLinkedin} autoCapitalize="none" />
+            <View style={dividerStyle} />
+            <TextInput style={inputStyle} placeholderTextColor={colors.textSecondary} placeholder="GitHub URL" value={github} onChangeText={setGithub} autoCapitalize="none" />
+          </BentoCard>
 
           <TouchableOpacity 
-            style={[styles.button, { backgroundColor: themeColors.aiAccent, marginTop: spacing.md }]} 
+            style={[styles.button, { backgroundColor: colors.accent, marginTop: spacing.xl }]} 
             onPress={() => updateMutation.mutate()}
             disabled={updateMutation.isPending}
           >
-            <Text style={[typography.button, { color: '#000' }]}>{updateMutation.isPending ? 'SAVING...' : 'SAVE PROFILE'}</Text>
+            <Text style={[typography.button, { color: '#fff' }]}>{updateMutation.isPending ? 'SAVING...' : 'SAVE PROFILE'}</Text>
           </TouchableOpacity>
 
         </Animated.View>
@@ -171,8 +185,35 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  card: { padding: 20, borderRadius: 16, borderWidth: 1, marginBottom: 20 },
-  input: { borderRadius: 8, padding: 16, marginBottom: 12, borderWidth: 1 },
-  button: { padding: 16, borderRadius: 9999, alignItems: 'center' },
-  outlineBtn: { padding: 14, borderRadius: 8, borderWidth: 1, alignItems: 'center' },
+  sectionHeader: {
+    fontSize: 13,
+    fontWeight: '600',
+    marginTop: 24,
+    marginBottom: 8,
+    paddingHorizontal: 16,
+    letterSpacing: 0.5,
+  },
+  groupCard: {
+    padding: 0,
+    marginBottom: 8,
+  },
+  input: {
+    padding: 16,
+    fontSize: 16,
+    borderWidth: 0,
+  },
+  divider: {
+    height: 1,
+    marginLeft: 16,
+  },
+  uploadBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+  },
+  button: {
+    padding: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+  }
 });

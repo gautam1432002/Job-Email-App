@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useTheme } from '../../theme/ThemeContext';
+import { useAppTheme, typography, spacing } from '../../utils/theme';
 
 const { width } = Dimensions.get('window');
 
@@ -37,7 +37,7 @@ const slides = [
 export default function OnboardingScreen() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
-  const { themeColors, typography, spacing } = useTheme();
+  const { colors } = useAppTheme();
 
   const handleNext = () => {
     if (currentSlide < slides.length - 1) {
@@ -54,17 +54,17 @@ export default function OnboardingScreen() {
   const slide = slides[currentSlide];
 
   return (
-    <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.content}>
         {/* Mocked Illustration Area for futuristic aesthetic */}
-        <View style={[styles.illustration, { borderColor: themeColors.aiAccent, backgroundColor: themeColors.elevatedSurface }]}>
-          <Text style={{ color: themeColors.aiAccent, fontSize: 40 }}>★</Text>
+        <View style={[styles.illustration, { borderColor: colors.accent, backgroundColor: colors.cardSurface }]}>
+          <Text style={{ color: colors.accent, fontSize: 40 }}>★</Text>
         </View>
 
-        <Text style={[typography.h1, { color: themeColors.textPrimary, marginBottom: spacing.md, textAlign: 'center' }]}>
+        <Text style={[typography.h1, { color: colors.textPrimary, marginBottom: spacing.md, textAlign: 'center' }]}>
           {slide.title}
         </Text>
-        <Text style={[typography.body1, { color: themeColors.textSecondary, textAlign: 'center', paddingHorizontal: spacing.xl }]}>
+        <Text style={[typography.body1, { color: colors.textSecondary, textAlign: 'center', paddingHorizontal: spacing.xl }]}>
           {slide.description}
         </Text>
       </View>
@@ -76,17 +76,17 @@ export default function OnboardingScreen() {
               key={index}
               style={[
                 styles.dot,
-                { backgroundColor: currentSlide === index ? themeColors.aiAccent : themeColors.border }
+                { backgroundColor: currentSlide === index ? colors.accent : colors.border }
               ]}
             />
           ))}
         </View>
         <View style={styles.buttonRow}>
           <TouchableOpacity onPress={handleSkip}>
-            <Text style={[typography.button, { color: themeColors.textSecondary }]}>SKIP</Text>
+            <Text style={[typography.button, { color: colors.textSecondary }]}>SKIP</Text>
           </TouchableOpacity>
           <TouchableOpacity 
-            style={[styles.nextButton, { backgroundColor: themeColors.aiAccent }]} 
+            style={[styles.nextButton, { backgroundColor: colors.accent }]} 
             onPress={handleNext}
           >
             <Text style={[typography.button, { color: '#000000' }]}>
@@ -100,14 +100,8 @@ export default function OnboardingScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+  container: { flex: 1 },
+  content: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   illustration: {
     width: width * 0.6,
     height: width * 0.6,
@@ -117,29 +111,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 40,
   },
-  footer: {
-    padding: 30,
-    paddingBottom: 50,
-  },
-  pagination: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: 30,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginHorizontal: 4,
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  nextButton: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 24,
-  }
+  footer: { padding: 30, paddingBottom: 50 },
+  pagination: { flexDirection: 'row', justifyContent: 'center', marginBottom: 30 },
+  dot: { width: 8, height: 8, borderRadius: 4, marginHorizontal: 4 },
+  buttonRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  nextButton: { paddingHorizontal: 24, paddingVertical: 12, borderRadius: 24 }
 });

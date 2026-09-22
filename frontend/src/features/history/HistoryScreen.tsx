@@ -3,8 +3,9 @@ import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-nativ
 import { useQuery } from '@tanstack/react-query';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import api from '../../services/api';
-import { Theme } from '../../utils/theme';
-import GlassCard from '../../components/GlassCard';
+import { useAppTheme, typography, spacing, borderRadius } from '../../utils/theme';
+import BentoCard from '../../components/BentoCard';
+import { MailCheck, MailX, Bot } from 'lucide-react-native';
 
 interface EmailLog {
   id: number;
@@ -17,6 +18,8 @@ interface EmailLog {
 }
 
 export default function HistoryScreen() {
+  const { colors, isDark } = useAppTheme();
+
   const { data: logs, isLoading, isError } = useQuery<EmailLog[]>({
     queryKey: ['history'],
     queryFn: async () => {
@@ -27,45 +30,61 @@ export default function HistoryScreen() {
 
   if (isLoading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color={Theme.colors.primary} />
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.accent} />
       </View>
     );
   }
 
   if (isError) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.errorText}>Failed to load history.</Text>
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <Text style={{ color: '#ef4444' }}>Failed to load history.</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <FlatList
         data={logs}
         keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={{ padding: Theme.spacing.md }}
+        contentContainerStyle={{ padding: spacing.md, paddingTop: 60, paddingBottom: 100 }}
+        ListHeaderComponent={
+          <Text style={[typography.h1, { color: colors.textPrimary, marginBottom: spacing.lg, paddingHorizontal: spacing.sm }]}>History</Text>
+        }
         ListEmptyComponent={
-          <Text style={styles.emptyText}>No emails sent yet.</Text>
+          <Text style={[typography.body1, { color: colors.textSecondary, textAlign: 'center', marginTop: spacing.xxl }]}>No emails sent yet.</Text>
         }
         renderItem={({ item, index }) => (
           <Animated.View entering={FadeIn.delay(index * 100)}>
-            <GlassCard style={styles.card}>
-              <View style={styles.row}>
-                <Text style={styles.companyName}>{item.company_name}</Text>
-                <Text style={[styles.status, item.status === 'sent' ? styles.statusSent : styles.statusFailed]}>
-                  {item.status.toUpperCase()}
-                </Text>
+            <BentoCard style={styles.card}>
+              <View style={styles.cardHeader}>
+                <View style={styles.recipientInfo}>
+                  <Text style={[typography.h3, { color: colors.textPrimary }]}>{item.company_name}</Text>
+                  <Text style={[typography.caption, { color: colors.textSecondary, marginTop: 2 }]}>{item.receiver_email}</Text>
+                </View>
+                <View style={[styles.statusIcon, { backgroundColor: item.status === 'sent' ? (isDark ? 'rgba(16, 185, 129, 0.15)' : 'rgba(16, 185, 129, 0.1)') : (isDark ? 'rgba(239, 68, 68, 0.15)' : 'rgba(239, 68, 68, 0.1)') }]}>
+                  {item.status === 'sent' ? <MailCheck color="#10b981" size={20} /> : <MailX color="#ef4444" size={20} />}
+                </View>
               </View>
-              <Text style={styles.receiver}>{item.receiver_email}</Text>
-              <Text style={styles.subject} numberOfLines={1}>{item.subject}</Text>
+              
+              <Text style={[typography.body2, { color: colors.textPrimary, marginVertical: spacing.md }]} numberOfLines={2}>
+                "{item.subject}"
+              </Text>
+              
+              <View style={[styles.divider, { backgroundColor: isDark ? '#38383A' : '#E5E5EA' }]} />
+              
               <View style={styles.footerRow}>
-                <Text style={styles.date}>{new Date(item.sent_at).toLocaleDateString()}</Text>
-                {item.ai_used && <Text style={styles.aiBadge}>AI Drafted</Text>}
+                <Text style={[typography.caption, { color: colors.textSecondary }]}>{new Date(item.sent_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}</Text>
+                {item.ai_used && (
+                  <View style={[styles.aiBadge, { backgroundColor: isDark ? 'rgba(10, 132, 255, 0.15)' : 'rgba(0, 122, 255, 0.1)' }]}>
+                    <Bot color={colors.accent} size={14} style={{ marginRight: 4 }} />
+                    <Text style={{ color: colors.accent, fontSize: 10, fontWeight: 'bold' }}>AI DRAFTED</Text>
+                  </View>
+                )}
               </View>
-            </GlassCard>
+            </BentoCard>
           </Animated.View>
         )}
       />
@@ -74,82 +93,13 @@ export default function HistoryScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: Theme.colors.background 
-  },
-  center: {
-    flex: 1,
-    backgroundColor: Theme.colors.background,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  card: {
-    marginBottom: Theme.spacing.md,
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Theme.spacing.xs,
-  },
-  companyName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: Theme.colors.primary,
-  },
-  status: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: Theme.borderRadius.pill,
-    overflow: 'hidden',
-  },
-  statusSent: {
-    backgroundColor: 'rgba(0, 250, 154, 0.2)',
-    color: Theme.colors.success,
-  },
-  statusFailed: {
-    backgroundColor: 'rgba(255, 76, 76, 0.2)',
-    color: Theme.colors.error,
-  },
-  receiver: {
-    color: Theme.colors.textDim,
-    fontSize: 12,
-    marginBottom: Theme.spacing.xs,
-  },
-  subject: {
-    color: Theme.colors.text,
-    fontSize: 14,
-    marginBottom: Theme.spacing.sm,
-  },
-  footerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: Theme.spacing.sm,
-  },
-  date: {
-    color: Theme.colors.textDim,
-    fontSize: 10,
-  },
-  aiBadge: {
-    fontSize: 10,
-    color: Theme.colors.background,
-    backgroundColor: Theme.colors.secondary,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: Theme.borderRadius.sm,
-    fontWeight: 'bold',
-    overflow: 'hidden',
-  },
-  errorText: {
-    color: Theme.colors.error,
-  },
-  emptyText: {
-    color: Theme.colors.textDim,
-    textAlign: 'center',
-    marginTop: Theme.spacing.xxl,
-  }
+  container: { flex: 1 },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  card: { padding: 20, marginBottom: 12 },
+  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+  recipientInfo: { flex: 1, paddingRight: 16 },
+  statusIcon: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center' },
+  divider: { height: 1, width: '100%', marginBottom: 12 },
+  footerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  aiBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 }
 });

@@ -2,11 +2,11 @@ import React, { useState, useContext } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
-import { useTheme } from '../../theme/ThemeContext';
+import { useAppTheme, typography, spacing } from '../../utils/theme';
 import { ProfileContext } from '../../store/ProfileContext';
 
 export default function ProfileEditorScreen() {
-  const { themeColors, typography, spacing } = useTheme();
+  const { colors, isDark } = useAppTheme();
   const { createProfile } = useContext(ProfileContext);
   const [profileName, setProfileName] = useState('');
 
@@ -31,34 +31,34 @@ export default function ProfileEditorScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: themeColors.background }]}>
-      <Text style={[typography.h1, { color: themeColors.textPrimary, marginBottom: spacing.md }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <Text style={[typography.h1, { color: colors.textPrimary, marginBottom: spacing.md }]}>
         Create Profile
       </Text>
-      <Text style={[typography.body1, { color: themeColors.textSecondary, marginBottom: spacing.xl }]}>
+      <Text style={[typography.body1, { color: colors.textSecondary, marginBottom: spacing.xl }]}>
         A profile holds your settings, email history, and contacts. You can create multiple profiles later.
       </Text>
 
-      <Text style={[typography.caption, { color: themeColors.textSecondary, marginBottom: spacing.sm }]}>
+      <Text style={[typography.caption, { color: colors.textSecondary, marginBottom: spacing.sm }]}>
         PROFILE NAME
       </Text>
       <TextInput
         style={[
           styles.input, 
           { 
-            backgroundColor: themeColors.elevatedSurface, 
-            color: themeColors.textPrimary,
-            borderColor: themeColors.border 
+            backgroundColor: colors.cardSurface, 
+            color: colors.textPrimary,
+            borderColor: colors.border 
           }
         ]}
         placeholder="e.g. Dev Jobs 2026"
-        placeholderTextColor={themeColors.textSecondary}
+        placeholderTextColor={colors.textSecondary}
         value={profileName}
         onChangeText={setProfileName}
       />
 
       {mutation.isError && (
-        <Text style={{ color: themeColors.error, marginTop: spacing.sm }}>
+        <Text style={{ color: '#ef4444', marginTop: spacing.sm }}>
           Failed to create profile. Ensure backend is running.
         </Text>
       )}
@@ -69,7 +69,7 @@ export default function ProfileEditorScreen() {
         style={[
           styles.button, 
           { 
-            backgroundColor: profileName.trim() ? themeColors.aiAccent : themeColors.border,
+            backgroundColor: profileName.trim() ? colors.accent : colors.border,
           }
         ]}
         disabled={!profileName.trim() || mutation.isPending}
@@ -78,7 +78,7 @@ export default function ProfileEditorScreen() {
         {mutation.isPending ? (
           <ActivityIndicator color="#000" />
         ) : (
-          <Text style={[typography.button, { color: '#000000' }]}>INITIALIZE PROFILE</Text>
+          <Text style={[typography.button, { color: '#ffffff' }]}>INITIALIZE PROFILE</Text>
         )}
       </TouchableOpacity>
     </View>

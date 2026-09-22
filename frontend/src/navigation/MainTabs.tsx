@@ -5,8 +5,8 @@ import HistoryScreen from '../features/history/HistoryScreen';
 import ProfileScreen from '../features/profile/ProfileScreen';
 import SettingsScreen from '../features/profile/SettingsScreen';
 import { View, Text, TouchableOpacity, Dimensions, StyleSheet, Platform, PanResponder } from 'react-native';
-import { useTheme } from '../theme/ThemeContext';
-import { BlurView } from 'expo-blur';
+import { useAppTheme } from '../utils/theme';
+
 import Animated, { useAnimatedStyle, withSpring, useSharedValue } from 'react-native-reanimated';
 import { Home, Clock, User, Settings } from 'lucide-react-native';
 
@@ -22,7 +22,7 @@ export type MainTabParamList = {
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
-  const { themeColors, isDarkMode } = useTheme();
+  const { colors: themeColors, isDark: isDarkMode } = useAppTheme();
   
   // 40 is total horizontal padding for the floating bar
   const tabWidth = (width - 40) / state.routes.length; 
@@ -73,14 +73,14 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
       style={[styles.shadowContainer, { borderColor: 'rgba(0,0,0,0.06)' }]} 
       {...panResponder.panHandlers}
     >
-      <BlurView intensity={90} tint={blurTint} style={[styles.blurView, { backgroundColor: 'rgba(255,255,255,0.7)' }]}>
+      <View style={[styles.solidView, { backgroundColor: themeColors.cardSurface }]}>
         {/* Animated Background Highlight */}
         <Animated.View 
           style={[
             styles.activeIndicator, 
             { 
               width: tabWidth, 
-              backgroundColor: 'rgba(0,0,0,0.05)'
+              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'
             }, 
             animatedStyle
           ]} 
@@ -102,10 +102,10 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
             }
           };
 
-          // Force dark icons since navbar is white transparent
+          // Use appropriate contrast colors for solid navbar
           const color = isFocused 
-            ? '#000000' 
-            : '#888888';
+            ? themeColors.textPrimary 
+            : themeColors.textSecondary;
           
           let IconComponent = Home;
           if (route.name === 'History') IconComponent = Clock;
@@ -152,7 +152,7 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
             </TouchableOpacity>
           );
         })}
-      </BlurView>
+      </View>
     </View>
   );
 }
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     borderWidth: 1, // Added for visibility on white backgrounds
   },
-  blurView: {
+  solidView: {
     flexDirection: 'row',
     height: '100%',
     width: '100%',

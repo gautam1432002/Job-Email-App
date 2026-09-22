@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Switch, KeyboardAvoidingView, Platform, Alert, Modal, SafeAreaView } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import Animated, { FadeIn, FadeOut, Easing, withRepeat, withTiming, useSharedValue, useAnimatedStyle, withSequence } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut, Easing, withRepeat, withTiming, useSharedValue, useAnimatedStyle } from 'react-native-reanimated';
 import api from '../../services/api';
-import { Theme } from '../../utils/theme';
-import GlassCard from '../../components/GlassCard';
+import { useAppTheme, typography, spacing, borderRadius } from '../../utils/theme';
+import BentoCard from '../../components/BentoCard';
+import { Sparkles, Paperclip, Check } from 'lucide-react-native';
 
 export default function ComposeScreen() {
+  const { colors, isDark } = useAppTheme();
   const [companyName, setCompanyName] = useState('');
   const [jobDescription, setJobDescription] = useState('');
   const [aboutCompany, setAboutCompany] = useState('');
@@ -20,15 +22,14 @@ export default function ComposeScreen() {
   const [generatedDraft, setGeneratedDraft] = useState<{subject: string; full_body: string} | null>(null);
 
   const THEMES = [
-    { id: 'none', name: 'Plain Text', color: '#52525b' },
-    { id: 'theme1', name: 'Void Purple', color: '#6d28d9' },
-    { id: 'theme2', name: 'Editorial Ink', color: '#18181b' },
-    { id: 'theme3', name: 'Soft Bento', color: '#fbbf24' },
-    { id: 'theme4', name: 'Neobrutalist', color: '#34d399' },
-    { id: 'theme5', name: 'Newsletter', color: '#1e293b' },
-    { id: 'theme6', name: 'Minimal', color: '#94a3b8' },
+    { id: 'none', name: 'Plain Text' },
+    { id: 'theme1', name: 'Void Purple' },
+    { id: 'theme2', name: 'Editorial Ink' },
+    { id: 'theme3', name: 'Soft Bento' },
+    { id: 'theme4', name: 'Neobrutalist' },
+    { id: 'theme5', name: 'Newsletter' },
+    { id: 'theme6', name: 'Minimal' },
   ];
-
 
   // Pulse animation for AI Loader
   const pulseScale = useSharedValue(1);
@@ -86,7 +87,6 @@ export default function ComposeScreen() {
       return res.data.html;
     },
     onSuccess: (htmlString) => {
-      // Inject viewport meta tag for mobile responsiveness if not present
       let finalHtml = htmlString;
       if (!finalHtml.includes('name="viewport"')) {
         finalHtml = finalHtml.replace('<head>', '<head><meta name="viewport" content="width=device-width, initial-scale=1.0">');
@@ -126,54 +126,64 @@ export default function ComposeScreen() {
     }
   });
 
+  const dividerStyle = [styles.divider, { backgroundColor: isDark ? '#38383A' : '#E5E5EA' }];
+  const inputStyle = [styles.input, { color: colors.textPrimary, backgroundColor: colors.background }];
+
   return (
-    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView contentContainerStyle={{ padding: Theme.spacing.md }}>
+    <KeyboardAvoidingView style={[styles.container, { backgroundColor: colors.background }]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <ScrollView contentContainerStyle={{ padding: spacing.md, paddingTop: 60, paddingBottom: 100 }}>
         {!generatedDraft ? (
           <Animated.View entering={FadeIn.duration(400)} exiting={FadeOut}>
-            <GlassCard style={styles.card}>
-              <Text style={styles.header}>
-                New Outreach {profile?.resume ? <Text style={{ color: Theme.colors.primary, fontSize: 12 }}>📎 Resume Attached</Text> : null}
-              </Text>
+            <View style={styles.headerRow}>
+              <Text style={[typography.h1, { color: colors.textPrimary }]}>Composer</Text>
+              {profile?.resume && (
+                <View style={[styles.resumeBadge, { backgroundColor: isDark ? 'rgba(10, 132, 255, 0.15)' : 'rgba(0, 122, 255, 0.1)' }]}>
+                  <Paperclip color={colors.accent} size={14} />
+                  <Text style={{ color: colors.accent, fontSize: 12, fontWeight: 'bold', marginLeft: 4 }}>Resume Linked</Text>
+                </View>
+              )}
+            </View>
+
+            <BentoCard style={{ padding: spacing.lg }}>
+              <Text style={[styles.label, { color: colors.textSecondary }]}>COMPANY NAME *</Text>
+              <TextInput style={inputStyle} placeholderTextColor={colors.textSecondary} placeholder="Acme Corp" value={companyName} onChangeText={setCompanyName} />
               
-              <Text style={styles.label}>Company Name *</Text>
-              <TextInput style={styles.input} placeholderTextColor={Theme.colors.textDim} placeholder="Acme Corp" value={companyName} onChangeText={setCompanyName} />
+              <Text style={[styles.label, { color: colors.textSecondary }]}>JOB DESCRIPTION / ROLE DETAILS</Text>
+              <TextInput style={[inputStyle, { height: 80, paddingTop: 16 }]} multiline placeholderTextColor={colors.textSecondary} placeholder="Looking for a backend engineer..." value={jobDescription} onChangeText={setJobDescription} />
               
-              <Text style={styles.label}>Job Description / Role Details</Text>
-              <TextInput style={[styles.input, { height: 80 }]} multiline placeholderTextColor={Theme.colors.textDim} placeholder="Looking for a backend engineer..." value={jobDescription} onChangeText={setJobDescription} />
-              
-              <Text style={styles.label}>Context / About Company</Text>
-              <TextInput style={styles.input} placeholderTextColor={Theme.colors.textDim} placeholder="Fast growing AI startup..." value={aboutCompany} onChangeText={setAboutCompany} />
+              <Text style={[styles.label, { color: colors.textSecondary }]}>CONTEXT / ABOUT COMPANY</Text>
+              <TextInput style={inputStyle} placeholderTextColor={colors.textSecondary} placeholder="Fast growing AI startup..." value={aboutCompany} onChangeText={setAboutCompany} />
               
               <View style={styles.switchRow}>
-                <Text style={styles.label}>Attach & Use Profile Resume</Text>
-                <Switch value={useResume} onValueChange={setUseResume} trackColor={{ false: 'gray', true: Theme.colors.secondary }} thumbColor={useResume ? Theme.colors.primary : '#f4f3f4'} />
+                <Text style={[typography.body1, { color: colors.textPrimary, fontWeight: '600' }]}>Attach Profile Resume</Text>
+                <Switch value={useResume} onValueChange={setUseResume} trackColor={{ false: colors.border, true: colors.accent }} thumbColor={'#ffffff'} />
               </View>
 
               {generateMutation.isPending ? (
                 <View style={styles.loadingContainer}>
-                  <Animated.View style={[styles.aiCore, animatedPulseStyle]} />
-                  <Text style={styles.loadingText}>Agentic AI Drafting...</Text>
+                  <Animated.View style={[styles.aiCore, { backgroundColor: colors.accent }, animatedPulseStyle]} />
+                  <Text style={[typography.caption, { color: colors.accent }]}>AGENTIC AI DRAFTING...</Text>
                 </View>
               ) : (
-                <TouchableOpacity style={styles.button} onPress={() => generateMutation.mutate()} disabled={!companyName}>
-                  <Text style={styles.buttonText}>GENERATE AI PITCH</Text>
+                <TouchableOpacity style={[styles.button, { backgroundColor: colors.accent }]} onPress={() => generateMutation.mutate()} disabled={!companyName}>
+                  <Sparkles color="#fff" size={20} style={{ marginRight: 8 }} />
+                  <Text style={[typography.button, { color: '#fff' }]}>GENERATE AI PITCH</Text>
                 </TouchableOpacity>
               )}
-            </GlassCard>
+            </BentoCard>
           </Animated.View>
         ) : (
           <Animated.View entering={FadeIn.duration(600)}>
-            <GlassCard style={styles.card}>
-              <Text style={styles.header}>Review Draft</Text>
+            <Text style={[typography.h1, { color: colors.textPrimary, marginBottom: spacing.md }]}>Review Draft</Text>
+            
+            <BentoCard style={{ padding: spacing.lg }}>
+              <Text style={[styles.label, { color: colors.textSecondary }]}>TO EMAIL *</Text>
+              <TextInput style={inputStyle} keyboardType="email-address" autoCapitalize="none" value={receiverEmail} onChangeText={setReceiverEmail} />
               
-              <Text style={styles.label}>To Email *</Text>
-              <TextInput style={styles.input} keyboardType="email-address" autoCapitalize="none" value={receiverEmail} onChangeText={setReceiverEmail} />
+              <Text style={[styles.label, { color: colors.textSecondary }]}>SUBJECT</Text>
+              <TextInput style={inputStyle} value={generatedDraft.subject} onChangeText={(t) => setGeneratedDraft({...generatedDraft, subject: t})} />
               
-              <Text style={styles.label}>Subject</Text>
-              <TextInput style={styles.input} value={generatedDraft.subject} onChangeText={(t) => setGeneratedDraft({...generatedDraft, subject: t})} />
-              
-              <Text style={styles.label}>Select Theme</Text>
+              <Text style={[styles.label, { color: colors.textSecondary }]}>SELECT THEME</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.themeScroll}>
                 {THEMES.map(theme => {
                   const isActive = selectedTheme === theme.id;
@@ -182,54 +192,56 @@ export default function ComposeScreen() {
                       key={theme.id}
                       style={[
                         styles.themeCard,
-                        { borderColor: isActive ? theme.color : 'rgba(255,255,255,0.1)' },
-                        isActive && { backgroundColor: 'rgba(255,255,255,0.05)' }
+                        { 
+                          borderColor: isActive ? colors.accent : colors.border,
+                          backgroundColor: isActive ? (isDark ? 'rgba(10, 132, 255, 0.15)' : 'rgba(0, 122, 255, 0.1)') : colors.background 
+                        }
                       ]}
                       onPress={() => setSelectedTheme(theme.id)}
                     >
-                      <View style={[styles.themeColorIndicator, { backgroundColor: theme.color }]} />
-                      <Text style={[styles.themeText, { color: isActive ? '#fff' : Theme.colors.textDim }]}>{theme.name}</Text>
+                      {isActive && <Check color={colors.accent} size={14} style={{ marginRight: 6 }} />}
+                      <Text style={[styles.themeText, { color: isActive ? colors.accent : colors.textSecondary }]}>{theme.name}</Text>
                     </TouchableOpacity>
                   );
                 })}
               </ScrollView>
 
-              <Text style={styles.label}>Body (HTML supported)</Text>
-              <TextInput style={[styles.input, { height: 200 }]} multiline value={generatedDraft.full_body} onChangeText={(t) => setGeneratedDraft({...generatedDraft, full_body: t})} />
+              <Text style={[styles.label, { color: colors.textSecondary }]}>HTML BODY</Text>
+              <TextInput style={[inputStyle, { height: 250, paddingTop: 16 }]} multiline value={generatedDraft.full_body} onChangeText={(t) => setGeneratedDraft({...generatedDraft, full_body: t})} />
               
               <TouchableOpacity 
-                style={[styles.button, { backgroundColor: Theme.colors.secondary, marginBottom: 10, marginTop: 15 }]} 
+                style={[styles.outlineBtn, { borderColor: colors.border }]} 
                 onPress={() => previewMutation.mutate()} 
                 disabled={previewMutation.isPending}
               >
-                <Text style={styles.buttonText}>{previewMutation.isPending ? "LOADING PREVIEW..." : "PREVIEW HTML THEME"}</Text>
+                <Text style={[typography.button, { color: colors.textPrimary }]}>{previewMutation.isPending ? "LOADING PREVIEW..." : "PREVIEW HTML THEME"}</Text>
               </TouchableOpacity>
               
-              <View style={[styles.actionRow, { marginTop: 0 }]}>
-                <TouchableOpacity style={[styles.button, styles.outlineBtn, { flex: 1, marginRight: 5 }]} onPress={() => setGeneratedDraft(null)}>
-                  <Text style={styles.outlineBtnText}>DISCARD</Text>
+              <View style={styles.actionRow}>
+                <TouchableOpacity style={[styles.outlineBtn, { flex: 1, marginRight: 8, borderColor: '#ef4444' }]} onPress={() => setGeneratedDraft(null)}>
+                  <Text style={[typography.button, { color: '#ef4444' }]}>DISCARD</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.button, {flex: 2, marginLeft: 5}]} onPress={() => sendMutation.mutate()} disabled={sendMutation.isPending}>
-                  <Text style={styles.buttonText}>{sendMutation.isPending ? "SENDING..." : "DISPATCH EMAIL"}</Text>
+                <TouchableOpacity style={[styles.button, { backgroundColor: colors.accent, flex: 2, marginLeft: 8, paddingVertical: 14 }]} onPress={() => sendMutation.mutate()} disabled={sendMutation.isPending}>
+                  <Text style={[typography.button, { color: '#fff' }]}>{sendMutation.isPending ? "SENDING..." : "DISPATCH EMAIL"}</Text>
                 </TouchableOpacity>
               </View>
-            </GlassCard>
+            </BentoCard>
           </Animated.View>
         )}
       </ScrollView>
 
       <Modal visible={previewModalVisible} animationType="slide" presentationStyle="pageSheet">
-        <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Theme Preview</Text>
-            <TouchableOpacity onPress={() => setPreviewModalVisible(false)} style={styles.modalCloseBtn}>
-              <Text style={styles.modalCloseText}>CLOSE</Text>
+        <SafeAreaView style={{ flex: 1, backgroundColor: colors.cardSurface }}>
+          <View style={[styles.modalHeader, { backgroundColor: colors.cardSurface, borderBottomColor: colors.border, borderBottomWidth: 1 }]}>
+            <Text style={[typography.h2, { color: colors.textPrimary }]}>Preview</Text>
+            <TouchableOpacity onPress={() => setPreviewModalVisible(false)}>
+              <Text style={[typography.button, { color: colors.accent }]}>Close</Text>
             </TouchableOpacity>
           </View>
           {previewHtml ? (
-            <WebView source={{ html: previewHtml }} style={{ flex: 1 }} originWhitelist={['*']} />
+            <WebView source={{ html: previewHtml }} style={{ flex: 1, backgroundColor: colors.background }} originWhitelist={['*']} />
           ) : (
-            <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}><Text>Loading preview...</Text></View>
+            <View style={[styles.center, { backgroundColor: colors.background }]}><Text style={{ color: colors.textPrimary }}>Loading preview...</Text></View>
           )}
         </SafeAreaView>
       </Modal>
@@ -239,26 +251,21 @@ export default function ComposeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Theme.colors.background },
-  card: { marginBottom: Theme.spacing.xl },
-  header: { fontSize: 24, fontWeight: 'bold', color: Theme.colors.text, marginBottom: Theme.spacing.lg },
-  label: { color: Theme.colors.secondary, fontSize: 12, fontWeight: 'bold', marginBottom: Theme.spacing.xs, textTransform: 'uppercase' },
-  input: { backgroundColor: 'rgba(0,0,0,0.3)', borderRadius: Theme.borderRadius.sm, padding: Theme.spacing.md, color: Theme.colors.text, marginBottom: Theme.spacing.md, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
-  switchRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Theme.spacing.xl },
-  button: { backgroundColor: Theme.colors.primary, padding: Theme.spacing.md, borderRadius: Theme.borderRadius.pill, alignItems: 'center', shadowColor: Theme.colors.primary, shadowOpacity: 0.5, shadowRadius: 10, elevation: 5 },
-  buttonText: { color: '#000', fontWeight: '900', letterSpacing: 1.5 },
-  outlineBtn: { backgroundColor: 'transparent', borderWidth: 1, borderColor: Theme.colors.error, shadowOpacity: 0 },
-  outlineBtnText: { color: Theme.colors.error, fontWeight: '900', letterSpacing: 1.5 },
-  actionRow: { flexDirection: 'row', marginTop: Theme.spacing.md },
-  loadingContainer: { alignItems: 'center', paddingVertical: Theme.spacing.lg },
-  aiCore: { width: 40, height: 40, borderRadius: 20, backgroundColor: Theme.colors.primary, marginBottom: Theme.spacing.md, shadowColor: Theme.colors.primary, shadowOpacity: 1, shadowRadius: 20, elevation: 15 },
-  loadingText: { color: Theme.colors.primary, fontWeight: 'bold', letterSpacing: 2 },
-  themeScroll: { marginBottom: Theme.spacing.md, paddingBottom: 5 },
-  themeCard: { flexDirection: 'row', alignItems: 'center', padding: Theme.spacing.sm, borderRadius: Theme.borderRadius.md, borderWidth: 1, marginRight: Theme.spacing.sm, backgroundColor: 'rgba(0,0,0,0.2)' },
-  themeColorIndicator: { width: 12, height: 12, borderRadius: 6, marginRight: Theme.spacing.sm },
-  themeText: { fontSize: 13, fontWeight: 'bold' },
-  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: '#000' },
-  modalTitle: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
-  modalCloseBtn: { padding: 8 },
-  modalCloseText: { color: Theme.colors.primary, fontWeight: 'bold' }
+  container: { flex: 1 },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, paddingHorizontal: 8 },
+  resumeBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16 },
+  label: { fontSize: 11, fontWeight: '700', marginBottom: 8, marginTop: 16, letterSpacing: 0.5 },
+  input: { borderRadius: 12, padding: 16, fontSize: 16, borderWidth: 1, borderColor: 'transparent' },
+  switchRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 24 },
+  button: { flexDirection: 'row', padding: 16, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  outlineBtn: { padding: 14, borderRadius: 16, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+  actionRow: { flexDirection: 'row', marginTop: 16 },
+  loadingContainer: { alignItems: 'center', paddingVertical: 24 },
+  aiCore: { width: 40, height: 40, borderRadius: 20, marginBottom: 16 },
+  themeScroll: { marginBottom: 8, paddingBottom: 8 },
+  themeCard: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 16, borderRadius: 12, borderWidth: 1, marginRight: 8 },
+  themeText: { fontSize: 13, fontWeight: '600' },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16 },
+  divider: { height: 1, width: '100%' }
 });

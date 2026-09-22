@@ -4,11 +4,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { ProfileContext } from '../../store/ProfileContext';
 import api from '../../services/api';
-import { useTheme } from '../../theme/ThemeContext';
+import { useAppTheme, typography, spacing } from '../../utils/theme';
 
 export default function SettingsScreen() {
   const { deleteProfile, activeProfileId } = useContext(ProfileContext);
-  const { themeColors, typography, spacing } = useTheme();
+  const { colors, isDark } = useAppTheme();
   const queryClient = useQueryClient();
   
   const [gmail, setGmail] = useState('');
@@ -59,53 +59,53 @@ export default function SettingsScreen() {
 
   if (isLoading) {
     return (
-      <View style={[styles.center, { backgroundColor: themeColors.background }]}>
-        <ActivityIndicator size="large" color={themeColors.aiAccent} />
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.accent} />
       </View>
     );
   }
 
   return (
-    <KeyboardAvoidingView style={[styles.container, { backgroundColor: themeColors.background }]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <KeyboardAvoidingView style={[styles.container, { backgroundColor: colors.background }]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={{ padding: spacing.md, paddingTop: 60 }}>
         <Animated.View entering={FadeIn.duration(400)}>
           
-          <View style={[styles.card, { backgroundColor: themeColors.elevatedSurface, borderColor: themeColors.border }]}>
-            <Text style={[typography.h2, { color: themeColors.textPrimary, marginBottom: spacing.sm }]}>Active Profile</Text>
-            <Text style={[typography.body1, { color: themeColors.textPrimary }]}><Text style={{ color: themeColors.aiAccent, fontWeight: 'bold' }}>Name:</Text> {profile?.profile_name}</Text>
+          <View style={[styles.card, { backgroundColor: colors.cardSurface, borderColor: colors.border }]}>
+            <Text style={[typography.h2, { color: colors.textPrimary, marginBottom: spacing.sm }]}>Active Profile</Text>
+            <Text style={[typography.body1, { color: colors.textPrimary }]}><Text style={{ color: colors.accent, fontWeight: 'bold' }}>Name:</Text> {profile?.profile_name}</Text>
           </View>
 
-          <View style={[styles.card, { backgroundColor: themeColors.elevatedSurface, borderColor: themeColors.border }]}>
-            <Text style={[typography.h2, { color: themeColors.textPrimary, marginBottom: spacing.md }]}>Integrations</Text>
+          <View style={[styles.card, { backgroundColor: colors.cardSurface, borderColor: colors.border }]}>
+            <Text style={[typography.h2, { color: colors.textPrimary, marginBottom: spacing.md }]}>Integrations</Text>
             
             <View style={styles.statusRow}>
-              <Text style={[typography.body2, { color: themeColors.textPrimary }]}>Gmail Configured:</Text>
+              <Text style={[typography.body2, { color: colors.textPrimary }]}>Gmail Configured:</Text>
               <Text style={[styles.statusBadge, { 
                 backgroundColor: profile?.gmail_configured ? 'rgba(52, 211, 153, 0.2)' : 'rgba(248, 113, 113, 0.2)', 
-                color: profile?.gmail_configured ? themeColors.success : themeColors.error 
+                color: profile?.gmail_configured ? '#10b981' : '#ef4444' 
               }]}>
                 {profile?.gmail_configured ? 'ACTIVE' : 'INACTIVE'}
               </Text>
             </View>
             
             <View style={styles.statusRow}>
-              <Text style={[typography.body2, { color: themeColors.textPrimary }]}>Gemini AI Configured:</Text>
+              <Text style={[typography.body2, { color: colors.textPrimary }]}>Gemini AI Configured:</Text>
               <Text style={[styles.statusBadge, { 
                 backgroundColor: profile?.gemini_configured ? 'rgba(52, 211, 153, 0.2)' : 'rgba(248, 113, 113, 0.2)', 
-                color: profile?.gemini_configured ? themeColors.success : themeColors.error 
+                color: profile?.gemini_configured ? '#10b981' : '#ef4444' 
               }]}>
                 {profile?.gemini_configured ? 'ACTIVE' : 'INACTIVE'}
               </Text>
             </View>
 
-            <Text style={[typography.caption, { color: themeColors.textSecondary, marginTop: spacing.md, marginBottom: spacing.md }]}>UPDATE CREDENTIALS (ENCRYPTED LOCALLY)</Text>
+            <Text style={[typography.caption, { color: colors.textSecondary, marginTop: spacing.md, marginBottom: spacing.md }]}>UPDATE CREDENTIALS (ENCRYPTED LOCALLY)</Text>
             
-            <TextInput style={[styles.input, { backgroundColor: themeColors.background, color: themeColors.textPrimary, borderColor: themeColors.border }]} placeholderTextColor={themeColors.textSecondary} placeholder="Gmail Address" autoCapitalize="none" value={gmail} onChangeText={setGmail} />
-            <TextInput style={[styles.input, { backgroundColor: themeColors.background, color: themeColors.textPrimary, borderColor: themeColors.border }]} placeholderTextColor={themeColors.textSecondary} placeholder="Gmail App Password" secureTextEntry value={appPassword} onChangeText={setAppPassword} />
-            <TextInput style={[styles.input, { backgroundColor: themeColors.background, color: themeColors.textPrimary, borderColor: themeColors.border }]} placeholderTextColor={themeColors.textSecondary} placeholder="Gemini API Key" secureTextEntry value={geminiKey} onChangeText={setGeminiKey} />
+            <TextInput style={[styles.input, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border }]} placeholderTextColor={colors.textSecondary} placeholder="Gmail Address" autoCapitalize="none" value={gmail} onChangeText={setGmail} />
+            <TextInput style={[styles.input, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border }]} placeholderTextColor={colors.textSecondary} placeholder="Gmail App Password" secureTextEntry value={appPassword} onChangeText={setAppPassword} />
+            <TextInput style={[styles.input, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border }]} placeholderTextColor={colors.textSecondary} placeholder="Gemini API Key" secureTextEntry value={geminiKey} onChangeText={setGeminiKey} />
             
             <TouchableOpacity 
-              style={[styles.button, { backgroundColor: themeColors.aiAccent, marginTop: spacing.md }]} 
+              style={[styles.button, { backgroundColor: colors.accent, marginTop: spacing.md }]} 
               onPress={() => updateMutation.mutate()}
               disabled={updateMutation.isPending || (!gmail && !appPassword && !geminiKey)}
             >
@@ -113,8 +113,8 @@ export default function SettingsScreen() {
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={[styles.logoutButton, { borderColor: themeColors.error }]} onPress={handleWipeProfile}>
-            <Text style={[typography.button, { color: themeColors.error }]}>WIPE LOCAL PROFILE</Text>
+          <TouchableOpacity style={[styles.logoutButton, { borderColor: '#ef4444' }]} onPress={handleWipeProfile}>
+            <Text style={[typography.button, { color: '#ef4444' }]}>WIPE LOCAL PROFILE</Text>
           </TouchableOpacity>
         </Animated.View>
       </ScrollView>
