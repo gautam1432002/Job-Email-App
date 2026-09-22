@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import * as DocumentPicker from 'expo-document-picker';
 import api from '../../services/api';
 import { useAppTheme, typography, spacing } from '../../utils/theme';
@@ -24,6 +24,8 @@ export default function ProfileScreen() {
   const [github, setGithub] = useState('');
   const [resumeFile, setResumeFile] = useState<any>(null);
   const [existingResume, setExistingResume] = useState(false);
+  
+  const [focusedInput, setFocusedInput] = useState<string | null>(null);
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ['profile'],
@@ -109,33 +111,44 @@ export default function ProfileScreen() {
   }
 
   const dividerStyle = [styles.divider, { backgroundColor: isDark ? '#38383A' : '#E5E5EA' }];
-  const inputStyle = [styles.input, { color: colors.textPrimary, backgroundColor: colors.cardSurface }];
+  
+  const getInputStyle = (inputName: string) => [
+    styles.input, 
+    { 
+      color: colors.textPrimary, 
+      backgroundColor: colors.cardSurface,
+      borderBottomWidth: 1,
+      borderBottomColor: focusedInput === inputName ? colors.neonCyan : 'transparent',
+    }
+  ];
+
+  const skillArray = skills.split(',').map(s => s.trim()).filter(s => s.length > 0);
 
   return (
     <KeyboardAvoidingView style={[styles.container, { backgroundColor: colors.background }]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={{ padding: spacing.md, paddingTop: 60, paddingBottom: 100 }}>
-        <Animated.View entering={FadeIn.duration(400)}>
+        <Animated.View entering={FadeInDown.duration(400).springify().damping(20)}>
           <Text style={[typography.h1, { color: colors.textPrimary, marginBottom: spacing.lg, paddingHorizontal: spacing.sm }]}>Profile</Text>
           
           <Text style={[styles.sectionHeader, { color: colors.textSecondary }]}>PERSONAL INFO</Text>
           <BentoCard style={styles.groupCard}>
-            <TextInput style={inputStyle} placeholderTextColor={colors.textSecondary} placeholder="Full Name" value={fullName} onChangeText={setFullName} />
+            <TextInput style={getInputStyle('fullName')} onFocus={() => setFocusedInput('fullName')} onBlur={() => setFocusedInput(null)} placeholderTextColor={colors.textSecondary} placeholder="Full Name" value={fullName} onChangeText={setFullName} />
             <View style={dividerStyle} />
-            <TextInput style={inputStyle} placeholderTextColor={colors.textSecondary} placeholder="Current Role / Headline" value={role} onChangeText={setRole} />
+            <TextInput style={getInputStyle('role')} onFocus={() => setFocusedInput('role')} onBlur={() => setFocusedInput(null)} placeholderTextColor={colors.textSecondary} placeholder="Current Role / Headline" value={role} onChangeText={setRole} />
           </BentoCard>
 
           <Text style={[styles.sectionHeader, { color: colors.textSecondary }]}>PROFESSIONAL DETAILS</Text>
           <BentoCard style={styles.groupCard}>
-            <TextInput style={inputStyle} placeholderTextColor={colors.textSecondary} placeholder="Location (e.g. Indore, India)" value={location} onChangeText={setLocation} />
+            <TextInput style={getInputStyle('location')} onFocus={() => setFocusedInput('location')} onBlur={() => setFocusedInput(null)} placeholderTextColor={colors.textSecondary} placeholder="Location (e.g. Indore, India)" value={location} onChangeText={setLocation} />
             <View style={dividerStyle} />
-            <TextInput style={inputStyle} placeholderTextColor={colors.textSecondary} placeholder="Years of Experience" value={experienceYears} onChangeText={setExperienceYears} keyboardType="numeric" />
+            <TextInput style={getInputStyle('experienceYears')} onFocus={() => setFocusedInput('experienceYears')} onBlur={() => setFocusedInput(null)} placeholderTextColor={colors.textSecondary} placeholder="Years of Experience" value={experienceYears} onChangeText={setExperienceYears} keyboardType="numeric" />
           </BentoCard>
 
           <Text style={[styles.sectionHeader, { color: colors.textSecondary }]}>EDUCATION</Text>
           <BentoCard style={styles.groupCard}>
-            <TextInput style={inputStyle} placeholderTextColor={colors.textSecondary} placeholder="College / University" value={college} onChangeText={setCollege} />
+            <TextInput style={getInputStyle('college')} onFocus={() => setFocusedInput('college')} onBlur={() => setFocusedInput(null)} placeholderTextColor={colors.textSecondary} placeholder="College / University" value={college} onChangeText={setCollege} />
             <View style={dividerStyle} />
-            <TextInput style={inputStyle} placeholderTextColor={colors.textSecondary} placeholder="Graduation Year (e.g. 2026)" value={gradYear} onChangeText={setGradYear} keyboardType="numeric" />
+            <TextInput style={getInputStyle('gradYear')} onFocus={() => setFocusedInput('gradYear')} onBlur={() => setFocusedInput(null)} placeholderTextColor={colors.textSecondary} placeholder="Graduation Year (e.g. 2026)" value={gradYear} onChangeText={setGradYear} keyboardType="numeric" />
           </BentoCard>
 
           <Text style={[styles.sectionHeader, { color: colors.textSecondary }]}>RESUME & DOCUMENTS</Text>
@@ -155,17 +168,34 @@ export default function ProfileScreen() {
           </BentoCard>
 
           <Text style={[styles.sectionHeader, { color: colors.textSecondary }]}>TECH STACK</Text>
-          <BentoCard style={styles.groupCard}>
-            <TextInput style={inputStyle} placeholderTextColor={colors.textSecondary} placeholder="Skills (comma separated)" value={skills} onChangeText={setSkills} />
+          <BentoCard style={[styles.groupCard, { paddingBottom: 16 }]}>
+            {skillArray.length > 0 && (
+              <View style={styles.skillPillContainer}>
+                {skillArray.map((skill, index) => (
+                  <View key={index} style={styles.skillPill}>
+                    <Text style={[typography.caption, { color: colors.neonCyan, fontWeight: 'bold' }]}>{skill}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+            <TextInput 
+              style={[getInputStyle('skills'), { backgroundColor: 'transparent', paddingHorizontal: 16 }]} 
+              onFocus={() => setFocusedInput('skills')} 
+              onBlur={() => setFocusedInput(null)} 
+              placeholderTextColor={colors.textSecondary} 
+              placeholder="Skills (comma separated)" 
+              value={skills} 
+              onChangeText={setSkills} 
+            />
           </BentoCard>
 
           <Text style={[styles.sectionHeader, { color: colors.textSecondary }]}>LINKS</Text>
           <BentoCard style={styles.groupCard}>
-            <TextInput style={inputStyle} placeholderTextColor={colors.textSecondary} placeholder="Portfolio URL" value={portfolio} onChangeText={setPortfolio} autoCapitalize="none" />
+            <TextInput style={getInputStyle('portfolio')} onFocus={() => setFocusedInput('portfolio')} onBlur={() => setFocusedInput(null)} placeholderTextColor={colors.textSecondary} placeholder="Portfolio URL" value={portfolio} onChangeText={setPortfolio} autoCapitalize="none" />
             <View style={dividerStyle} />
-            <TextInput style={inputStyle} placeholderTextColor={colors.textSecondary} placeholder="LinkedIn URL" value={linkedin} onChangeText={setLinkedin} autoCapitalize="none" />
+            <TextInput style={getInputStyle('linkedin')} onFocus={() => setFocusedInput('linkedin')} onBlur={() => setFocusedInput(null)} placeholderTextColor={colors.textSecondary} placeholder="LinkedIn URL" value={linkedin} onChangeText={setLinkedin} autoCapitalize="none" />
             <View style={dividerStyle} />
-            <TextInput style={inputStyle} placeholderTextColor={colors.textSecondary} placeholder="GitHub URL" value={github} onChangeText={setGithub} autoCapitalize="none" />
+            <TextInput style={getInputStyle('github')} onFocus={() => setFocusedInput('github')} onBlur={() => setFocusedInput(null)} placeholderTextColor={colors.textSecondary} placeholder="GitHub URL" value={github} onChangeText={setGithub} autoCapitalize="none" />
           </BentoCard>
 
           <TouchableOpacity 
@@ -215,5 +245,18 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 16,
     alignItems: 'center',
+  },
+  skillPillContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+  },
+  skillPill: {
+    backgroundColor: 'rgba(0, 240, 255, 0.1)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
   }
 });

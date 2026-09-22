@@ -2,10 +2,10 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Animated, { FadeInUp } from 'react-native-reanimated';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useQuery } from '@tanstack/react-query';
 import api from '../../services/api';
-import { useAppTheme, typography, spacing, borderRadius } from '../../utils/theme';
+import { useAppTheme, typography, spacing, shadows } from '../../utils/theme';
 import BentoCard from '../../components/BentoCard';
 import { PenLine, Send, MessageSquare } from 'lucide-react-native';
 
@@ -23,7 +23,7 @@ export default function HomeScreen() {
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]} contentContainerStyle={{ padding: spacing.lg, paddingTop: 60 }}>
-      <Animated.View entering={FadeInUp.duration(400)}>
+      <Animated.View entering={FadeInDown.duration(400).springify().damping(20)}>
         <Text style={[typography.h1, { color: colors.textPrimary, marginBottom: spacing.md }]}>
           ProReach
         </Text>
@@ -33,13 +33,13 @@ export default function HomeScreen() {
 
         {/* Big Compose Action */}
         <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Compose')}>
-          <BentoCard style={styles.primaryAction}>
-            <View style={[styles.iconBox, { backgroundColor: isDark ? 'rgba(10, 132, 255, 0.15)' : 'rgba(0, 122, 255, 0.1)' }]}>
-              <PenLine color={colors.accent} size={32} />
+          <BentoCard style={styles.primaryAction} variant="gradient">
+            <View style={[styles.iconBox, { backgroundColor: 'rgba(255, 255, 255, 0.15)' }]}>
+              <PenLine color="#ffffff" size={32} />
             </View>
             <View style={styles.actionTextContainer}>
-              <Text style={[typography.h2, { color: colors.textPrimary }]}>Draft New Pitch</Text>
-              <Text style={[typography.body2, { color: colors.textSecondary }]}>Initialize AI generation flow</Text>
+              <Text style={[typography.h2, { color: '#ffffff' }]}>Draft New Pitch</Text>
+              <Text style={[typography.body2, { color: 'rgba(255, 255, 255, 0.8)' }]}>Initialize AI generation flow</Text>
             </View>
           </BentoCard>
         </TouchableOpacity>
@@ -53,7 +53,7 @@ export default function HomeScreen() {
             <View style={[styles.smallIconBox, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)' }]}>
               <Send color={colors.textPrimary} size={20} />
             </View>
-            <Text style={[typography.h1, { color: colors.textPrimary, marginVertical: spacing.sm }]}>{history?.length || 0}</Text>
+            <Text style={[typography.h1, { color: colors.neonCyan, marginVertical: spacing.sm }, shadows.glowCyan]}>{history?.length || 0}</Text>
             <Text style={[typography.caption, { color: colors.textSecondary }]}>EMAILS SENT</Text>
           </BentoCard>
           
@@ -61,7 +61,7 @@ export default function HomeScreen() {
             <View style={[styles.smallIconBox, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)' }]}>
               <MessageSquare color={colors.textPrimary} size={20} />
             </View>
-            <Text style={[typography.h1, { color: colors.textPrimary, marginVertical: spacing.sm }]}>0</Text>
+            <Text style={[typography.h1, { color: colors.emerald, marginVertical: spacing.sm }, shadows.glowEmerald]}>0</Text>
             <Text style={[typography.caption, { color: colors.textSecondary }]}>RESPONSES</Text>
           </BentoCard>
         </View>

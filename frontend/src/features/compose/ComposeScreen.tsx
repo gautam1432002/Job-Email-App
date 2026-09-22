@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Switch, KeyboardAvoidingView, Platform, Alert, Modal, SafeAreaView } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import Animated, { FadeIn, FadeOut, Easing, withRepeat, withTiming, useSharedValue, useAnimatedStyle } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInDown, FadeOut, Easing, withRepeat, withTiming, useSharedValue, useAnimatedStyle } from 'react-native-reanimated';
+import { LinearGradient } from 'expo-linear-gradient';
 import api from '../../services/api';
 import { useAppTheme, typography, spacing, borderRadius } from '../../utils/theme';
 import BentoCard from '../../components/BentoCard';
@@ -133,7 +134,7 @@ export default function ComposeScreen() {
     <KeyboardAvoidingView style={[styles.container, { backgroundColor: colors.background }]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={{ padding: spacing.md, paddingTop: 60, paddingBottom: 100 }}>
         {!generatedDraft ? (
-          <Animated.View entering={FadeIn.duration(400)} exiting={FadeOut}>
+          <Animated.View entering={FadeInDown.duration(400).springify().damping(20)} exiting={FadeOut}>
             <View style={styles.headerRow}>
               <Text style={[typography.h1, { color: colors.textPrimary }]}>Composer</Text>
               {profile?.resume && (
@@ -165,15 +166,17 @@ export default function ComposeScreen() {
                   <Text style={[typography.caption, { color: colors.accent }]}>AGENTIC AI DRAFTING...</Text>
                 </View>
               ) : (
-                <TouchableOpacity style={[styles.button, { backgroundColor: colors.accent }]} onPress={() => generateMutation.mutate()} disabled={!companyName}>
-                  <Sparkles color="#fff" size={20} style={{ marginRight: 8 }} />
-                  <Text style={[typography.button, { color: '#fff' }]}>GENERATE AI PITCH</Text>
+                <TouchableOpacity onPress={() => generateMutation.mutate()} disabled={!companyName}>
+                  <LinearGradient colors={[colors.deepViolet, colors.neonCyan]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.button}>
+                    <Sparkles color="#fff" size={20} style={{ marginRight: 8 }} />
+                    <Text style={[typography.button, { color: '#fff' }]}>GENERATE AI PITCH</Text>
+                  </LinearGradient>
                 </TouchableOpacity>
               )}
             </BentoCard>
           </Animated.View>
         ) : (
-          <Animated.View entering={FadeIn.duration(600)}>
+          <Animated.View entering={FadeInDown.duration(600).springify().damping(20)}>
             <Text style={[typography.h1, { color: colors.textPrimary, marginBottom: spacing.md }]}>Review Draft</Text>
             
             <BentoCard style={{ padding: spacing.lg }}>
@@ -193,14 +196,14 @@ export default function ComposeScreen() {
                       style={[
                         styles.themeCard,
                         { 
-                          borderColor: isActive ? colors.accent : colors.border,
-                          backgroundColor: isActive ? (isDark ? 'rgba(10, 132, 255, 0.15)' : 'rgba(0, 122, 255, 0.1)') : colors.background 
+                          borderColor: isActive ? colors.neonCyan : colors.border,
+                          backgroundColor: isActive ? 'rgba(0, 240, 255, 0.15)' : colors.background 
                         }
                       ]}
                       onPress={() => setSelectedTheme(theme.id)}
                     >
-                      {isActive && <Check color={colors.accent} size={14} style={{ marginRight: 6 }} />}
-                      <Text style={[styles.themeText, { color: isActive ? colors.accent : colors.textSecondary }]}>{theme.name}</Text>
+                      {isActive && <Check color={colors.neonCyan} size={14} style={{ marginRight: 6 }} />}
+                      <Text style={[styles.themeText, { color: isActive ? colors.neonCyan : colors.textSecondary }]}>{theme.name}</Text>
                     </TouchableOpacity>
                   );
                 })}

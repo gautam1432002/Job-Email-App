@@ -5,8 +5,11 @@ export const LightTheme = {
   cardSurface: '#FFFFFF',
   textPrimary: '#000000',
   textSecondary: '#8E8E93',
-  accent: '#007AFF',
+  accent: '#007AFF', // Legacy, keep if needed
   border: '#E5E5EA',
+  neonCyan: '#00F0FF',
+  deepViolet: '#8A2BE2',
+  emerald: '#00FF66',
 };
 
 export const DarkTheme = {
@@ -14,8 +17,11 @@ export const DarkTheme = {
   cardSurface: '#1C1C1E',
   textPrimary: '#FFFFFF',
   textSecondary: '#8E8E93',
-  accent: '#0A84FF',
+  accent: '#0A84FF', // Legacy, keep if needed
   border: '#38383A',
+  neonCyan: '#00F0FF',
+  deepViolet: '#8A2BE2',
+  emerald: '#00FF66',
 };
 
 export const useAppTheme = () => {
@@ -78,4 +84,24 @@ export const borderRadius = {
   md: 16,
   lg: 24,
   pill: 9999,
+};
+
+export const shadows = {
+  glowCyan: {
+    textShadowColor: 'rgba(0, 240, 255, 0.8)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
+  },
+  glowEmerald: {
+    textShadowColor: 'rgba(0, 255, 102, 0.8)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
+  },
+  glowBoxCyan: {
+    shadowColor: '#00F0FF',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 10,
+    elevation: 8,
+  }
 };
