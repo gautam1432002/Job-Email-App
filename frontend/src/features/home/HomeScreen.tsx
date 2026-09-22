@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import Animated, { FadeInRight } from 'react-native-reanimated';
 import { useQuery } from '@tanstack/react-query';
 import api from '../../services/api';
 import { useAppTheme, typography, spacing, shadows } from '../../utils/theme';
@@ -23,7 +23,7 @@ export default function HomeScreen() {
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]} contentContainerStyle={{ padding: spacing.lg, paddingTop: 60 }}>
-      <Animated.View entering={FadeInDown.duration(400).springify().damping(20)}>
+      <Animated.View entering={FadeInRight.duration(250)}>
         <Text style={[typography.h1, { color: colors.textPrimary, marginBottom: spacing.md }]}>
           ProReach
         </Text>
@@ -53,7 +53,7 @@ export default function HomeScreen() {
             <View style={[styles.smallIconBox, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)' }]}>
               <Send color={colors.textPrimary} size={20} />
             </View>
-            <Text style={[typography.h1, { color: colors.neonCyan, marginVertical: spacing.sm }, shadows.glowCyan]}>{history?.length || 0}</Text>
+            <Text style={[typography.h1, { color: colors.textPrimary, marginVertical: spacing.sm, fontWeight: '800' }]}>{history?.length || 0}</Text>
             <Text style={[typography.caption, { color: colors.textSecondary }]}>EMAILS SENT</Text>
           </BentoCard>
           
@@ -61,7 +61,7 @@ export default function HomeScreen() {
             <View style={[styles.smallIconBox, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)' }]}>
               <MessageSquare color={colors.textPrimary} size={20} />
             </View>
-            <Text style={[typography.h1, { color: colors.emerald, marginVertical: spacing.sm }, shadows.glowEmerald]}>0</Text>
+            <Text style={[typography.h1, { color: colors.textPrimary, marginVertical: spacing.sm, fontWeight: '800' }]}>0</Text>
             <Text style={[typography.caption, { color: colors.textSecondary }]}>RESPONSES</Text>
           </BentoCard>
         </View>

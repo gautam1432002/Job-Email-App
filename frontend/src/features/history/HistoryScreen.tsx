@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import Animated, { FadeInRight } from 'react-native-reanimated';
 import api from '../../services/api';
 import { useAppTheme, typography, spacing, borderRadius } from '../../utils/theme';
 import BentoCard from '../../components/BentoCard';
@@ -57,18 +57,14 @@ export default function HistoryScreen() {
           <Text style={[typography.body1, { color: colors.textSecondary, textAlign: 'center', marginTop: spacing.xxl }]}>No emails sent yet.</Text>
         }
         renderItem={({ item, index }) => (
-          <Animated.View entering={FadeInDown.duration(400).springify().damping(20).delay(index * 100)}>
+          <Animated.View entering={FadeInRight.duration(250).delay(index * 100)}>
             <BentoCard style={styles.card}>
               <View style={styles.cardHeader}>
                 <View style={styles.recipientInfo}>
-                  <Text style={[typography.h3, { color: colors.textPrimary }]}>{item.company_name}</Text>
-                  <Text style={[typography.caption, { color: colors.textSecondary, marginTop: 2 }]}>{item.receiver_email}</Text>
+                  <Text style={[typography.h3, { color: colors.textPrimary, fontWeight: '700' }]}>{item.company_name}</Text>
+                  <Text style={[typography.caption, { color: colors.textSecondary, marginTop: 4 }]}>{item.receiver_email}</Text>
                 </View>
-                <View style={[styles.statusBadgeFull, { backgroundColor: item.status === 'sent' ? 'rgba(0, 255, 102, 0.1)' : 'rgba(239, 68, 68, 0.1)' }]}>
-                  <Text style={[typography.caption, { color: item.status === 'sent' ? colors.emerald : '#ef4444', fontWeight: 'bold' }]}>
-                    {item.status.toUpperCase()}
-                  </Text>
-                </View>
+                <View style={[styles.dotIndicator, { backgroundColor: item.status === 'sent' ? '#10b981' : '#ef4444' }]} />
               </View>
               
               <Text style={[typography.body2, { color: colors.textPrimary, marginVertical: spacing.md }]} numberOfLines={2}>
@@ -80,9 +76,9 @@ export default function HistoryScreen() {
               <View style={styles.footerRow}>
                 <Text style={[typography.caption, { color: colors.textSecondary }]}>{new Date(item.sent_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}</Text>
                 {item.ai_used && (
-                  <View style={[styles.aiBadge, { backgroundColor: 'rgba(0, 240, 255, 0.1)' }]}>
-                    <Bot color={colors.neonCyan} size={14} style={{ marginRight: 4 }} />
-                    <Text style={{ color: colors.neonCyan, fontSize: 10, fontWeight: 'bold' }}>AI DRAFTED</Text>
+                  <View style={[styles.aiBadge, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }]}>
+                    <Bot color={colors.textSecondary} size={14} style={{ marginRight: 4 }} />
+                    <Text style={{ color: colors.textSecondary, fontSize: 10, fontWeight: '600' }}>AI ASSISTED</Text>
                   </View>
                 )}
               </View>
@@ -100,7 +96,7 @@ const styles = StyleSheet.create({
   card: { padding: 20, marginBottom: 12 },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   recipientInfo: { flex: 1, paddingRight: 16 },
-  statusBadgeFull: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
+  dotIndicator: { width: 8, height: 8, borderRadius: 4, marginTop: 6 },
   divider: { height: 1, width: '100%', marginBottom: 12 },
   footerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   aiBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 }

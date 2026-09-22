@@ -1,14 +1,14 @@
 import React, { useContext, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import Animated, { FadeInRight } from 'react-native-reanimated';
 import { ProfileContext } from '../../store/ProfileContext';
 import api from '../../services/api';
 import { useAppTheme, typography, spacing } from '../../utils/theme';
 
 export default function SettingsScreen() {
   const { deleteProfile, activeProfileId } = useContext(ProfileContext);
-  const { colors, isDark } = useAppTheme();
+  const { colors, isDark, themeMode, setThemeMode } = useAppTheme();
   const queryClient = useQueryClient();
   
   const [gmail, setGmail] = useState('');
@@ -68,11 +68,34 @@ export default function SettingsScreen() {
   return (
     <KeyboardAvoidingView style={[styles.container, { backgroundColor: colors.background }]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={{ padding: spacing.md, paddingTop: 60 }}>
-        <Animated.View entering={FadeIn.duration(400)}>
+        <Animated.View entering={FadeInRight.duration(400)}>
           
           <View style={[styles.card, { backgroundColor: colors.cardSurface, borderColor: colors.border }]}>
             <Text style={[typography.h2, { color: colors.textPrimary, marginBottom: spacing.sm }]}>Active Profile</Text>
             <Text style={[typography.body1, { color: colors.textPrimary }]}><Text style={{ color: colors.accent, fontWeight: 'bold' }}>Name:</Text> {profile?.profile_name}</Text>
+          </View>
+
+          <View style={[styles.card, { backgroundColor: colors.cardSurface, borderColor: colors.border }]}>
+            <Text style={[typography.h2, { color: colors.textPrimary, marginBottom: spacing.md }]}>Appearance</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              {(['system', 'light', 'dark'] as const).map((mode) => (
+                <TouchableOpacity
+                  key={mode}
+                  onPress={() => setThemeMode(mode)}
+                  style={[
+                    styles.themeToggle,
+                    { 
+                      borderColor: themeMode === mode ? colors.textPrimary : colors.border,
+                      backgroundColor: themeMode === mode ? (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)') : 'transparent' 
+                    }
+                  ]}
+                >
+                  <Text style={[typography.button, { color: themeMode === mode ? colors.textPrimary : colors.textSecondary }]}>
+                    {mode.charAt(0).toUpperCase() + mode.slice(1)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
 
           <View style={[styles.card, { backgroundColor: colors.cardSurface, borderColor: colors.border }]}>
@@ -105,11 +128,11 @@ export default function SettingsScreen() {
             <TextInput style={[styles.input, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border }]} placeholderTextColor={colors.textSecondary} placeholder="Gemini API Key" secureTextEntry value={geminiKey} onChangeText={setGeminiKey} />
             
             <TouchableOpacity 
-              style={[styles.button, { backgroundColor: colors.accent, marginTop: spacing.md }]} 
+              style={[styles.button, { backgroundColor: colors.textPrimary, marginTop: spacing.md }]} 
               onPress={() => updateMutation.mutate()}
               disabled={updateMutation.isPending || (!gmail && !appPassword && !geminiKey)}
             >
-              <Text style={[typography.button, { color: '#000' }]}>{updateMutation.isPending ? 'UPDATING...' : 'SAVE INTEGRATIONS'}</Text>
+              <Text style={[typography.button, { color: colors.background }]}>{updateMutation.isPending ? 'UPDATING...' : 'SAVE INTEGRATIONS'}</Text>
             </TouchableOpacity>
           </View>
 
@@ -131,4 +154,5 @@ const styles = StyleSheet.create({
   input: { borderRadius: 8, padding: 16, marginBottom: 16, borderWidth: 1 },
   button: { padding: 16, borderRadius: 9999, alignItems: 'center' },
   logoutButton: { padding: 16, alignItems: 'center', marginBottom: 50, borderWidth: 1, borderRadius: 9999 },
+  themeToggle: { flex: 1, padding: 12, alignItems: 'center', borderWidth: 1, borderRadius: 8, marginHorizontal: 4 },
 });

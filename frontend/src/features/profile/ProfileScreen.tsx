@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import Animated, { FadeInRight } from 'react-native-reanimated';
 import * as DocumentPicker from 'expo-document-picker';
 import api from '../../services/api';
 import { useAppTheme, typography, spacing } from '../../utils/theme';
@@ -105,20 +105,18 @@ export default function ProfileScreen() {
   if (isLoading) {
     return (
       <View style={[styles.center, { backgroundColor: colors.background }]}>
-        <ActivityIndicator size="large" color={colors.accent} />
+        <ActivityIndicator size="large" color={colors.textPrimary} />
       </View>
     );
   }
 
-  const dividerStyle = [styles.divider, { backgroundColor: isDark ? '#38383A' : '#E5E5EA' }];
+  const dividerStyle = [styles.divider, { backgroundColor: colors.border }];
   
   const getInputStyle = (inputName: string) => [
     styles.input, 
     { 
       color: colors.textPrimary, 
-      backgroundColor: colors.cardSurface,
-      borderBottomWidth: 1,
-      borderBottomColor: focusedInput === inputName ? colors.neonCyan : 'transparent',
+      backgroundColor: focusedInput === inputName ? (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)') : 'transparent',
     }
   ];
 
@@ -127,7 +125,7 @@ export default function ProfileScreen() {
   return (
     <KeyboardAvoidingView style={[styles.container, { backgroundColor: colors.background }]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={{ padding: spacing.md, paddingTop: 60, paddingBottom: 100 }}>
-        <Animated.View entering={FadeInDown.duration(400).springify().damping(20)}>
+        <Animated.View entering={FadeInRight.duration(250)}>
           <Text style={[typography.h1, { color: colors.textPrimary, marginBottom: spacing.lg, paddingHorizontal: spacing.sm }]}>Profile</Text>
           
           <Text style={[styles.sectionHeader, { color: colors.textSecondary }]}>PERSONAL INFO</Text>
@@ -154,16 +152,16 @@ export default function ProfileScreen() {
           <Text style={[styles.sectionHeader, { color: colors.textSecondary }]}>RESUME & DOCUMENTS</Text>
           <BentoCard style={styles.groupCard}>
             <TouchableOpacity style={styles.uploadBtn} onPress={handlePickResume}>
-              <UploadCloud color={colors.accent} size={24} style={{ marginRight: 12 }} />
+              <UploadCloud color={colors.textPrimary} size={24} style={{ marginRight: 12 }} />
               <View style={{ flex: 1 }}>
                 <Text style={[typography.body1, { color: colors.textPrimary }]}>Upload PDF Resume</Text>
                 {resumeFile ? (
                   <Text style={[typography.caption, { color: colors.textSecondary, marginTop: 2 }]}>{resumeFile.name}</Text>
                 ) : existingResume ? (
-                  <Text style={[typography.caption, { color: '#34d399', marginTop: 2 }]}>Resume previously uploaded</Text>
+                  <Text style={[typography.caption, { color: '#10b981', marginTop: 2 }]}>Resume previously uploaded</Text>
                 ) : null}
               </View>
-              {existingResume && !resumeFile && <CheckCircle color="#34d399" size={20} />}
+              {existingResume && !resumeFile && <CheckCircle color="#10b981" size={20} />}
             </TouchableOpacity>
           </BentoCard>
 
@@ -172,14 +170,14 @@ export default function ProfileScreen() {
             {skillArray.length > 0 && (
               <View style={styles.skillPillContainer}>
                 {skillArray.map((skill, index) => (
-                  <View key={index} style={styles.skillPill}>
-                    <Text style={[typography.caption, { color: colors.neonCyan, fontWeight: 'bold' }]}>{skill}</Text>
+                  <View key={index} style={[styles.skillPill, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }]}>
+                    <Text style={[typography.caption, { color: colors.textPrimary, fontWeight: '600' }]}>{skill}</Text>
                   </View>
                 ))}
               </View>
             )}
             <TextInput 
-              style={[getInputStyle('skills'), { backgroundColor: 'transparent', paddingHorizontal: 16 }]} 
+              style={[getInputStyle('skills'), { paddingHorizontal: 16 }]} 
               onFocus={() => setFocusedInput('skills')} 
               onBlur={() => setFocusedInput(null)} 
               placeholderTextColor={colors.textSecondary} 
@@ -199,11 +197,11 @@ export default function ProfileScreen() {
           </BentoCard>
 
           <TouchableOpacity 
-            style={[styles.button, { backgroundColor: colors.accent, marginTop: spacing.xl }]} 
+            style={[styles.button, { backgroundColor: colors.textPrimary, marginTop: spacing.xl }]} 
             onPress={() => updateMutation.mutate()}
             disabled={updateMutation.isPending}
           >
-            <Text style={[typography.button, { color: '#fff' }]}>{updateMutation.isPending ? 'SAVING...' : 'SAVE PROFILE'}</Text>
+            <Text style={[typography.button, { color: colors.background }]}>{updateMutation.isPending ? 'SAVING...' : 'SAVE PROFILE'}</Text>
           </TouchableOpacity>
 
         </Animated.View>
@@ -254,7 +252,6 @@ const styles = StyleSheet.create({
     paddingTop: 16,
   },
   skillPill: {
-    backgroundColor: 'rgba(0, 240, 255, 0.1)',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,

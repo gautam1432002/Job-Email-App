@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Switch, KeyboardAvoidingView, Platform, Alert, Modal, SafeAreaView } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import Animated, { FadeIn, FadeInDown, FadeOut, Easing, withRepeat, withTiming, useSharedValue, useAnimatedStyle } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInRight, FadeOut, Easing, withRepeat, withTiming, useSharedValue, useAnimatedStyle } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import api from '../../services/api';
 import { useAppTheme, typography, spacing, borderRadius } from '../../utils/theme';
@@ -134,7 +134,7 @@ export default function ComposeScreen() {
     <KeyboardAvoidingView style={[styles.container, { backgroundColor: colors.background }]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={{ padding: spacing.md, paddingTop: 60, paddingBottom: 100 }}>
         {!generatedDraft ? (
-          <Animated.View entering={FadeInDown.duration(400).springify().damping(20)} exiting={FadeOut}>
+          <Animated.View entering={FadeInRight.duration(250)} exiting={FadeOut}>
             <View style={styles.headerRow}>
               <Text style={[typography.h1, { color: colors.textPrimary }]}>Composer</Text>
               {profile?.resume && (
@@ -176,7 +176,7 @@ export default function ComposeScreen() {
             </BentoCard>
           </Animated.View>
         ) : (
-          <Animated.View entering={FadeInDown.duration(600).springify().damping(20)}>
+          <Animated.View entering={FadeInRight.duration(250)}>
             <Text style={[typography.h1, { color: colors.textPrimary, marginBottom: spacing.md }]}>Review Draft</Text>
             
             <BentoCard style={{ padding: spacing.lg }}>
