@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Switch, KeyboardAvoidingView, Platform, Alert, Modal, SafeAreaView } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import Animated, { FadeIn, FadeInRight, FadeOut, Easing, withRepeat, withTiming, useSharedValue, useAnimatedStyle } from 'react-native-reanimated';
+import Animated, { FadeInRight, FadeOut, Easing, withRepeat, withTiming, useSharedValue, useAnimatedStyle } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as SecureStore from 'expo-secure-store';
 import api from '../../services/api';
 import { useAppTheme, typography, spacing, borderRadius } from '../../utils/theme';
 import BentoCard from '../../components/BentoCard';
-import { Sparkles, Paperclip, Check } from 'lucide-react-native';
+import { Sparkles, Paperclip, Check, CheckCircle } from 'lucide-react-native';
 
 export default function ComposeScreen() {
   const { colors, isDark } = useAppTheme();
@@ -21,6 +22,8 @@ export default function ComposeScreen() {
   const [previewHtml, setPreviewHtml] = useState('');
 
   const [generatedDraft, setGeneratedDraft] = useState<{subject: string; full_body: string} | null>(null);
+  const [sentSuccessData, setSentSuccessData] = useState<{id: number, companyName: string} | null>(null);
+  const [reminderDays, setReminderDays] = useState('7');
 
   const THEMES = [
     { id: 'none', name: 'Plain Text' },
@@ -113,8 +116,8 @@ export default function ComposeScreen() {
       });
       return res.data;
     },
-    onSuccess: () => {
-      Alert.alert("Success", "Email dispatched via SMTP!");
+    onSuccess: (data) => {
+      setSentSuccessData({ id: data.id, companyName: companyName });
       setGeneratedDraft(null);
       setCompanyName('');
       setJobDescription('');
@@ -133,7 +136,55 @@ export default function ComposeScreen() {
   return (
     <KeyboardAvoidingView style={[styles.container, { backgroundColor: colors.background }]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={{ padding: spacing.md, paddingTop: 60, paddingBottom: 100 }}>
-        {!generatedDraft ? (
+        {sentSuccessData ? (
+          <Animated.View entering={FadeInRight.duration(250)}>
+            <BentoCard style={{ padding: spacing.xl, alignItems: 'center' }}>
+              <CheckCircle color="#10b981" size={64} style={{ marginBottom: 16 }} />
+              <Text style={[typography.h2, { color: colors.textPrimary, textAlign: 'center' }]}>Email Sent to {sentSuccessData.companyName}</Text>
+              
+              <Text style={[typography.body1, { color: colors.textSecondary, marginTop: 32, marginBottom: 16 }]}>Set a Follow-Up Reminder?</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 32 }}>
+                <Text style={{ color: colors.textPrimary, marginRight: 8, fontSize: 16 }}>Remind me in</Text>
+                <TextInput 
+                  style={[styles.input, { width: 70, textAlign: 'center', backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', color: colors.textPrimary, padding: 8 }]} 
+                  value={reminderDays} 
+                  onChangeText={setReminderDays} 
+                  keyboardType="numeric" 
+                />
+                <Text style={{ color: colors.textPrimary, marginLeft: 8, fontSize: 16 }}>days</Text>
+              </View>
+              
+              <TouchableOpacity 
+                style={[styles.button, { backgroundColor: colors.accent, width: '100%' }]} 
+                onPress={async () => {
+                  if (reminderDays && !isNaN(Number(reminderDays))) {
+                    const date = new Date();
+                    date.setDate(date.getDate() + Number(reminderDays));
+                    
+                    const existing = await SecureStore.getItemAsync('reminders');
+                    const reminders = existing ? JSON.parse(existing) : {};
+                    reminders[sentSuccessData.id] = {
+                       date: date.toISOString(),
+                       companyName: sentSuccessData.companyName
+                    };
+                    await SecureStore.setItemAsync('reminders', JSON.stringify(reminders));
+                    Alert.alert("Reminder Set", `We'll remind you to follow up on ${date.toLocaleDateString()}`);
+                  }
+                  setSentSuccessData(null);
+                }}
+              >
+                <Text style={[typography.button, { color: '#fff' }]}>SAVE & COMPOSE ANOTHER</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={{ marginTop: 24 }}
+                onPress={() => setSentSuccessData(null)}
+              >
+                <Text style={[typography.button, { color: colors.textSecondary }]}>SKIP</Text>
+              </TouchableOpacity>
+            </BentoCard>
+          </Animated.View>
+        ) : !generatedDraft ? (
           <Animated.View entering={FadeInRight.duration(250)} exiting={FadeOut}>
             <View style={styles.headerRow}>
               <Text style={[typography.h1, { color: colors.textPrimary }]}>Composer</Text>

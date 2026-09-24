@@ -7,7 +7,9 @@ import { useQuery } from '@tanstack/react-query';
 import api from '../../services/api';
 import { useAppTheme, typography, spacing, shadows } from '../../utils/theme';
 import BentoCard from '../../components/BentoCard';
-import { PenLine, Send, MessageSquare } from 'lucide-react-native';
+import { PenLine, Send, MessageSquare, Clock } from 'lucide-react-native';
+import * as SecureStore from 'expo-secure-store';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function HomeScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
@@ -20,6 +22,33 @@ export default function HomeScreen() {
       return res.data;
     }
   });
+
+  const [overdueReminders, setOverdueReminders] = React.useState<any[]>([]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      async function fetchReminders() {
+        try {
+          const existing = await SecureStore.getItemAsync('reminders');
+          if (existing) {
+            const reminders = JSON.parse(existing);
+            const now = new Date();
+            const overdue = [];
+            for (const key in reminders) {
+              const date = new Date(reminders[key].date);
+              if (date <= now) {
+                overdue.push(reminders[key]);
+              }
+            }
+            setOverdueReminders(overdue);
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      fetchReminders();
+    }, [])
+  );
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]} contentContainerStyle={{ padding: spacing.lg, paddingTop: 60 }}>
@@ -65,6 +94,30 @@ export default function HomeScreen() {
             <Text style={[typography.caption, { color: colors.textSecondary }]}>RESPONSES</Text>
           </BentoCard>
         </View>
+
+        {overdueReminders.length > 0 && (
+          <Animated.View entering={SlideInRight.duration(250).delay(100)}>
+            <Text style={[typography.h3, { color: colors.textPrimary, marginBottom: spacing.md, marginTop: spacing.xl }]}>
+              Action Needed
+            </Text>
+            <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('History')}>
+              <BentoCard style={[styles.primaryAction, { borderColor: '#ef4444', borderWidth: 1 }]}>
+                <View style={[styles.iconBox, { backgroundColor: 'rgba(239, 68, 68, 0.15)' }]}>
+                  <Clock color="#ef4444" size={32} />
+                </View>
+                <View style={styles.actionTextContainer}>
+                  <Text style={[typography.h2, { color: colors.textPrimary }]}>{overdueReminders.length} Follow-Up{overdueReminders.length > 1 ? 's' : ''} Due</Text>
+                  <Text style={[typography.body2, { color: colors.textSecondary }]} numberOfLines={1}>
+                    {overdueReminders.map(r => r.companyName).join(', ')}
+                  </Text>
+                </View>
+                <View style={{ backgroundColor: '#ef4444', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 }}>
+                  <Text style={{ color: '#fff', fontSize: 10, fontWeight: 'bold' }}>NEEDS FOLLOW-UP</Text>
+                </View>
+              </BentoCard>
+            </TouchableOpacity>
+          </Animated.View>
+        )}
 
       </Animated.View>
     </ScrollView>

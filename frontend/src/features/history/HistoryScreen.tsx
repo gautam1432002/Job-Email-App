@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
-import { useQuery } from '@tanstack/react-query';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, ScrollView, TouchableOpacity } from 'react-native';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Animated, { SlideInRight, SlideOutLeft, Easing } from 'react-native-reanimated';
 import api from '../../services/api';
 import { useAppTheme, typography, spacing, borderRadius } from '../../utils/theme';
@@ -13,12 +13,16 @@ interface EmailLog {
   company_name: string;
   subject: string;
   status: string;
+  application_status: string;
   sent_at: string;
   ai_used: boolean;
 }
 
+const STATUSES = ['Applied', 'Viewed', 'Interview', 'Offer', 'Rejected'];
+
 export default function HistoryScreen() {
   const { colors, isDark } = useAppTheme();
+  const queryClient = useQueryClient();
 
   const { data: logs, isLoading, isError } = useQuery<EmailLog[]>({
     queryKey: ['history'],
@@ -26,6 +30,27 @@ export default function HistoryScreen() {
       const res = await api.get('history/');
       return res.data;
     },
+  });
+
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: number, status: string }) => {
+      const res = await api.patch(`history/${id}/`, { application_status: status });
+      return res.data;
+    },
+    onMutate: async ({ id, status }) => {
+      await queryClient.cancelQueries({ queryKey: ['history'] });
+      const previousLogs = queryClient.getQueryData(['history']);
+      queryClient.setQueryData(['history'], (old: any) => 
+        old?.map((log: any) => log.id === id ? { ...log, application_status: status } : log)
+      );
+      return { previousLogs };
+    },
+    onError: (err, newLog, context) => {
+      queryClient.setQueryData(['history'], context?.previousLogs);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['history'] });
+    }
   });
 
   if (isLoading) {
@@ -86,6 +111,28 @@ export default function HistoryScreen() {
                   </View>
                 )}
               </View>
+
+              <View style={{ marginTop: 16 }}>
+                <Text style={[typography.caption, { color: colors.textSecondary, marginBottom: 8 }]}>APPLICATION STATUS</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  {STATUSES.map(s => {
+                    const isActive = item.application_status === s;
+                    return (
+                      <TouchableOpacity 
+                        key={s} 
+                        onPress={() => updateStatusMutation.mutate({ id: item.id, status: s })}
+                        style={[styles.statusChip, { 
+                          backgroundColor: isActive ? (isDark ? '#FFFFFF' : '#000000') : 'transparent',
+                          borderColor: isActive ? 'transparent' : colors.border
+                        }]}
+                      >
+                        <Text style={[styles.statusChipText, { color: isActive ? (isDark ? '#000000' : '#FFFFFF') : colors.textSecondary }]}>{s}</Text>
+                      </TouchableOpacity>
+                    )
+                  })}
+                </ScrollView>
+              </View>
+
             </BentoCard>
           </View>
         )}
@@ -103,5 +150,16 @@ const styles = StyleSheet.create({
   dotIndicator: { width: 8, height: 8, borderRadius: 4, marginTop: 6 },
   divider: { height: 1, width: '100%', marginBottom: 12 },
   footerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  aiBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 }
+  aiBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 },
+  statusChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1,
+    marginRight: 8,
+  },
+  statusChipText: {
+    fontSize: 12,
+    fontWeight: '600',
+  }
 });

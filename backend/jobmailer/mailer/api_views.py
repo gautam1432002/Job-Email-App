@@ -211,7 +211,7 @@ class SendEmailView(views.APIView):
             )
             
             # Log history
-            EmailLog.objects.create(
+            log = EmailLog.objects.create(
                 profile=profile,
                 receiver_email=serializer.validated_data['receiver_email'],
                 company_name=serializer.validated_data['company_name'],
@@ -223,7 +223,7 @@ class SendEmailView(views.APIView):
             )
             
             if success:
-                return Response({"status": "Email sent successfully", "message": msg})
+                return Response({"status": "Email sent successfully", "message": msg, "id": log.id})
             else:
                 return Response({"error": msg}, status=status.HTTP_502_BAD_GATEWAY)
             
