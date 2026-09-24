@@ -125,7 +125,7 @@ export default function ProfileScreen() {
   return (
     <KeyboardAvoidingView style={[styles.container, { backgroundColor: colors.background }]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={{ padding: spacing.md, paddingTop: 60, paddingBottom: 100 }}>
-        <Animated.View entering={SlideInRight.duration(250).easing(Easing.out(Easing.cubic))} exiting={SlideOutLeft.duration(250)}>
+        <Animated.View>
           <Text style={[typography.h1, { color: colors.textPrimary, marginBottom: spacing.lg, paddingHorizontal: spacing.sm }]}>Profile</Text>
           
           <Text style={[styles.sectionHeader, { color: colors.textSecondary }]}>PERSONAL INFO</Text>

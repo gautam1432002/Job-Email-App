@@ -52,7 +52,7 @@ export default function HomeScreen() {
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]} contentContainerStyle={{ padding: spacing.lg, paddingTop: 60 }}>
-      <Animated.View entering={SlideInRight.duration(250).easing(Easing.out(Easing.cubic))} exiting={SlideOutLeft.duration(250)}>
+      <Animated.View>
         <Text style={[typography.h1, { color: colors.textPrimary, marginBottom: spacing.md }]}>
           ProReach
         </Text>

@@ -1,12 +1,22 @@
 import React, { useContext } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { View, ActivityIndicator } from 'react-native';
 import MainStack from './MainStack';
 import ProfileSetupStack from './ProfileSetupStack';
 import { ProfileContext } from '../store/ProfileContext';
+import { useAppTheme } from '../utils/theme';
 
 export default function AppNavigator() {
   const { activeProfileId, isLoading } = useContext(ProfileContext);
+  const { colors } = useAppTheme();
+
+  const navTheme = {
+    ...DefaultTheme,
+    colors: {
+      ...DefaultTheme.colors,
+      background: colors.background,
+    },
+  };
 
   if (isLoading) {
     return (
@@ -17,7 +27,7 @@ export default function AppNavigator() {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={navTheme}>
       {activeProfileId ? <MainStack /> : <ProfileSetupStack />}
     </NavigationContainer>
   );

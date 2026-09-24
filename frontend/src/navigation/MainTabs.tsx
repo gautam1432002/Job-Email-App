@@ -4,10 +4,10 @@ import HomeScreen from '../features/home/HomeScreen';
 import HistoryScreen from '../features/history/HistoryScreen';
 import ProfileScreen from '../features/profile/ProfileScreen';
 import SettingsScreen from '../features/profile/SettingsScreen';
-import { View, Text, TouchableOpacity, Dimensions, StyleSheet, Platform, PanResponder } from 'react-native';
+import { View, Text, TouchableOpacity, Dimensions, StyleSheet, Platform } from 'react-native';
 import { useAppTheme } from '../utils/theme';
-
-import Animated, { useAnimatedStyle, withSpring, useSharedValue } from 'react-native-reanimated';
+import { GestureDetector, Gesture } from 'react-native-gesture-handler';
+import Animated, { useAnimatedStyle, withSpring, useSharedValue, runOnJS } from 'react-native-reanimated';
 import { Home, Clock, User, Settings } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
@@ -27,9 +27,10 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   // 40 is total horizontal padding for the floating bar
   const tabWidth = (width - 40) / state.routes.length; 
   const indicatorPosition = useSharedValue(0);
+  const activeIndexShared = useSharedValue(state.index);
 
   useEffect(() => {
-    // Snappy Spring for translation
+    activeIndexShared.value = state.index;
     indicatorPosition.value = withSpring(state.index * tabWidth, { 
       damping: 16, 
       stiffness: 250,
@@ -43,36 +44,28 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
     };
   });
 
-  // Force solid white transparent blur
-  const blurTint = "light";
-
-  const panResponder = React.useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => false,
-      onMoveShouldSetPanResponder: (evt, gestureState) => {
-        return Math.abs(gestureState.dx) > 15 && Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
-      },
-      onPanResponderRelease: (evt, gestureState) => {
-        if (gestureState.dx > 40) {
-          const prevIndex = Math.max(0, state.index - 1);
-          if (prevIndex !== state.index) {
-            navigation.navigate(state.routes[prevIndex].name);
-          }
-        } else if (gestureState.dx < -40) {
-          const nextIndex = Math.min(state.routes.length - 1, state.index + 1);
-          if (nextIndex !== state.index) {
-            navigation.navigate(state.routes[nextIndex].name);
-          }
-        }
-      },
+  const panGesture = Gesture.Pan()
+    .onBegin((e) => {
+      // Optional: stop existing spring, but withSpring handles interruptions well
     })
-  ).current;
+    .onUpdate((e) => {
+      // e.x is relative to the GestureDetector view
+      const boundedX = Math.min(Math.max(0, e.x - tabWidth / 2), width - 40 - tabWidth);
+      indicatorPosition.value = boundedX;
+      
+      const newIndex = Math.max(0, Math.min(state.routes.length - 1, Math.floor(e.x / tabWidth)));
+      activeIndexShared.value = newIndex;
+    })
+    .onEnd((e) => {
+      const finalIndex = Math.max(0, Math.min(state.routes.length - 1, Math.floor(e.x / tabWidth)));
+      indicatorPosition.value = withSpring(finalIndex * tabWidth, { damping: 16, stiffness: 250, mass: 0.5 });
+      activeIndexShared.value = finalIndex;
+      runOnJS(navigation.navigate)(state.routes[finalIndex].name);
+    });
 
   return (
-    <View 
-      style={[styles.shadowContainer, { borderColor: 'rgba(0,0,0,0.06)' }]} 
-      {...panResponder.panHandlers}
-    >
+    <GestureDetector gesture={panGesture}>
+      <View style={[styles.shadowContainer, { borderColor: 'rgba(0,0,0,0.06)' }]}>
       <View style={[styles.solidView, { backgroundColor: themeColors.cardSurface }]}>
         {/* Animated Background Highlight */}
         <Animated.View 
@@ -112,8 +105,8 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
           else if (route.name === 'Profile') IconComponent = User;
           else if (route.name === 'Settings') IconComponent = Settings;
 
-          // Tactile scale effect
           const scale = useSharedValue(isFocused ? 1.15 : 1);
+          
           useEffect(() => {
             scale.value = withSpring(isFocused ? 1.15 : 1, {
               damping: 16,
@@ -122,9 +115,11 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
             });
           }, [isFocused]);
 
-          const tabAnimatedStyle = useAnimatedStyle(() => ({
-            transform: [{ scale: scale.value }]
-          }));
+          const tabAnimatedStyle = useAnimatedStyle(() => {
+            return {
+              transform: [{ scale: scale.value }]
+            };
+          });
 
           return (
             <TouchableOpacity
@@ -135,7 +130,7 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
               testID={options.tabBarTestID}
               onPress={onPress}
               style={styles.tabItem}
-              activeOpacity={0.7}
+              activeOpacity={1}
             >
               <Animated.View style={[styles.tabItemInner, tabAnimatedStyle]}>
                 <IconComponent 
@@ -153,7 +148,8 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
           );
         })}
       </View>
-    </View>
+      </View>
+    </GestureDetector>
   );
 }
 
@@ -211,6 +207,7 @@ export default function MainTabs() {
   return (
     <Tab.Navigator
       tabBar={props => <CustomTabBar {...props} />}
+      sceneContainerStyle={{ backgroundColor: 'transparent' }}
       screenOptions={{
         headerShown: false,
         animation: 'fade', // Add standard cross-fade animation natively
