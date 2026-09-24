@@ -70,7 +70,10 @@ export default function HistoryScreen() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <Animated.View 
+      style={[styles.container, { backgroundColor: colors.background }]}
+      entering={SlideInRight.duration(280).easing(Easing.out(Easing.cubic))}
+    >
       <FlatList
         data={logs}
         keyExtractor={(item) => item.id.toString()}
@@ -133,7 +136,7 @@ export default function HistoryScreen() {
           </View>
         )}
       />
-    </View>
+    </Animated.View>
   );
 }
 

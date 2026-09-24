@@ -124,7 +124,10 @@ export default function ProfileScreen() {
 
   return (
     <KeyboardAvoidingView style={[styles.container, { backgroundColor: colors.background }]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <View style={[{ flex: 1, backgroundColor: colors.background }]}>
+      <Animated.View 
+        style={[{ flex: 1, backgroundColor: colors.background }]}
+        entering={SlideInRight.duration(280).easing(Easing.out(Easing.cubic))}
+      >
         <ScrollView contentContainerStyle={{ padding: spacing.md, paddingTop: 60, paddingBottom: 120 }}>
           <Text style={[typography.h1, { color: colors.textPrimary, marginBottom: spacing.lg, paddingHorizontal: spacing.sm }]}>Profile</Text>
           
@@ -205,7 +208,7 @@ export default function ProfileScreen() {
           </TouchableOpacity>
 
         </ScrollView>
-      </View>
+      </Animated.View>
     </KeyboardAvoidingView>
   );
 }

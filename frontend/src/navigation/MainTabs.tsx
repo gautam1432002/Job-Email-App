@@ -211,7 +211,8 @@ export default function MainTabs() {
       sceneContainerStyle={{ backgroundColor: themeColors.background }}
       screenOptions={{
         headerShown: false,
-        animation: 'shift', // Use React Navigation 7 native sliding transition
+        unmountOnBlur: true,
+        animation: 'none',
         tabBarStyle: {
           borderTopWidth: 0,
           elevation: 0,
