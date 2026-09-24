@@ -131,6 +131,15 @@ class EmailLogListView(generics.ListAPIView):
         return EmailLog.objects.filter(profile=self.request.profile).order_by('-sent_at')
 
 
+class EmailLogUpdateView(generics.UpdateAPIView):
+    serializer_class = EmailLogSerializer
+    authentication_classes = [ProfileAuthentication]
+    permission_classes = [IsProfileAuthenticated]
+
+    def get_queryset(self):
+        return EmailLog.objects.filter(profile=self.request.profile)
+
+
 class GeneratePitchView(views.APIView):
     authentication_classes = [ProfileAuthentication]
     permission_classes = [IsProfileAuthenticated]

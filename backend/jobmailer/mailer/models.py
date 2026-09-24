@@ -85,6 +85,16 @@ class EmailLog(models.Model):
         max_length=10, choices=STATUS_CHOICES, default='failed'
     )
     error_message  = models.TextField(blank=True)
+    APP_STATUS_CHOICES = [
+        ('Applied', 'Applied'),
+        ('Viewed', 'Viewed'),
+        ('Interview', 'Interview'),
+        ('Offer', 'Offer'),
+        ('Rejected', 'Rejected')
+    ]
+    application_status = models.CharField(
+        max_length=20, choices=APP_STATUS_CHOICES, default='Applied'
+    )
     sent_at        = models.DateTimeField(auto_now_add=True)
 
     class Meta:
