@@ -67,8 +67,8 @@ export default function SettingsScreen() {
 
   return (
     <KeyboardAvoidingView style={[styles.container, { backgroundColor: colors.background }]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView contentContainerStyle={{ padding: spacing.md, paddingTop: 60 }}>
-        <Animated.View>
+      <View style={[{ flex: 1, backgroundColor: colors.background }]}>
+        <ScrollView contentContainerStyle={{ padding: spacing.md, paddingTop: 60, paddingBottom: 120 }}>
           
           <View style={[styles.card, { backgroundColor: colors.cardSurface, borderColor: colors.border }]}>
             <Text style={[typography.h2, { color: colors.textPrimary, marginBottom: spacing.sm }]}>Active Profile</Text>
@@ -139,8 +139,8 @@ export default function SettingsScreen() {
           <TouchableOpacity style={[styles.logoutButton, { borderColor: '#ef4444' }]} onPress={handleWipeProfile}>
             <Text style={[typography.button, { color: '#ef4444' }]}>WIPE LOCAL PROFILE</Text>
           </TouchableOpacity>
-        </Animated.View>
-      </ScrollView>
+        </ScrollView>
+      </View>
     </KeyboardAvoidingView>
   );
 }

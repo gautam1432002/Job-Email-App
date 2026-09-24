@@ -70,11 +70,11 @@ export default function HistoryScreen() {
   }
 
   return (
-    <Animated.View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <FlatList
         data={logs}
         keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={{ padding: spacing.md, paddingTop: 60, paddingBottom: 100 }}
+        contentContainerStyle={{ padding: spacing.md, paddingTop: 60, paddingBottom: 120 }}
         ListHeaderComponent={
           <Text style={[typography.h1, { color: colors.textPrimary, marginBottom: spacing.lg, paddingHorizontal: spacing.sm }]}>History</Text>
         }
@@ -133,7 +133,7 @@ export default function HistoryScreen() {
           </View>
         )}
       />
-    </Animated.View>
+    </View>
   );
 }
 

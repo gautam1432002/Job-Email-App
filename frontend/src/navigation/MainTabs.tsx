@@ -204,13 +204,14 @@ const styles = StyleSheet.create({
 });
 
 export default function MainTabs() {
+  const { colors: themeColors } = useAppTheme();
   return (
     <Tab.Navigator
       tabBar={props => <CustomTabBar {...props} />}
-      sceneContainerStyle={{ backgroundColor: 'transparent' }}
+      sceneContainerStyle={{ backgroundColor: themeColors.background }}
       screenOptions={{
         headerShown: false,
-        animation: 'fade', // Add standard cross-fade animation natively
+        animation: 'shift', // Use React Navigation 7 native sliding transition
         tabBarStyle: {
           borderTopWidth: 0,
           elevation: 0,

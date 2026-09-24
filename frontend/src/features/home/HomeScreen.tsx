@@ -51,8 +51,8 @@ export default function HomeScreen() {
   );
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: colors.background }]} contentContainerStyle={{ padding: spacing.lg, paddingTop: 60 }}>
-      <Animated.View>
+    <View style={[{ flex: 1, backgroundColor: colors.background }]}>
+      <ScrollView style={[styles.container]} contentContainerStyle={{ padding: spacing.lg, paddingTop: 60, paddingBottom: 120 }}>
         <Text style={[typography.h1, { color: colors.textPrimary, marginBottom: spacing.md }]}>
           ProReach
         </Text>
@@ -119,8 +119,8 @@ export default function HomeScreen() {
           </Animated.View>
         )}
 
-      </Animated.View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
