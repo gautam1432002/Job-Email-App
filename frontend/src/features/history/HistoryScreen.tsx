@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import Animated, { FadeInRight } from 'react-native-reanimated';
+import Animated, { SlideInRight, SlideOutLeft, Easing } from 'react-native-reanimated';
 import api from '../../services/api';
 import { useAppTheme, typography, spacing, borderRadius } from '../../utils/theme';
 import BentoCard from '../../components/BentoCard';
@@ -45,7 +45,11 @@ export default function HistoryScreen() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <Animated.View 
+      style={[styles.container, { backgroundColor: colors.background }]}
+      entering={SlideInRight.duration(250).easing(Easing.out(Easing.cubic))} 
+      exiting={SlideOutLeft.duration(250)}
+    >
       <FlatList
         data={logs}
         keyExtractor={(item) => item.id.toString()}
@@ -57,7 +61,7 @@ export default function HistoryScreen() {
           <Text style={[typography.body1, { color: colors.textSecondary, textAlign: 'center', marginTop: spacing.xxl }]}>No emails sent yet.</Text>
         }
         renderItem={({ item, index }) => (
-          <Animated.View entering={FadeInRight.duration(250).delay(index * 100)}>
+          <View>
             <BentoCard style={styles.card}>
               <View style={styles.cardHeader}>
                 <View style={styles.recipientInfo}>
@@ -83,10 +87,10 @@ export default function HistoryScreen() {
                 )}
               </View>
             </BentoCard>
-          </Animated.View>
+          </View>
         )}
       />
-    </View>
+    </Animated.View>
   );
 }
 

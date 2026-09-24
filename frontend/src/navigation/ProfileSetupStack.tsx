@@ -11,7 +11,10 @@ export default function ProfileSetupStack() {
       initialRouteName="Onboarding"
       screenOptions={{
         headerShown: false,
-        cardStyle: { backgroundColor: '#0a0a0a' },
+        animation: 'slide_from_right',
+        animationDuration: 280,
+        gestureEnabled: true,
+        gestureDirection: 'horizontal'
       }}
     >
       <Stack.Screen name="Onboarding" component={OnboardingScreen} />

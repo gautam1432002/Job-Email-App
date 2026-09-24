@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Animated, { FadeInRight } from 'react-native-reanimated';
+import Animated, { SlideInRight, SlideOutLeft, Easing } from 'react-native-reanimated';
 import { useQuery } from '@tanstack/react-query';
 import api from '../../services/api';
 import { useAppTheme, typography, spacing, shadows } from '../../utils/theme';
@@ -23,7 +23,7 @@ export default function HomeScreen() {
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]} contentContainerStyle={{ padding: spacing.lg, paddingTop: 60 }}>
-      <Animated.View entering={FadeInRight.duration(250)}>
+      <Animated.View entering={SlideInRight.duration(250).easing(Easing.out(Easing.cubic))} exiting={SlideOutLeft.duration(250)}>
         <Text style={[typography.h1, { color: colors.textPrimary, marginBottom: spacing.md }]}>
           ProReach
         </Text>

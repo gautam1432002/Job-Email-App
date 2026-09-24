@@ -12,7 +12,13 @@ const Stack = createNativeStackNavigator<MainStackParamList>();
 
 export default function MainStack() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false, cardStyle: { backgroundColor: '#000' } }}>
+    <Stack.Navigator screenOptions={{ 
+      headerShown: false, 
+      animation: 'slide_from_right', 
+      animationDuration: 280, 
+      gestureEnabled: true, 
+      gestureDirection: 'horizontal' 
+    }}>
       <Stack.Screen name="MainTabs" component={MainTabs} />
       <Stack.Screen name="Compose" component={ComposeScreen} />
     </Stack.Navigator>

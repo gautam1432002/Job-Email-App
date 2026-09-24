@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import Animated, { FadeInRight } from 'react-native-reanimated';
+import Animated, { SlideInRight, SlideOutLeft, Easing } from 'react-native-reanimated';
 import { ProfileContext } from '../../store/ProfileContext';
 import api from '../../services/api';
 import { useAppTheme, typography, spacing } from '../../utils/theme';
@@ -68,7 +68,7 @@ export default function SettingsScreen() {
   return (
     <KeyboardAvoidingView style={[styles.container, { backgroundColor: colors.background }]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={{ padding: spacing.md, paddingTop: 60 }}>
-        <Animated.View entering={FadeInRight.duration(400)}>
+        <Animated.View entering={SlideInRight.duration(250).easing(Easing.out(Easing.cubic))} exiting={SlideOutLeft.duration(250)}>
           
           <View style={[styles.card, { backgroundColor: colors.cardSurface, borderColor: colors.border }]}>
             <Text style={[typography.h2, { color: colors.textPrimary, marginBottom: spacing.sm }]}>Active Profile</Text>
