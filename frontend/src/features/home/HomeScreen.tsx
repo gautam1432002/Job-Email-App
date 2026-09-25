@@ -186,33 +186,33 @@ export default function HomeScreen() {
 
       <Modal visible={!!selectedFramework} transparent animationType="slide">
         <View style={{ flex: 1, backgroundColor: 'transparent', justifyContent: 'flex-end', paddingHorizontal: spacing.lg, paddingBottom: spacing.xl * 2 }}>
-          <View style={{ backgroundColor: colors.cardSurface, padding: spacing.xl, borderRadius: 24, shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.35, shadowRadius: 30, elevation: 24 }}>
+          <BentoCard variant="gradient" style={{ padding: spacing.xl, borderRadius: 24, shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.35, shadowRadius: 30, elevation: 24 }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.lg }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-                <View style={[styles.smallIconBox, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', marginRight: 12 }]}>
-                  {selectedFramework?.icon}
+                <View style={[styles.smallIconBox, { backgroundColor: 'rgba(255,255,255,0.2)', marginRight: 12 }]}>
+                  {selectedFramework && React.cloneElement(selectedFramework.icon, { color: '#ffffff' })}
                 </View>
-                <Text style={[typography.h2, { color: colors.textPrimary, flexShrink: 1 }]} numberOfLines={1}>{selectedFramework?.title}</Text>
+                <Text style={[typography.h2, { color: '#ffffff', flexShrink: 1 }]} numberOfLines={1}>{selectedFramework?.title}</Text>
               </View>
               <TouchableOpacity onPress={() => setSelectedFramework(null)} style={{ paddingLeft: 8 }}>
-                <Text style={[typography.button, { color: colors.textSecondary }]}>Close</Text>
+                <Text style={[typography.button, { color: 'rgba(255,255,255,0.7)' }]}>Close</Text>
               </TouchableOpacity>
             </View>
-            <Text style={[typography.body1, { color: colors.textSecondary, marginBottom: spacing.md }]}>{selectedFramework?.desc}</Text>
-            <BentoCard style={{ backgroundColor: colors.background, padding: spacing.md, marginBottom: spacing.xl }}>
-              <Text style={[typography.body1, { color: colors.textPrimary, fontStyle: 'italic' }]}>"{selectedFramework?.context}"</Text>
-            </BentoCard>
+            <Text style={[typography.body1, { color: 'rgba(255,255,255,0.9)', marginBottom: spacing.md }]}>{selectedFramework?.desc}</Text>
+            <View style={{ backgroundColor: 'rgba(0,0,0,0.15)', padding: spacing.md, marginBottom: spacing.xl, borderRadius: 16 }}>
+              <Text style={[typography.body1, { color: '#ffffff', fontStyle: 'italic' }]}>"{selectedFramework?.context}"</Text>
+            </View>
             <TouchableOpacity 
-              style={{ backgroundColor: colors.accent, padding: 16, borderRadius: 16, alignItems: 'center' }}
+              style={{ backgroundColor: '#ffffff', padding: 16, borderRadius: 16, alignItems: 'center' }}
               onPress={() => {
                 const ctx = selectedFramework.context;
                 setSelectedFramework(null);
                 navigation.navigate('Compose', { initialContext: ctx });
               }}
             >
-              <Text style={[typography.button, { color: '#fff' }]}>Use This Framework</Text>
+              <Text style={[typography.button, { color: colors.accent }]}>Use This Framework</Text>
             </TouchableOpacity>
-          </View>
+          </BentoCard>
         </View>
       </Modal>
     </Animated.View>
