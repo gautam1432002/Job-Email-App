@@ -7,9 +7,10 @@ import { useQuery } from '@tanstack/react-query';
 import api from '../../services/api';
 import { useAppTheme, typography, spacing, shadows } from '../../utils/theme';
 import BentoCard from '../../components/BentoCard';
-import { PenLine, Send, MessageSquare, Clock } from 'lucide-react-native';
+import { PenLine, Send, MessageSquare, Clock, Zap, Target, Users } from 'lucide-react-native';
 import * as SecureStore from 'expo-secure-store';
 import { useFocusEffect } from '@react-navigation/native';
+import Svg, { Circle } from 'react-native-svg';
 
 export default function HomeScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
@@ -24,6 +25,21 @@ export default function HomeScreen() {
   });
 
   const [overdueReminders, setOverdueReminders] = React.useState<any[]>([]);
+
+  const today = new Date().toISOString().split('T')[0];
+  const pitchesToday = history?.filter((h: any) => h.sent_at?.startsWith(today)).length || 0;
+  const dailyGoal = 5;
+  const progress = Math.min(pitchesToday / dailyGoal, 1);
+  const radius = 30;
+  const strokeWidth = 8;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - progress * circumference;
+
+  const frameworks = [
+    { id: 'standard', title: 'Standard', desc: 'Professional & direct', icon: <Zap color={colors.textPrimary} size={20} />, context: 'Reaching out for a standard application process. Summarize why my profile fits the role.' },
+    { id: 'aggressive', title: 'Aggressive Follow-up', desc: 'Show high intent', icon: <Target color={colors.textPrimary} size={20} />, context: 'Following up after a previous conversation or application to show strong, aggressive interest and intent.' },
+    { id: 'networking', title: 'Networking', desc: 'Focus on connection', icon: <Users color={colors.textPrimary} size={20} />, context: 'Looking to connect and learn more about the team, not explicitly asking for a job right now.' },
+  ];
 
   useFocusEffect(
     React.useCallback(() => {
@@ -75,6 +91,49 @@ export default function HomeScreen() {
             </View>
           </BentoCard>
         </TouchableOpacity>
+
+        {/* Quick Frameworks */}
+        <Text style={[typography.h3, { color: colors.textPrimary, marginBottom: spacing.md, marginTop: spacing.xl }]}>
+          Quick Frameworks
+        </Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -spacing.lg, paddingHorizontal: spacing.lg }} contentContainerStyle={{ paddingRight: spacing.lg * 2 }}>
+          {frameworks.map((fw) => (
+            <TouchableOpacity 
+              key={fw.id} 
+              activeOpacity={0.7} 
+              onPress={() => navigation.navigate('Compose', { initialContext: fw.context })}
+              style={{ width: 160, marginRight: spacing.sm }}
+            >
+              <BentoCard style={{ padding: spacing.md, height: 110, justifyContent: 'space-between' }}>
+                <View style={[styles.smallIconBox, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', marginBottom: 8 }]}>
+                  {fw.icon}
+                </View>
+                <View>
+                  <Text style={[typography.body1, { color: colors.textPrimary, fontWeight: '700' }]} numberOfLines={1}>{fw.title}</Text>
+                  <Text style={[typography.caption, { color: colors.textSecondary }]} numberOfLines={1}>{fw.desc}</Text>
+                </View>
+              </BentoCard>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
+        {/* Daily Outreach Tracker */}
+        <Text style={[typography.h3, { color: colors.textPrimary, marginBottom: spacing.md, marginTop: spacing.xl }]}>
+          Daily Progress
+        </Text>
+        <BentoCard style={{ flexDirection: 'row', alignItems: 'center', padding: spacing.lg }}>
+           <View style={{ width: 80, height: 80, justifyContent: 'center', alignItems: 'center' }}>
+             <Svg width="80" height="80" viewBox="0 0 80 80">
+               <Circle cx="40" cy="40" r={radius} stroke={colors.border} strokeWidth={strokeWidth} fill="none" />
+               <Circle cx="40" cy="40" r={radius} stroke={colors.accent} strokeWidth={strokeWidth} fill="none" strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} strokeLinecap="round" transform="rotate(-90 40 40)" />
+             </Svg>
+             <Text style={{ position: 'absolute', fontWeight: 'bold', fontSize: 16, color: colors.textPrimary }}>{pitchesToday}/{dailyGoal}</Text>
+           </View>
+           <View style={{ marginLeft: spacing.lg, flex: 1 }}>
+             <Text style={[typography.h2, { color: colors.textPrimary, marginBottom: 4 }]}>Pitches Drafted</Text>
+             <Text style={[typography.body2, { color: colors.textSecondary }]}>{pitchesToday >= dailyGoal ? "Goal reached! Great job." : `${dailyGoal - pitchesToday} more to reach your daily goal!`}</Text>
+           </View>
+        </BentoCard>
 
         {/* Quick Stats Grid */}
         <Text style={[typography.h3, { color: colors.textPrimary, marginBottom: spacing.md, marginTop: spacing.xl }]}>

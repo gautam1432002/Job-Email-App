@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Switch, KeyboardAvoidingView, Platform, Alert, Modal, SafeAreaView } from 'react-native';
+import { useRoute, RouteProp } from '@react-navigation/native';
 import { WebView } from 'react-native-webview';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import Animated, { FadeInRight, FadeOut, Easing, withRepeat, withTiming, useSharedValue, useAnimatedStyle } from 'react-native-reanimated';
@@ -11,15 +12,22 @@ import BentoCard from '../../components/BentoCard';
 import { Sparkles, Paperclip, Check, CheckCircle } from 'lucide-react-native';
 
 export default function ComposeScreen() {
+  const route = useRoute<RouteProp<Record<string, { initialContext?: string }>, string>>();
   const { colors, isDark } = useAppTheme();
   const [companyName, setCompanyName] = useState('');
   const [jobDescription, setJobDescription] = useState('');
-  const [aboutCompany, setAboutCompany] = useState('');
+  const [aboutCompany, setAboutCompany] = useState(route.params?.initialContext || '');
   const [useResume, setUseResume] = useState(true);
   const [receiverEmail, setReceiverEmail] = useState('');
   const [selectedTheme, setSelectedTheme] = useState('none');
   const [previewModalVisible, setPreviewModalVisible] = useState(false);
   const [previewHtml, setPreviewHtml] = useState('');
+
+  React.useEffect(() => {
+    if (route.params?.initialContext) {
+      setAboutCompany(route.params.initialContext);
+    }
+  }, [route.params?.initialContext]);
 
   const [generatedDraft, setGeneratedDraft] = useState<{subject: string; full_body: string} | null>(null);
   const [sentSuccessData, setSentSuccessData] = useState<{id: number, companyName: string} | null>(null);
