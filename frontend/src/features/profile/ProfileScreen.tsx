@@ -6,7 +6,9 @@ import * as DocumentPicker from 'expo-document-picker';
 import api from '../../services/api';
 import { useAppTheme, typography, spacing } from '../../utils/theme';
 import BentoCard from '../../components/BentoCard';
-import { UploadCloud, CheckCircle } from 'lucide-react-native';
+import { UploadCloud, CheckCircle, Eye } from 'lucide-react-native';
+import * as WebBrowser from 'expo-web-browser';
+import * as IntentLauncher from 'expo-intent-launcher';
 
 export default function ProfileScreen() {
   const { colors, isDark } = useAppTheme();
@@ -74,7 +76,9 @@ export default function ProfileScreen() {
         formData.append('experience_years', experienceYears);
       }
       formData.append('college', college);
-      formData.append('grad_year', gradYear);
+      if (gradYear !== '') {
+        formData.append('grad_year', gradYear);
+      }
       formData.append('skills', skills);
       formData.append('portfolio', portfolio);
       formData.append('linkedin', linkedin);
@@ -154,18 +158,47 @@ export default function ProfileScreen() {
 
           <Text style={[styles.sectionHeader, { color: colors.textSecondary }]}>RESUME & DOCUMENTS</Text>
           <BentoCard style={styles.groupCard}>
-            <TouchableOpacity style={styles.uploadBtn} onPress={handlePickResume}>
-              <UploadCloud color={colors.textPrimary} size={24} style={{ marginRight: 12 }} />
-              <View style={{ flex: 1 }}>
-                <Text style={[typography.body1, { color: colors.textPrimary }]}>Upload PDF Resume</Text>
-                {resumeFile ? (
-                  <Text style={[typography.caption, { color: colors.textSecondary, marginTop: 2 }]}>{resumeFile.name}</Text>
-                ) : existingResume ? (
-                  <Text style={[typography.caption, { color: '#10b981', marginTop: 2 }]}>Resume previously uploaded</Text>
-                ) : null}
-              </View>
-              {existingResume && !resumeFile && <CheckCircle color="#10b981" size={20} />}
-            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <TouchableOpacity style={[styles.uploadBtn, { flex: 1 }]} onPress={handlePickResume}>
+                <UploadCloud color={colors.textPrimary} size={24} style={{ marginRight: 12 }} />
+                <View style={{ flex: 1 }}>
+                  <Text style={[typography.body1, { color: colors.textPrimary }]}>Upload PDF Resume</Text>
+                  {resumeFile ? (
+                    <Text style={[typography.caption, { color: colors.textSecondary, marginTop: 2 }]}>{resumeFile.name}</Text>
+                  ) : existingResume ? (
+                    <Text style={[typography.caption, { color: '#10b981', marginTop: 2 }]}>Resume previously uploaded</Text>
+                  ) : null}
+                </View>
+                {existingResume && !resumeFile && <CheckCircle color="#10b981" size={20} />}
+              </TouchableOpacity>
+
+              {resumeFile && (
+                <TouchableOpacity 
+                  style={{ padding: 16, borderLeftWidth: 1, borderLeftColor: colors.border, justifyContent: 'center', alignItems: 'center' }}
+                  onPress={async () => {
+                    try {
+                      if (resumeFile.uri) {
+                        if (Platform.OS === 'android') {
+                          await IntentLauncher.startActivityAsync('android.intent.action.VIEW', {
+                            data: resumeFile.uri,
+                            flags: 1,
+                            type: 'application/pdf'
+                          });
+                        } else {
+                          await WebBrowser.openBrowserAsync(resumeFile.uri);
+                        }
+                      }
+                    } catch (e) {
+                      console.log("Could not open preview", e);
+                      Alert.alert("Preview Unavailable", "Cannot open this file type on this device.");
+                    }
+                  }}
+                >
+                  <Eye color={colors.accent} size={20} />
+                  <Text style={{ color: colors.accent, fontSize: 10, marginTop: 4 }}>Preview</Text>
+                </TouchableOpacity>
+              )}
+            </View>
           </BentoCard>
 
           <Text style={[styles.sectionHeader, { color: colors.textSecondary }]}>TECH STACK</Text>
