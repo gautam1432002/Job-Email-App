@@ -5,7 +5,7 @@ import Animated, { SlideInRight, SlideOutLeft, Easing } from 'react-native-reani
 import api from '../../services/api';
 import { useAppTheme, typography, spacing, borderRadius } from '../../utils/theme';
 import BentoCard from '../../components/BentoCard';
-import { Bot } from 'lucide-react-native';
+import { Bot, CheckCircle } from 'lucide-react-native';
 
 interface EmailLog {
   id: number;
@@ -23,6 +23,28 @@ const STATUSES = ['Applied', 'Viewed', 'Interview', 'Offer', 'Rejected'];
 export default function HistoryScreen() {
   const { colors, isDark } = useAppTheme();
   const queryClient = useQueryClient();
+
+  const [selectedIds, setSelectedIds] = React.useState<Set<number>>(new Set());
+  const isSelectionMode = selectedIds.size > 0;
+
+  const toggleSelection = (id: number) => {
+    setSelectedIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) newSet.delete(id);
+      else newSet.add(id);
+      return newSet;
+    });
+  };
+
+  const deleteMutation = useMutation({
+    mutationFn: async (ids: number[]) => {
+      await Promise.all(ids.map(id => api.delete(`history/${id}/`)));
+    },
+    onSuccess: () => {
+      setSelectedIds(new Set());
+      queryClient.invalidateQueries({ queryKey: ['history'] });
+    }
+  });
 
   const { data: logs, isLoading, isError } = useQuery<EmailLog[]>({
     queryKey: ['history'],
@@ -84,9 +106,28 @@ export default function HistoryScreen() {
         ListEmptyComponent={
           <Text style={[typography.body1, { color: colors.textSecondary, textAlign: 'center', marginTop: spacing.xxl }]}>No emails sent yet.</Text>
         }
-        renderItem={({ item, index }) => (
-          <View>
-            <BentoCard style={styles.card}>
+        renderItem={({ item, index }) => {
+          const isSelected = selectedIds.has(item.id);
+          return (
+          <TouchableOpacity 
+            activeOpacity={0.8}
+            onLongPress={() => {
+              if (!isSelectionMode) toggleSelection(item.id);
+            }}
+            onPress={() => {
+              if (isSelectionMode) {
+                toggleSelection(item.id);
+              } else {
+                // standard behavior to open email details
+              }
+            }}
+          >
+            <BentoCard style={[styles.card, isSelected && { borderColor: colors.accent, borderWidth: 2 }]}>
+              {isSelected && (
+                <View style={{ position: 'absolute', top: 16, right: 16, zIndex: 10 }}>
+                  <CheckCircle color={colors.accent} size={24} fill="rgba(255,255,255,0.8)" />
+                </View>
+              )}
               <View style={styles.cardHeader}>
                 <View style={styles.recipientInfo}>
                   <Text style={[typography.h3, { color: colors.textPrimary, fontWeight: '700' }]}>{item.company_name}</Text>
@@ -133,9 +174,28 @@ export default function HistoryScreen() {
               </View>
 
             </BentoCard>
-          </View>
-        )}
+          </TouchableOpacity>
+        )}}
       />
+
+      {isSelectionMode && (
+        <Animated.View 
+          entering={SlideInRight.duration(200)} 
+          style={{ position: 'absolute', bottom: 110, left: spacing.lg, right: spacing.lg }}
+        >
+          <TouchableOpacity 
+            style={{ backgroundColor: '#ef4444', padding: spacing.md, borderRadius: 16, alignItems: 'center', shadowColor: '#ef4444', shadowOpacity: 0.4, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 8 }}
+            onPress={() => deleteMutation.mutate(Array.from(selectedIds))}
+            disabled={deleteMutation.isPending}
+          >
+            {deleteMutation.isPending ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={[typography.button, { color: '#ffffff' }]}>Delete Selected ({selectedIds.size})</Text>
+            )}
+          </TouchableOpacity>
+        </Animated.View>
+      )}
     </Animated.View>
   );
 }

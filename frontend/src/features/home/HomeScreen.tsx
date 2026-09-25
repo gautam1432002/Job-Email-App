@@ -139,13 +139,12 @@ export default function HomeScreen() {
         </Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -spacing.lg }} contentContainerStyle={{ paddingLeft: spacing.lg, paddingRight: spacing.lg * 2, paddingBottom: spacing.lg, paddingTop: spacing.sm }}>
           {frameworks.map((fw) => (
-            <TouchableOpacity 
-              key={fw.id} 
-              activeOpacity={0.7} 
-              onPress={() => setSelectedFramework(fw)}
-              style={{ width: 160, marginRight: spacing.sm }}
-            >
-              <BentoCard style={{ padding: spacing.md, minHeight: 120, justifyContent: 'space-between' }}>
+            <BentoCard key={fw.id} style={{ width: 160, marginRight: spacing.sm, minHeight: 120 }}>
+              <TouchableOpacity 
+                activeOpacity={0.6} 
+                onPress={() => setSelectedFramework(fw)}
+                style={{ flex: 1, padding: spacing.md, justifyContent: 'space-between' }}
+              >
                 <View style={[styles.smallIconBox, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', marginBottom: 12 }]}>
                   {fw.icon}
                 </View>
@@ -153,8 +152,8 @@ export default function HomeScreen() {
                   <Text style={[typography.body1, { color: colors.textPrimary, fontWeight: '700', marginBottom: 4 }]} numberOfLines={1}>{fw.title}</Text>
                   <Text style={[typography.caption, { color: colors.textSecondary }]}>{fw.desc}</Text>
                 </View>
-              </BentoCard>
-            </TouchableOpacity>
+              </TouchableOpacity>
+            </BentoCard>
           ))}
         </ScrollView>
 
