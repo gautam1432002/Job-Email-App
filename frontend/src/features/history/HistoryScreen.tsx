@@ -77,7 +77,7 @@ export default function HistoryScreen() {
       <FlatList
         data={logs}
         keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={{ padding: spacing.md, paddingTop: 60, paddingBottom: 120 }}
+        contentContainerStyle={{ padding: spacing.md, paddingTop: 60, paddingBottom: 140 }}
         ListHeaderComponent={
           <Text style={[typography.h1, { color: colors.textPrimary, marginBottom: spacing.lg, paddingHorizontal: spacing.sm }]}>History</Text>
         }

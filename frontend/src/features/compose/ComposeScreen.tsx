@@ -135,7 +135,7 @@ export default function ComposeScreen() {
 
   return (
     <KeyboardAvoidingView style={[styles.container, { backgroundColor: colors.background }]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView contentContainerStyle={{ padding: spacing.md, paddingTop: 60, paddingBottom: 100 }}>
+      <ScrollView contentContainerStyle={{ padding: spacing.md, paddingTop: 60, paddingBottom: 140 }}>
         {sentSuccessData ? (
           <Animated.View entering={FadeInRight.duration(250)}>
             <BentoCard style={{ padding: spacing.xl, alignItems: 'center' }}>

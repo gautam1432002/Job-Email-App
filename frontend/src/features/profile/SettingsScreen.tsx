@@ -71,7 +71,7 @@ export default function SettingsScreen() {
         style={[{ flex: 1, backgroundColor: colors.background }]}
         entering={SlideInRight.duration(280).easing(Easing.out(Easing.cubic))}
       >
-        <ScrollView contentContainerStyle={{ padding: spacing.md, paddingTop: 60, paddingBottom: 120 }}>
+        <ScrollView contentContainerStyle={{ padding: spacing.md, paddingTop: 60, paddingBottom: 140 }}>
           
           <View style={[styles.card, { backgroundColor: colors.cardSurface, borderColor: colors.border }]}>
             <Text style={[typography.h2, { color: colors.textPrimary, marginBottom: spacing.sm }]}>Active Profile</Text>

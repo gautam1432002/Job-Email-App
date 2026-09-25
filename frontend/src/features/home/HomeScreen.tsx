@@ -55,7 +55,7 @@ export default function HomeScreen() {
       style={[{ flex: 1, backgroundColor: colors.background }]}
       entering={SlideInRight.duration(280).easing(Easing.out(Easing.cubic))}
     >
-      <ScrollView style={[styles.container]} contentContainerStyle={{ padding: spacing.lg, paddingTop: 60, paddingBottom: 120 }}>
+      <ScrollView style={[styles.container]} contentContainerStyle={{ padding: spacing.lg, paddingTop: 60, paddingBottom: 140 }}>
         <Text style={[typography.h1, { color: colors.textPrimary, marginBottom: spacing.md }]}>
           ProReach
         </Text>
