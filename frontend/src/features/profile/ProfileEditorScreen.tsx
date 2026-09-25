@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
 import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 import { useAppTheme, typography, spacing } from '../../utils/theme';
@@ -31,7 +31,10 @@ export default function ProfileEditorScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <ScrollView 
+      style={[styles.container, { backgroundColor: colors.background }]}
+      contentContainerStyle={{ paddingHorizontal: spacing.md, paddingTop: 100, paddingBottom: 140 }}
+    >
       <Text style={[typography.h1, { color: colors.textPrimary, marginBottom: spacing.md }]}>
         Create Profile
       </Text>
@@ -63,7 +66,7 @@ export default function ProfileEditorScreen() {
         </Text>
       )}
 
-      <View style={{ flex: 1 }} />
+      <View style={{ flex: 1, minHeight: 40 }} />
 
       <TouchableOpacity 
         style={[
@@ -81,15 +84,13 @@ export default function ProfileEditorScreen() {
           <Text style={[typography.button, { color: '#ffffff' }]}>INITIALIZE PROFILE</Text>
         )}
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 24,
-    paddingTop: 100,
   },
   input: {
     height: 56,

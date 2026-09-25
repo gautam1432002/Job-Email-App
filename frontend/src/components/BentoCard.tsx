@@ -7,14 +7,16 @@ interface BentoCardProps {
   children: React.ReactNode;
   style?: ViewStyle;
   variant?: 'default' | 'gradient' | 'glow';
+  padding?: number;
 }
 
-export default function BentoCard({ children, style, variant = 'default' }: BentoCardProps) {
+export default function BentoCard({ children, style, variant = 'default', padding = 16 }: BentoCardProps) {
   const { isDark, colors } = useAppTheme();
 
   const baseStyle = [
     styles.card,
     {
+      padding,
       backgroundColor: variant === 'gradient' ? 'transparent' : colors.cardSurface,
       borderColor: variant === 'glow' ? colors.neonCyan : (isDark ? colors.border : 'transparent'),
       borderWidth: (isDark || variant === 'glow') ? 1 : 0,

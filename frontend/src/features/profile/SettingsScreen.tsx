@@ -156,12 +156,12 @@ export default function SettingsScreen() {
       >
         <ScrollView contentContainerStyle={{ padding: spacing.md, paddingTop: 60, paddingBottom: 140 }}>
           
-          <BentoCard style={styles.card}>
+          <BentoCard style={styles.card} padding={24}>
             <Text style={[typography.h2, { color: colors.textPrimary, marginBottom: spacing.sm }]}>Active Profile</Text>
             <Text style={[typography.body1, { color: colors.textPrimary }]}><Text style={{ color: colors.accent, fontWeight: 'bold' }}>Name:</Text> {profile?.profile_name}</Text>
           </BentoCard>
 
-          <BentoCard style={styles.card}>
+          <BentoCard style={styles.card} padding={24}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
               <View>
                 <Text style={[typography.h2, { color: colors.textPrimary, marginBottom: 4 }]}>Appearance</Text>
@@ -183,7 +183,7 @@ export default function SettingsScreen() {
             </View>
           </BentoCard>
 
-          <BentoCard style={styles.card}>
+          <BentoCard style={styles.card} padding={24}>
             <Text style={[typography.h2, { color: colors.textPrimary, marginBottom: spacing.sm }]}>AI Setting</Text>
             <Text style={[typography.body2, { color: colors.textSecondary, marginBottom: spacing.md }]}>Slide to select your default outreach tone</Text>
             
@@ -234,7 +234,7 @@ export default function SettingsScreen() {
             </View>
           </BentoCard>
 
-          <BentoCard style={styles.card}>
+          <BentoCard style={styles.card} padding={24}>
             <Text style={[typography.h2, { color: colors.textPrimary, marginBottom: spacing.md }]}>Integrations</Text>
             
             <View style={styles.statusRow}>
@@ -284,10 +284,10 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  card: { padding: 24, marginBottom: 20 },
+  card: { marginBottom: 20 },
   statusRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   statusBadge: { fontSize: 10, fontWeight: 'bold', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 9999, overflow: 'hidden' },
-  input: { borderRadius: 8, padding: 16, marginBottom: 16, borderWidth: 1 },
+  input: { borderRadius: 8, paddingHorizontal: 16, paddingVertical: 12, marginBottom: 16, borderWidth: 1 },
   button: { padding: 16, borderRadius: 9999, alignItems: 'center' },
   logoutButton: { padding: 16, alignItems: 'center', marginBottom: 50, borderWidth: 1, borderRadius: 9999 },
   themeToggle: { flex: 1, padding: 12, alignItems: 'center', borderWidth: 1, borderRadius: 8, marginHorizontal: 4 },

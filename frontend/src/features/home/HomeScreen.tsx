@@ -43,9 +43,9 @@ export default function HomeScreen() {
   const strokeDashoffset = circumference - progress * circumference;
 
   const frameworks = [
-    { id: 'standard', title: 'Standard', desc: 'Professional & direct', icon: <Zap color={colors.textPrimary} size={20} />, context: 'Reaching out for a standard application process. Summarize why my profile fits the role.' },
-    { id: 'aggressive', title: 'Aggressive Follow-up', desc: 'Show high intent', icon: <Target color={colors.textPrimary} size={20} />, context: 'Following up after a previous conversation or application to show strong, aggressive interest and intent.' },
-    { id: 'networking', title: 'Networking', desc: 'Focus on connection', icon: <Users color={colors.textPrimary} size={20} />, context: 'Looking to connect and learn more about the team, not explicitly asking for a job right now.' },
+    { id: 'standard', title: 'Standard', desc: 'Professional & direct', icon: <Zap color={colors.textPrimary} size={20} />, context: 'Reaching out for a standard application process. Summarize why my profile fits the role.', tone: 'Professional' },
+    { id: 'aggressive', title: 'Aggressive Follow-up', desc: 'Show high intent', icon: <Target color={colors.textPrimary} size={20} />, context: 'Following up after a previous conversation or application to show strong, aggressive interest and intent.', tone: 'Direct' },
+    { id: 'networking', title: 'Networking', desc: 'Focus on connection', icon: <Users color={colors.textPrimary} size={20} />, context: 'Looking to connect and learn more about the team, not explicitly asking for a job right now.', tone: 'Friendly' },
   ];
 
   useFocusEffect(
@@ -88,7 +88,7 @@ export default function HomeScreen() {
 
         {/* Big Compose Action */}
         <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Compose')}>
-          <BentoCard style={styles.primaryAction} variant="gradient">
+          <BentoCard style={styles.primaryAction} variant="gradient" padding={24}>
             <View style={[styles.iconBox, { backgroundColor: 'rgba(255, 255, 255, 0.15)' }]}>
               <PenLine color="#ffffff" size={32} />
             </View>
@@ -103,8 +103,8 @@ export default function HomeScreen() {
         <Text style={[typography.h3, { color: colors.textPrimary, marginBottom: spacing.md, marginTop: spacing.xl }]}>
           Overview
         </Text>
-        <View style={styles.statsGrid}>
-          <BentoCard style={[styles.statCard, { marginRight: spacing.sm }]}>
+        <View style={[styles.statsGrid, { gap: 16 }]}>
+          <BentoCard style={styles.statCard} padding={16}>
             <View style={[styles.smallIconBox, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)' }]}>
               <Send color={colors.textPrimary} size={20} />
             </View>
@@ -112,7 +112,7 @@ export default function HomeScreen() {
             <Text style={[typography.caption, { color: colors.textSecondary }]}>EMAILS SENT</Text>
           </BentoCard>
           
-          <BentoCard style={[styles.statCard, { marginLeft: spacing.sm }]}>
+          <BentoCard style={styles.statCard} padding={16}>
             <View style={[styles.smallIconBox, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)' }]}>
               <MessageSquare color={colors.textPrimary} size={20} />
             </View>
@@ -125,7 +125,7 @@ export default function HomeScreen() {
         <Text style={[typography.h3, { color: colors.textPrimary, marginBottom: spacing.md, marginTop: spacing.xl }]}>
           Daily Progress
         </Text>
-        <BentoCard style={{ flexDirection: 'row', alignItems: 'center', padding: spacing.lg }}>
+        <BentoCard style={{ flexDirection: 'row', alignItems: 'center' }} padding={24}>
            <View style={{ width: 80, height: 80, justifyContent: 'center', alignItems: 'center' }}>
              <Svg width="80" height="80" viewBox="0 0 80 80">
                <Circle cx="40" cy="40" r={radius} stroke={colors.border} strokeWidth={strokeWidth} fill="none" />
@@ -145,7 +145,7 @@ export default function HomeScreen() {
         </Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -spacing.lg }} contentContainerStyle={{ paddingLeft: spacing.lg, paddingRight: spacing.lg * 2, paddingBottom: spacing.lg, paddingTop: spacing.sm }}>
           {frameworks.map((fw) => (
-            <BentoCard key={fw.id} style={{ width: 160, marginRight: spacing.sm, minHeight: 120 }}>
+            <BentoCard key={fw.id} style={{ width: 160, marginRight: spacing.sm, minHeight: 120 }} padding={0}>
               <TouchableOpacity 
                 activeOpacity={0.6} 
                 onPress={() => setSelectedFramework(fw)}
@@ -169,7 +169,7 @@ export default function HomeScreen() {
               Action Needed
             </Text>
             <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('History')}>
-              <BentoCard style={[styles.primaryAction, { borderColor: '#ef4444', borderWidth: 1 }]}>
+              <BentoCard style={[styles.primaryAction, { borderColor: '#ef4444', borderWidth: 1 }]} padding={24}>
                 <View style={[styles.iconBox, { backgroundColor: 'rgba(239, 68, 68, 0.15)' }]}>
                   <Clock color="#ef4444" size={32} />
                 </View>
@@ -191,7 +191,7 @@ export default function HomeScreen() {
 
       <Modal visible={!!selectedFramework} transparent animationType="slide">
         <View style={{ flex: 1, backgroundColor: 'transparent', justifyContent: 'flex-end', paddingHorizontal: spacing.lg, paddingBottom: spacing.xl * 2 }}>
-          <BentoCard variant="gradient" style={{ padding: spacing.xl, borderRadius: 24, shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.35, shadowRadius: 30, elevation: 24 }}>
+          <BentoCard variant="gradient" style={{ borderRadius: 24, shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.35, shadowRadius: 30, elevation: 24 }} padding={32}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.lg }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
                 <View style={[styles.smallIconBox, { backgroundColor: 'rgba(255,255,255,0.2)', marginRight: 12 }]}>
@@ -211,8 +211,9 @@ export default function HomeScreen() {
               style={{ backgroundColor: '#ffffff', padding: 16, borderRadius: 16, alignItems: 'center' }}
               onPress={() => {
                 const ctx = selectedFramework.context;
+                const tone = selectedFramework.tone;
                 setSelectedFramework(null);
-                navigation.navigate('Compose', { initialContext: ctx });
+                navigation.navigate('Compose', { initialContext: ctx, initialTone: tone });
               }}
             >
               <Text style={[typography.button, { color: colors.accent }]}>Use This Framework</Text>
@@ -231,7 +232,6 @@ const styles = StyleSheet.create({
   primaryAction: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: spacing.xl,
   },
   iconBox: {
     width: 64,
@@ -250,7 +250,6 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    padding: spacing.lg,
     justifyContent: 'center',
     alignItems: 'flex-start',
   },

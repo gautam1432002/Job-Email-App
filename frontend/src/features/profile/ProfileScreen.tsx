@@ -157,7 +157,7 @@ export default function ProfileScreen() {
           </BentoCard>
 
           <Text style={[styles.sectionHeader, { color: colors.textSecondary }]}>RESUME & DOCUMENTS</Text>
-          <BentoCard style={styles.groupCard}>
+          <BentoCard style={styles.groupCard} padding={0}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TouchableOpacity style={[styles.uploadBtn, { flex: 1 }]} onPress={handlePickResume}>
                 <UploadCloud color={colors.textPrimary} size={24} style={{ marginRight: 12 }} />
@@ -262,7 +262,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   input: {
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     fontSize: 16,
     borderWidth: 0,
   },

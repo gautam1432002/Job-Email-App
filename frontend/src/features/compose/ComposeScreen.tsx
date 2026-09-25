@@ -1,18 +1,21 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Switch, KeyboardAvoidingView, Platform, Alert, Modal, SafeAreaView } from 'react-native';
-import { useRoute, RouteProp } from '@react-navigation/native';
+import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { WebView } from 'react-native-webview';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import Animated, { FadeInRight, FadeOut, Easing, withRepeat, withTiming, useSharedValue, useAnimatedStyle } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../../services/api';
 import { useAppTheme, typography, spacing, borderRadius } from '../../utils/theme';
 import BentoCard from '../../components/BentoCard';
 import { Sparkles, Paperclip, Check, CheckCircle } from 'lucide-react-native';
 
 export default function ComposeScreen() {
-  const route = useRoute<RouteProp<Record<string, { initialContext?: string }>, string>>();
+  const route = useRoute<RouteProp<Record<string, { initialContext?: string, initialTone?: string }>, string>>();
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const { colors, isDark } = useAppTheme();
   const [companyName, setCompanyName] = useState('');
   const [jobDescription, setJobDescription] = useState('');
@@ -22,12 +25,26 @@ export default function ComposeScreen() {
   const [selectedTheme, setSelectedTheme] = useState('none');
   const [previewModalVisible, setPreviewModalVisible] = useState(false);
   const [previewHtml, setPreviewHtml] = useState('');
+  const [tone, setTone] = useState(route.params?.initialTone || 'Professional');
 
   React.useEffect(() => {
     if (route.params?.initialContext) {
       setAboutCompany(route.params.initialContext);
     }
-  }, [route.params?.initialContext]);
+    if (route.params?.initialTone) {
+      setTone(route.params.initialTone);
+    } else {
+      const loadDefaultTone = async () => {
+        try {
+          const defaultTone = await AsyncStorage.getItem('defaultAiTone');
+          if (defaultTone) setTone(defaultTone);
+        } catch (e) {
+          console.log('Failed to load default tone', e);
+        }
+      };
+      loadDefaultTone();
+    }
+  }, [route.params?.initialContext, route.params?.initialTone]);
 
   const [generatedDraft, setGeneratedDraft] = useState<{subject: string; full_body: string} | null>(null);
   const [sentSuccessData, setSentSuccessData] = useState<{id: number, companyName: string} | null>(null);
@@ -72,6 +89,7 @@ export default function ComposeScreen() {
         job_description: jobDescription,
         about_company: aboutCompany,
         use_resume: useResume,
+        tone: tone,
       });
       return res.data;
     },
@@ -179,14 +197,18 @@ export default function ComposeScreen() {
                     Alert.alert("Reminder Set", `We'll remind you to follow up on ${date.toLocaleDateString()}`);
                   }
                   setSentSuccessData(null);
+                  navigation.navigate('MainTabs', { screen: 'History' });
                 }}
               >
-                <Text style={[typography.button, { color: '#fff' }]}>SAVE & COMPOSE ANOTHER</Text>
+                <Text style={[typography.button, { color: '#fff' }]}>SAVE & VIEW HISTORY</Text>
               </TouchableOpacity>
               
               <TouchableOpacity 
                 style={{ marginTop: 24 }}
-                onPress={() => setSentSuccessData(null)}
+                onPress={() => {
+                  setSentSuccessData(null);
+                  navigation.navigate('MainTabs', { screen: 'History' });
+                }}
               >
                 <Text style={[typography.button, { color: colors.textSecondary }]}>SKIP</Text>
               </TouchableOpacity>
@@ -211,6 +233,19 @@ export default function ComposeScreen() {
               <Text style={[styles.label, { color: colors.textSecondary }]}>JOB DESCRIPTION / ROLE DETAILS</Text>
               <TextInput style={[inputStyle, { height: 80, paddingTop: 16 }]} multiline placeholderTextColor={colors.textSecondary} placeholder="Looking for a backend engineer..." value={jobDescription} onChangeText={setJobDescription} />
               
+              <Text style={[styles.label, { color: colors.textSecondary }]}>TONE</Text>
+              <View style={{ flexDirection: 'row', marginBottom: 16 }}>
+                {(['Professional', 'Friendly', 'Direct']).map((t) => (
+                   <TouchableOpacity
+                     key={t}
+                     onPress={() => setTone(t)}
+                     style={[styles.outlineBtn, { flex: 1, marginHorizontal: 4, borderColor: tone === t ? colors.accent : colors.border, backgroundColor: tone === t ? 'rgba(0,0,0,0.05)' : 'transparent', padding: 10 }]}
+                   >
+                     <Text style={{ color: tone === t ? colors.accent : colors.textSecondary, fontSize: 12, fontWeight: '600' }}>{t}</Text>
+                   </TouchableOpacity>
+                ))}
+              </View>
+
               <Text style={[styles.label, { color: colors.textSecondary }]}>CONTEXT / ABOUT COMPANY</Text>
               <TextInput style={inputStyle} placeholderTextColor={colors.textSecondary} placeholder="Fast growing AI startup..." value={aboutCompany} onChangeText={setAboutCompany} />
               
@@ -317,8 +352,8 @@ const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, paddingHorizontal: 8 },
   resumeBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16 },
-  label: { fontSize: 11, fontWeight: '700', marginBottom: 8, marginTop: 16, letterSpacing: 0.5 },
-  input: { borderRadius: 12, padding: 16, fontSize: 16, borderWidth: 1, borderColor: 'transparent' },
+  label: { fontSize: 11, fontWeight: '700', marginBottom: 4, marginTop: 12, letterSpacing: 0.5 },
+  input: { borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, fontSize: 16, borderWidth: 1, borderColor: 'transparent' },
   switchRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 24 },
   button: { flexDirection: 'row', padding: 16, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
   outlineBtn: { padding: 14, borderRadius: 16, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
