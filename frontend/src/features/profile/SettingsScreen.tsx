@@ -1,7 +1,7 @@
-import React, { useContext, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import React, { useContext, useState, useRef, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Animated as RNAnimated, PanResponder } from 'react-native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import Animated, { SlideInRight, SlideOutLeft, Easing } from 'react-native-reanimated';
+import Animated, { SlideInRight, SlideOutLeft, Easing, ZoomIn } from 'react-native-reanimated';
 import { ProfileContext } from '../../store/ProfileContext';
 import api from '../../services/api';
 import { useAppTheme, typography, spacing } from '../../utils/theme';
@@ -27,8 +27,65 @@ export default function SettingsScreen() {
   });
 
   const [defaultAiTone, setDefaultAiTone] = useState('Professional');
+  const AI_TONES = ['Professional', 'Friendly', 'Direct'];
+  const [trackWidth, setTrackWidth] = useState(0);
+  const slideAnim = useRef(new RNAnimated.Value(0)).current;
 
-  React.useEffect(() => {
+  const stateRef = useRef({ defaultAiTone, trackWidth });
+  useEffect(() => {
+    stateRef.current = { defaultAiTone, trackWidth };
+  }, [defaultAiTone, trackWidth]);
+
+  useEffect(() => {
+    if (trackWidth > 0) {
+      const idx = Math.max(0, AI_TONES.indexOf(defaultAiTone));
+      RNAnimated.spring(slideAnim, {
+        toValue: idx * (trackWidth / 3),
+        useNativeDriver: true,
+        friction: 8,
+        tension: 50
+      }).start();
+    }
+  }, [defaultAiTone, trackWidth]);
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => false,
+      onMoveShouldSetPanResponder: (_, gestureState) => Math.abs(gestureState.dx) > 5,
+      onPanResponderMove: (evt, gestureState) => {
+        const { defaultAiTone, trackWidth } = stateRef.current;
+        const startPos = Math.max(0, AI_TONES.indexOf(defaultAiTone)) * (trackWidth / 3);
+        let newPos = startPos + gestureState.dx;
+        
+        if (newPos < 0) newPos = 0;
+        if (newPos > (trackWidth / 3) * 2) newPos = (trackWidth / 3) * 2;
+        
+        slideAnim.setValue(newPos);
+      },
+      onPanResponderRelease: (evt, gestureState) => {
+        const { defaultAiTone, trackWidth } = stateRef.current;
+        const startPos = Math.max(0, AI_TONES.indexOf(defaultAiTone)) * (trackWidth / 3);
+        const finalPos = startPos + gestureState.dx;
+        
+        const segmentWidth = trackWidth / 3;
+        let closestIndex = Math.round(finalPos / segmentWidth);
+        if (closestIndex < 0) closestIndex = 0;
+        if (closestIndex > 2) closestIndex = 2;
+        
+        handleToneChange(AI_TONES[closestIndex]);
+      },
+      onPanResponderTerminate: () => {
+        const { defaultAiTone, trackWidth } = stateRef.current;
+        const idx = Math.max(0, AI_TONES.indexOf(defaultAiTone));
+        RNAnimated.spring(slideAnim, {
+          toValue: idx * (trackWidth / 3),
+          useNativeDriver: true,
+        }).start();
+      }
+    })
+  ).current;
+
+  useEffect(() => {
     const loadSettings = async () => {
       try {
         const tone = await AsyncStorage.getItem('defaultAiTone');
@@ -109,46 +166,63 @@ export default function SettingsScreen() {
               <View>
                 <Text style={[typography.h2, { color: colors.textPrimary, marginBottom: 4 }]}>Appearance</Text>
                 <Text style={[typography.caption, { color: colors.textSecondary }]}>
-                  {themeMode === 'system' ? 'System Default' : themeMode === 'light' ? 'Light Mode' : 'Dark Mode'}
+                  {isDark ? 'Dark Mode' : 'Light Mode'}
                 </Text>
               </View>
               <TouchableOpacity
                 activeOpacity={0.7}
                 onPress={() => {
-                  if (themeMode === 'system') setThemeMode('light');
-                  else if (themeMode === 'light') setThemeMode('dark');
-                  else setThemeMode('system');
+                  setThemeMode(isDark ? 'light' : 'dark');
                 }}
                 style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', justifyContent: 'center', alignItems: 'center' }}
               >
-                {themeMode === 'light' ? <Sun color={colors.textPrimary} size={28} /> : themeMode === 'dark' ? <Moon color={colors.textPrimary} size={28} /> : <Laptop color={colors.textPrimary} size={28} />}
+                <Animated.View key={isDark ? 'dark' : 'light'} entering={ZoomIn.duration(250).easing(Easing.out(Easing.cubic))}>
+                  {isDark ? <Moon color={colors.textPrimary} size={28} /> : <Sun color={colors.textPrimary} size={28} />}
+                </Animated.View>
               </TouchableOpacity>
             </View>
           </BentoCard>
 
           <BentoCard style={styles.card}>
-            <Text style={[typography.h2, { color: colors.textPrimary, marginBottom: spacing.sm }]}>AI Voice Engine</Text>
+            <Text style={[typography.h2, { color: colors.textPrimary, marginBottom: spacing.sm }]}>AI Setting</Text>
             <Text style={[typography.body2, { color: colors.textSecondary, marginBottom: spacing.md }]}>Slide to select your default outreach tone</Text>
             
-            <View style={{ height: 56, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)', borderRadius: 28, flexDirection: 'row', padding: 4 }}>
-              {(['Professional', 'Friendly', 'Direct']).map((tone) => {
+            <View 
+              style={{ height: 56, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)', borderRadius: 28, flexDirection: 'row', padding: 4, position: 'relative' }}
+              onLayout={(e) => setTrackWidth(e.nativeEvent.layout.width - 8)}
+              {...panResponder.panHandlers}
+            >
+              {trackWidth > 0 && (
+                <RNAnimated.View 
+                  style={{
+                    position: 'absolute',
+                    top: 4,
+                    left: 4,
+                    width: trackWidth / 3,
+                    height: 48,
+                    borderRadius: 24,
+                    backgroundColor: isDark ? '#38383A' : '#FFFFFF',
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: isDark ? 0.3 : 0.08,
+                    shadowRadius: 8,
+                    elevation: 4,
+                    transform: [{ translateX: slideAnim }]
+                  }}
+                />
+              )}
+              {AI_TONES.map((tone) => {
                 const isActive = defaultAiTone === tone;
                 return (
                   <TouchableOpacity
                     key={tone}
-                    activeOpacity={0.8}
+                    activeOpacity={1}
                     onPress={() => handleToneChange(tone)}
                     style={{ 
                       flex: 1, 
                       justifyContent: 'center', 
                       alignItems: 'center', 
-                      borderRadius: 24, 
-                      backgroundColor: isActive ? (isDark ? '#38383A' : '#FFFFFF') : 'transparent',
-                      shadowColor: isActive ? '#000' : 'transparent',
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: isActive ? (isDark ? 0.3 : 0.08) : 0,
-                      shadowRadius: 8,
-                      elevation: isActive ? 4 : 0
+                      zIndex: 1
                     }}
                   >
                     <Text style={[typography.button, { color: isActive ? colors.textPrimary : colors.textSecondary, fontSize: 13 }]}>
