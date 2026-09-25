@@ -67,13 +67,22 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
     <GestureDetector gesture={panGesture}>
       <View style={[styles.shadowContainer, { borderColor: 'rgba(0,0,0,0.06)' }]}>
       <View style={[styles.solidView, { backgroundColor: themeColors.cardSurface }]}>
-        {/* Animated Background Highlight */}
+        {/* Animated Floating Pill Highlight */}
         <Animated.View 
           style={[
             styles.activeIndicator, 
             { 
-              width: tabWidth, 
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'
+              width: tabWidth, // Maximized width to fully cover the option text
+              height: 58,
+              top: 3,
+              left: 0, // Adjusted offset to keep it perfectly centered
+              borderRadius: 28,
+              backgroundColor: isDarkMode ? '#38383A' : '#FFFFFF',
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 6 }, // Increased shadow depth
+              shadowOpacity: isDarkMode ? 0.5 : 0.2, // Darker shadow
+              shadowRadius: 16, // Softer, wider spread
+              elevation: 8 // Higher elevation on Android
             }, 
             animatedStyle
           ]} 
