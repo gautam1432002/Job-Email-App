@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated, { SlideInRight, SlideOutLeft, Easing } from 'react-native-reanimated';
@@ -25,6 +25,7 @@ export default function HomeScreen() {
   });
 
   const [overdueReminders, setOverdueReminders] = React.useState<any[]>([]);
+  const [selectedFramework, setSelectedFramework] = React.useState<any>(null);
 
   const today = new Date().toISOString().split('T')[0];
   const pitchesToday = history?.filter((h: any) => h.sent_at?.startsWith(today)).length || 0;
@@ -92,49 +93,6 @@ export default function HomeScreen() {
           </BentoCard>
         </TouchableOpacity>
 
-        {/* Quick Frameworks */}
-        <Text style={[typography.h3, { color: colors.textPrimary, marginBottom: spacing.md, marginTop: spacing.xl }]}>
-          Quick Frameworks
-        </Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -spacing.lg, paddingHorizontal: spacing.lg }} contentContainerStyle={{ paddingRight: spacing.lg * 2 }}>
-          {frameworks.map((fw) => (
-            <TouchableOpacity 
-              key={fw.id} 
-              activeOpacity={0.7} 
-              onPress={() => navigation.navigate('Compose', { initialContext: fw.context })}
-              style={{ width: 160, marginRight: spacing.sm }}
-            >
-              <BentoCard style={{ padding: spacing.md, height: 110, justifyContent: 'space-between' }}>
-                <View style={[styles.smallIconBox, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', marginBottom: 8 }]}>
-                  {fw.icon}
-                </View>
-                <View>
-                  <Text style={[typography.body1, { color: colors.textPrimary, fontWeight: '700' }]} numberOfLines={1}>{fw.title}</Text>
-                  <Text style={[typography.caption, { color: colors.textSecondary }]} numberOfLines={1}>{fw.desc}</Text>
-                </View>
-              </BentoCard>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-
-        {/* Daily Outreach Tracker */}
-        <Text style={[typography.h3, { color: colors.textPrimary, marginBottom: spacing.md, marginTop: spacing.xl }]}>
-          Daily Progress
-        </Text>
-        <BentoCard style={{ flexDirection: 'row', alignItems: 'center', padding: spacing.lg }}>
-           <View style={{ width: 80, height: 80, justifyContent: 'center', alignItems: 'center' }}>
-             <Svg width="80" height="80" viewBox="0 0 80 80">
-               <Circle cx="40" cy="40" r={radius} stroke={colors.border} strokeWidth={strokeWidth} fill="none" />
-               <Circle cx="40" cy="40" r={radius} stroke={colors.accent} strokeWidth={strokeWidth} fill="none" strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} strokeLinecap="round" transform="rotate(-90 40 40)" />
-             </Svg>
-             <Text style={{ position: 'absolute', fontWeight: 'bold', fontSize: 16, color: colors.textPrimary }}>{pitchesToday}/{dailyGoal}</Text>
-           </View>
-           <View style={{ marginLeft: spacing.lg, flex: 1 }}>
-             <Text style={[typography.h2, { color: colors.textPrimary, marginBottom: 4 }]}>Pitches Drafted</Text>
-             <Text style={[typography.body2, { color: colors.textSecondary }]}>{pitchesToday >= dailyGoal ? "Goal reached! Great job." : `${dailyGoal - pitchesToday} more to reach your daily goal!`}</Text>
-           </View>
-        </BentoCard>
-
         {/* Quick Stats Grid */}
         <Text style={[typography.h3, { color: colors.textPrimary, marginBottom: spacing.md, marginTop: spacing.xl }]}>
           Overview
@@ -156,6 +114,49 @@ export default function HomeScreen() {
             <Text style={[typography.caption, { color: colors.textSecondary }]}>RESPONSES</Text>
           </BentoCard>
         </View>
+
+        {/* Daily Outreach Tracker */}
+        <Text style={[typography.h3, { color: colors.textPrimary, marginBottom: spacing.md, marginTop: spacing.xl }]}>
+          Daily Progress
+        </Text>
+        <BentoCard style={{ flexDirection: 'row', alignItems: 'center', padding: spacing.lg }}>
+           <View style={{ width: 80, height: 80, justifyContent: 'center', alignItems: 'center' }}>
+             <Svg width="80" height="80" viewBox="0 0 80 80">
+               <Circle cx="40" cy="40" r={radius} stroke={colors.border} strokeWidth={strokeWidth} fill="none" />
+               <Circle cx="40" cy="40" r={radius} stroke={colors.accent} strokeWidth={strokeWidth} fill="none" strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} strokeLinecap="round" transform="rotate(-90 40 40)" />
+             </Svg>
+             <Text style={{ position: 'absolute', fontWeight: 'bold', fontSize: 16, color: colors.textPrimary }}>{pitchesToday}/{dailyGoal}</Text>
+           </View>
+           <View style={{ marginLeft: spacing.lg, flex: 1 }}>
+             <Text style={[typography.h2, { color: colors.textPrimary, marginBottom: 4 }]}>Pitches Drafted</Text>
+             <Text style={[typography.body2, { color: colors.textSecondary }]}>{pitchesToday >= dailyGoal ? "Goal reached! Great job." : `${dailyGoal - pitchesToday} more to reach your daily goal!`}</Text>
+           </View>
+        </BentoCard>
+
+        {/* Quick Frameworks */}
+        <Text style={[typography.h3, { color: colors.textPrimary, marginBottom: spacing.md, marginTop: spacing.xl }]}>
+          Quick Frameworks
+        </Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -spacing.lg, paddingHorizontal: spacing.lg }} contentContainerStyle={{ paddingRight: spacing.lg * 2 }}>
+          {frameworks.map((fw) => (
+            <TouchableOpacity 
+              key={fw.id} 
+              activeOpacity={0.7} 
+              onPress={() => setSelectedFramework(fw)}
+              style={{ width: 160, marginRight: spacing.sm }}
+            >
+              <BentoCard style={{ padding: spacing.md, minHeight: 120, justifyContent: 'space-between' }}>
+                <View style={[styles.smallIconBox, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', marginBottom: 12 }]}>
+                  {fw.icon}
+                </View>
+                <View>
+                  <Text style={[typography.body1, { color: colors.textPrimary, fontWeight: '700', marginBottom: 4 }]} numberOfLines={1}>{fw.title}</Text>
+                  <Text style={[typography.caption, { color: colors.textSecondary }]}>{fw.desc}</Text>
+                </View>
+              </BentoCard>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
 
         {overdueReminders.length > 0 && (
           <Animated.View entering={SlideInRight.duration(250).delay(100)}>
@@ -182,6 +183,38 @@ export default function HomeScreen() {
         )}
 
       </ScrollView>
+
+      <Modal visible={!!selectedFramework} transparent animationType="slide">
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' }}>
+          <View style={{ backgroundColor: colors.cardSurface, padding: spacing.xl, borderTopLeftRadius: 24, borderTopRightRadius: 24, shadowColor: '#000', shadowOffset: { width: 0, height: -4 }, shadowOpacity: 0.1, shadowRadius: 12, elevation: 10 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.lg }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={[styles.smallIconBox, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', marginRight: 12 }]}>
+                  {selectedFramework?.icon}
+                </View>
+                <Text style={[typography.h2, { color: colors.textPrimary }]}>{selectedFramework?.title}</Text>
+              </View>
+              <TouchableOpacity onPress={() => setSelectedFramework(null)}>
+                <Text style={[typography.button, { color: colors.textSecondary }]}>Close</Text>
+              </TouchableOpacity>
+            </View>
+            <Text style={[typography.body1, { color: colors.textSecondary, marginBottom: spacing.md }]}>{selectedFramework?.desc}</Text>
+            <BentoCard style={{ backgroundColor: colors.background, padding: spacing.md, marginBottom: spacing.xl }}>
+              <Text style={[typography.body1, { color: colors.textPrimary, fontStyle: 'italic' }]}>"{selectedFramework?.context}"</Text>
+            </BentoCard>
+            <TouchableOpacity 
+              style={{ backgroundColor: colors.accent, padding: 16, borderRadius: 16, alignItems: 'center' }}
+              onPress={() => {
+                const ctx = selectedFramework.context;
+                setSelectedFramework(null);
+                navigation.navigate('Compose', { initialContext: ctx });
+              }}
+            >
+              <Text style={[typography.button, { color: '#fff' }]}>Use This Framework</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </Animated.View>
   );
 }
