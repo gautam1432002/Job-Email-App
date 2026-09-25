@@ -1,7 +1,8 @@
 from django.urls import path
 from .api_views import (
     ProfileCreateView, ProfileView, CompanyListCreateView, CompanyRetrieveUpdateDestroyView,
-    EmailLogListView, EmailLogUpdateView, GeneratePitchView, SendEmailView, PreviewEmailView
+    EmailLogListView, EmailLogUpdateView, GeneratePitchView, SendEmailView, PreviewEmailView,
+    EmailLogBulkDeleteView
 )
 
 urlpatterns = [
@@ -13,6 +14,7 @@ urlpatterns = [
     
     path('history/', EmailLogListView.as_view(), name='api-email-history'),
     path('history/<int:pk>/', EmailLogUpdateView.as_view(), name='api-email-history-update'),
+    path('compose/history/bulk/', EmailLogBulkDeleteView.as_view(), name='api-history-bulk-delete'),
     
     path('compose/generate/', GeneratePitchView.as_view(), name='api-generate-pitch'),
     path('compose/preview/', PreviewEmailView.as_view(), name='api-preview-email'),

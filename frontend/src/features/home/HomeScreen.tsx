@@ -27,8 +27,14 @@ export default function HomeScreen() {
   const [overdueReminders, setOverdueReminders] = React.useState<any[]>([]);
   const [selectedFramework, setSelectedFramework] = React.useState<any>(null);
 
-  const today = new Date().toISOString().split('T')[0];
-  const pitchesToday = history?.filter((h: any) => h.sent_at?.startsWith(today)).length || 0;
+  const todayDate = new Date();
+  const pitchesToday = history?.filter((h: any) => {
+    if (!h.sent_at) return false;
+    const sentDate = new Date(h.sent_at);
+    return sentDate.getDate() === todayDate.getDate() &&
+           sentDate.getMonth() === todayDate.getMonth() &&
+           sentDate.getFullYear() === todayDate.getFullYear();
+  }).length || 0;
   const dailyGoal = 5;
   const progress = Math.min(pitchesToday / dailyGoal, 1);
   const radius = 30;

@@ -38,7 +38,7 @@ export default function HistoryScreen() {
 
   const deleteMutation = useMutation({
     mutationFn: async (ids: number[]) => {
-      await Promise.all(ids.map(id => api.delete(`history/${id}/`)));
+      await api.delete('compose/history/bulk/', { data: { ids } });
     },
     onSuccess: () => {
       setSelectedIds(new Set());

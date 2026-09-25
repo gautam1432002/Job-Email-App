@@ -140,6 +140,17 @@ class EmailLogUpdateView(generics.UpdateAPIView):
         return EmailLog.objects.filter(profile=self.request.profile)
 
 
+class EmailLogBulkDeleteView(views.APIView):
+    authentication_classes = [ProfileAuthentication]
+    permission_classes = [IsProfileAuthenticated]
+
+    def delete(self, request):
+        ids = request.data.get('ids', [])
+        EmailLog.objects.filter(id__in=ids, profile=request.profile).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
 class GeneratePitchView(views.APIView):
     authentication_classes = [ProfileAuthentication]
     permission_classes = [IsProfileAuthenticated]

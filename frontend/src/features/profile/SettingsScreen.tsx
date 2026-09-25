@@ -5,6 +5,9 @@ import Animated, { SlideInRight, SlideOutLeft, Easing } from 'react-native-reani
 import { ProfileContext } from '../../store/ProfileContext';
 import api from '../../services/api';
 import { useAppTheme, typography, spacing } from '../../utils/theme';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import BentoCard from '../../components/BentoCard';
+import { Sun, Moon, Laptop } from 'lucide-react-native';
 
 export default function SettingsScreen() {
   const { deleteProfile, activeProfileId } = useContext(ProfileContext);
@@ -22,6 +25,29 @@ export default function SettingsScreen() {
       return res.data;
     },
   });
+
+  const [defaultAiTone, setDefaultAiTone] = useState('Professional');
+
+  React.useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const tone = await AsyncStorage.getItem('defaultAiTone');
+        if (tone) setDefaultAiTone(tone);
+      } catch (e) {
+        console.error("Failed to load settings", e);
+      }
+    };
+    loadSettings();
+  }, []);
+
+  const handleToneChange = async (tone: string) => {
+    setDefaultAiTone(tone);
+    try {
+      await AsyncStorage.setItem('defaultAiTone', tone);
+    } catch (e) {
+      console.error("Failed to save settings", e);
+    }
+  };
 
   const updateMutation = useMutation({
     mutationFn: async () => {
@@ -73,35 +99,68 @@ export default function SettingsScreen() {
       >
         <ScrollView contentContainerStyle={{ padding: spacing.md, paddingTop: 60, paddingBottom: 140 }}>
           
-          <View style={[styles.card, { backgroundColor: colors.cardSurface, borderColor: colors.border }]}>
+          <BentoCard style={styles.card}>
             <Text style={[typography.h2, { color: colors.textPrimary, marginBottom: spacing.sm }]}>Active Profile</Text>
             <Text style={[typography.body1, { color: colors.textPrimary }]}><Text style={{ color: colors.accent, fontWeight: 'bold' }}>Name:</Text> {profile?.profile_name}</Text>
-          </View>
+          </BentoCard>
 
-          <View style={[styles.card, { backgroundColor: colors.cardSurface, borderColor: colors.border }]}>
-            <Text style={[typography.h2, { color: colors.textPrimary, marginBottom: spacing.md }]}>Appearance</Text>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-              {(['system', 'light', 'dark'] as const).map((mode) => (
-                <TouchableOpacity
-                  key={mode}
-                  onPress={() => setThemeMode(mode)}
-                  style={[
-                    styles.themeToggle,
-                    { 
-                      borderColor: themeMode === mode ? colors.textPrimary : colors.border,
-                      backgroundColor: themeMode === mode ? (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)') : 'transparent' 
-                    }
-                  ]}
-                >
-                  <Text style={[typography.button, { color: themeMode === mode ? colors.textPrimary : colors.textSecondary }]}>
-                    {mode.charAt(0).toUpperCase() + mode.slice(1)}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+          <BentoCard style={styles.card}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <View>
+                <Text style={[typography.h2, { color: colors.textPrimary, marginBottom: 4 }]}>Appearance</Text>
+                <Text style={[typography.caption, { color: colors.textSecondary }]}>
+                  {themeMode === 'system' ? 'System Default' : themeMode === 'light' ? 'Light Mode' : 'Dark Mode'}
+                </Text>
+              </View>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => {
+                  if (themeMode === 'system') setThemeMode('light');
+                  else if (themeMode === 'light') setThemeMode('dark');
+                  else setThemeMode('system');
+                }}
+                style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', justifyContent: 'center', alignItems: 'center' }}
+              >
+                {themeMode === 'light' ? <Sun color={colors.textPrimary} size={28} /> : themeMode === 'dark' ? <Moon color={colors.textPrimary} size={28} /> : <Laptop color={colors.textPrimary} size={28} />}
+              </TouchableOpacity>
             </View>
-          </View>
+          </BentoCard>
 
-          <View style={[styles.card, { backgroundColor: colors.cardSurface, borderColor: colors.border }]}>
+          <BentoCard style={styles.card}>
+            <Text style={[typography.h2, { color: colors.textPrimary, marginBottom: spacing.sm }]}>AI Voice Engine</Text>
+            <Text style={[typography.body2, { color: colors.textSecondary, marginBottom: spacing.md }]}>Slide to select your default outreach tone</Text>
+            
+            <View style={{ height: 56, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)', borderRadius: 28, flexDirection: 'row', padding: 4 }}>
+              {(['Professional', 'Friendly', 'Direct']).map((tone) => {
+                const isActive = defaultAiTone === tone;
+                return (
+                  <TouchableOpacity
+                    key={tone}
+                    activeOpacity={0.8}
+                    onPress={() => handleToneChange(tone)}
+                    style={{ 
+                      flex: 1, 
+                      justifyContent: 'center', 
+                      alignItems: 'center', 
+                      borderRadius: 24, 
+                      backgroundColor: isActive ? (isDark ? '#38383A' : '#FFFFFF') : 'transparent',
+                      shadowColor: isActive ? '#000' : 'transparent',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: isActive ? (isDark ? 0.3 : 0.08) : 0,
+                      shadowRadius: 8,
+                      elevation: isActive ? 4 : 0
+                    }}
+                  >
+                    <Text style={[typography.button, { color: isActive ? colors.textPrimary : colors.textSecondary, fontSize: 13 }]}>
+                      {tone}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </BentoCard>
+
+          <BentoCard style={styles.card}>
             <Text style={[typography.h2, { color: colors.textPrimary, marginBottom: spacing.md }]}>Integrations</Text>
             
             <View style={styles.statusRow}>
@@ -137,7 +196,7 @@ export default function SettingsScreen() {
             >
               <Text style={[typography.button, { color: colors.background }]}>{updateMutation.isPending ? 'UPDATING...' : 'SAVE INTEGRATIONS'}</Text>
             </TouchableOpacity>
-          </View>
+          </BentoCard>
 
           <TouchableOpacity style={[styles.logoutButton, { borderColor: '#ef4444' }]} onPress={handleWipeProfile}>
             <Text style={[typography.button, { color: '#ef4444' }]}>WIPE LOCAL PROFILE</Text>
@@ -151,7 +210,7 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  card: { padding: 20, borderRadius: 16, borderWidth: 1, marginBottom: 20 },
+  card: { padding: 24, marginBottom: 20 },
   statusRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   statusBadge: { fontSize: 10, fontWeight: 'bold', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 9999, overflow: 'hidden' },
   input: { borderRadius: 8, padding: 16, marginBottom: 16, borderWidth: 1 },
