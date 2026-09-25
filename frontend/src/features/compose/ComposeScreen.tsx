@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Switch, KeyboardAvoidingView, Platform, Alert, Modal, SafeAreaView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Switch, KeyboardAvoidingView, Platform, Alert, Modal } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { WebView } from 'react-native-webview';
@@ -59,7 +60,36 @@ export default function ComposeScreen() {
     { id: 'theme5', name: 'Newsletter' },
     { id: 'theme6', name: 'Minimal' },
   ];
+  // AI Tone slider
+  const TONES = ['Professional', 'Friendly', 'Direct'];
+  const [toneTrackWidth, setToneTrackWidth] = useState(0);
+  const toneIndex = Math.max(0, TONES.indexOf(tone));
+  const toneIndicatorPos = useSharedValue(toneIndex);
+  
+  React.useEffect(() => {
+    toneIndicatorPos.value = withTiming(toneIndex, { duration: 250, easing: Easing.out(Easing.cubic) });
+  }, [toneIndex]);
 
+  const toneIndicatorStyle = useAnimatedStyle(() => {
+    const width = toneTrackWidth > 0 ? (toneTrackWidth - 8) / 3 : 0; 
+    return {
+      width,
+      transform: [{ translateX: toneIndicatorPos.value * width }]
+    };
+  });
+
+  // Theme slider
+  const [themeLayouts, setThemeLayouts] = useState<Record<string, { x: number, width: number }>>({});
+  const themeIndicatorPos = useSharedValue(0);
+  const themeIndicatorWidth = useSharedValue(0);
+
+  React.useEffect(() => {
+    const layout = themeLayouts[selectedTheme];
+    if (layout) {
+      themeIndicatorPos.value = withTiming(layout.x, { duration: 250, easing: Easing.out(Easing.cubic) });
+      themeIndicatorWidth.value = withTiming(layout.width, { duration: 250, easing: Easing.out(Easing.cubic) });
+    }
+  }, [selectedTheme, themeLayouts]);
   // Pulse animation for AI Loader
   const pulseScale = useSharedValue(1);
   const pulseOpacity = useSharedValue(0.5);
@@ -234,14 +264,38 @@ export default function ComposeScreen() {
               <TextInput style={[inputStyle, { height: 80, paddingTop: 16 }]} multiline placeholderTextColor={colors.textSecondary} placeholder="Looking for a backend engineer..." value={jobDescription} onChangeText={setJobDescription} />
               
               <Text style={[styles.label, { color: colors.textSecondary }]}>TONE</Text>
-              <View style={{ flexDirection: 'row', marginBottom: 16 }}>
-                {(['Professional', 'Friendly', 'Direct']).map((t) => (
+              <View 
+                style={{ height: 48, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)', borderRadius: 24, flexDirection: 'row', padding: 4, position: 'relative', marginBottom: 16 }}
+                onLayout={(e) => setToneTrackWidth(e.nativeEvent.layout.width)}
+              >
+                {toneTrackWidth > 0 && (
+                  <Animated.View 
+                    style={[
+                      {
+                        position: 'absolute',
+                        top: 4,
+                        left: 4,
+                        height: 40,
+                        borderRadius: 20,
+                        backgroundColor: isDark ? '#38383A' : '#FFFFFF',
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: isDark ? 0.3 : 0.08,
+                        shadowRadius: 8,
+                        elevation: 4,
+                      },
+                      toneIndicatorStyle
+                    ]}
+                  />
+                )}
+                {TONES.map((t) => (
                    <TouchableOpacity
                      key={t}
+                     activeOpacity={1}
                      onPress={() => setTone(t)}
-                     style={[styles.outlineBtn, { flex: 1, marginHorizontal: 4, borderColor: tone === t ? colors.accent : colors.border, backgroundColor: tone === t ? 'rgba(0,0,0,0.05)' : 'transparent', padding: 10 }]}
+                     style={{ flex: 1, justifyContent: 'center', alignItems: 'center', zIndex: 1 }}
                    >
-                     <Text style={{ color: tone === t ? colors.accent : colors.textSecondary, fontSize: 12, fontWeight: '600' }}>{t}</Text>
+                     <Text style={{ color: tone === t ? colors.textPrimary : colors.textSecondary, fontSize: 12, fontWeight: '600' }}>{t}</Text>
                    </TouchableOpacity>
                 ))}
               </View>
@@ -282,25 +336,46 @@ export default function ComposeScreen() {
               
               <Text style={[styles.label, { color: colors.textSecondary }]}>SELECT THEME</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.themeScroll}>
-                {THEMES.map(theme => {
-                  const isActive = selectedTheme === theme.id;
-                  return (
-                    <TouchableOpacity
-                      key={theme.id}
-                      style={[
-                        styles.themeCard,
-                        { 
-                          borderColor: isActive ? colors.neonCyan : colors.border,
-                          backgroundColor: isActive ? 'rgba(0, 240, 255, 0.15)' : colors.background 
-                        }
-                      ]}
-                      onPress={() => setSelectedTheme(theme.id)}
-                    >
-                      {isActive && <Check color={colors.neonCyan} size={14} style={{ marginRight: 6 }} />}
-                      <Text style={[styles.themeText, { color: isActive ? colors.neonCyan : colors.textSecondary }]}>{theme.name}</Text>
-                    </TouchableOpacity>
-                  );
-                })}
+                <View style={{ flexDirection: 'row', position: 'relative' }}>
+                  <Animated.View 
+                    style={[
+                      {
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        bottom: 0,
+                        borderRadius: 12,
+                        backgroundColor: 'rgba(0, 240, 255, 0.15)',
+                        borderColor: colors.neonCyan,
+                        borderWidth: 1,
+                      },
+                      themeIndicatorStyle
+                    ]}
+                  />
+                  {THEMES.map(theme => {
+                    const isActive = selectedTheme === theme.id;
+                    return (
+                      <TouchableOpacity
+                        key={theme.id}
+                        style={[
+                          styles.themeCard,
+                          { 
+                            borderColor: 'transparent',
+                            backgroundColor: 'transparent' 
+                          }
+                        ]}
+                        onPress={() => setSelectedTheme(theme.id)}
+                        onLayout={(e) => {
+                          const layout = e.nativeEvent.layout;
+                          setThemeLayouts(prev => ({...prev, [theme.id]: { x: layout.x, width: layout.width }}));
+                        }}
+                      >
+                        {isActive && <Check color={colors.neonCyan} size={14} style={{ marginRight: 6 }} />}
+                        <Text style={[styles.themeText, { color: isActive ? colors.neonCyan : colors.textSecondary }]}>{theme.name}</Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
               </ScrollView>
 
               <Text style={[styles.label, { color: colors.textSecondary }]}>HTML BODY</Text>
