@@ -9,6 +9,7 @@ import { useAppTheme, typography, spacing, shadows } from '../../utils/theme';
 import BentoCard from '../../components/BentoCard';
 import { PenLine, Send, MessageSquare, Clock, Zap, Target, Users } from 'lucide-react-native';
 import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import Svg, { Circle } from 'react-native-svg';
 
@@ -35,7 +36,8 @@ export default function HomeScreen() {
            sentDate.getMonth() === todayDate.getMonth() &&
            sentDate.getFullYear() === todayDate.getFullYear();
   }).length || 0;
-  const dailyGoal = 5;
+  
+  const [dailyGoal, setDailyGoal] = React.useState(5);
   const progress = Math.min(pitchesToday / dailyGoal, 1);
   const radius = 30;
   const strokeWidth = 8;
@@ -64,6 +66,15 @@ export default function HomeScreen() {
               }
             }
             setOverdueReminders(overdue);
+          }
+        } catch (e) {
+          console.error(e);
+        }
+
+        try {
+          const goal = await AsyncStorage.getItem('dailyGoal');
+          if (goal && !isNaN(Number(goal))) {
+            setDailyGoal(Number(goal));
           }
         } catch (e) {
           console.error(e);

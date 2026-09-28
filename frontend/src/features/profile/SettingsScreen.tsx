@@ -1,13 +1,13 @@
 import React, { useContext, useState, useRef, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Animated as RNAnimated, PanResponder } from 'react-native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import Animated, { SlideInRight, SlideOutLeft, Easing, ZoomIn } from 'react-native-reanimated';
+import Animated, { SlideInRight, SlideOutLeft, Easing, ZoomIn, FadeInDown, FadeInUp, FadeOutDown, FadeOutUp } from 'react-native-reanimated';
 import { ProfileContext } from '../../store/ProfileContext';
 import api from '../../services/api';
 import { useAppTheme, typography, spacing } from '../../utils/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BentoCard from '../../components/BentoCard';
-import { Sun, Moon, Laptop } from 'lucide-react-native';
+import { Sun, Moon, Laptop, ChevronUp, ChevronDown } from 'lucide-react-native';
 
 export default function SettingsScreen() {
   const { deleteProfile, activeProfileId } = useContext(ProfileContext);
@@ -27,6 +27,8 @@ export default function SettingsScreen() {
   });
 
   const [defaultAiTone, setDefaultAiTone] = useState('Professional');
+  const [dailyGoal, setDailyGoal] = useState('5');
+  const [goalAnimDir, setGoalAnimDir] = useState(1);
   const AI_TONES = ['Professional', 'Friendly', 'Direct'];
   const [trackWidth, setTrackWidth] = useState(0);
   const slideAnim = useRef(new RNAnimated.Value(0)).current;
@@ -90,12 +92,35 @@ export default function SettingsScreen() {
       try {
         const tone = await AsyncStorage.getItem('defaultAiTone');
         if (tone) setDefaultAiTone(tone);
+        const goal = await AsyncStorage.getItem('dailyGoal');
+        if (goal) setDailyGoal(goal);
       } catch (e) {
         console.error("Failed to load settings", e);
       }
     };
     loadSettings();
   }, []);
+
+  const handleDailyGoalChange = async (val: string) => {
+    setDailyGoal(val);
+    try {
+      await AsyncStorage.setItem('dailyGoal', val);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const incrementGoal = () => {
+    setGoalAnimDir(1);
+    const num = parseInt(dailyGoal) || 5;
+    if (num < 999) handleDailyGoalChange(String(num + 1));
+  };
+
+  const decrementGoal = () => {
+    setGoalAnimDir(-1);
+    const num = parseInt(dailyGoal) || 5;
+    if (num > 1) handleDailyGoalChange(String(num - 1));
+  };
 
   const handleToneChange = async (tone: string) => {
     setDefaultAiTone(tone);
@@ -231,6 +256,64 @@ export default function SettingsScreen() {
                   </TouchableOpacity>
                 );
               })}
+            </View>
+          </BentoCard>
+
+          <BentoCard style={styles.card} padding={24}>
+            <Text style={[typography.h2, { color: colors.textPrimary, marginBottom: spacing.sm }]}>Outreach Goals</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Text style={[typography.body2, { color: colors.textSecondary }]}>Daily Pitch Limit</Text>
+              
+              <View style={{ 
+                flexDirection: 'column', 
+                alignItems: 'center', 
+                backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', 
+                borderRadius: 20, 
+                paddingVertical: 8, 
+                paddingHorizontal: 16,
+                borderWidth: 1,
+                borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: isDark ? 0.3 : 0.05,
+                shadowRadius: 4,
+              }}>
+                <TouchableOpacity onPress={incrementGoal} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                  <ChevronUp size={24} color={colors.textSecondary} />
+                </TouchableOpacity>
+                
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 8 }}>
+                  {/* Left Mechanical Grip */}
+                  <View style={{ gap: 4, paddingRight: 12 }}>
+                    {[...Array(5)].map((_, i) => (
+                      <View key={`lg-${i}`} style={{ height: 2, width: 10, backgroundColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)', borderRadius: 1 }} />
+                    ))}
+                  </View>
+
+                  <View style={{ height: 36, width: 44, overflow: 'hidden', justifyContent: 'center', alignItems: 'center' }}>
+                    <Animated.Text
+                      key={dailyGoal}
+                      entering={goalAnimDir === 1 ? FadeInDown.duration(300).easing(Easing.out(Easing.cubic)) : FadeInUp.duration(300).easing(Easing.out(Easing.cubic))}
+                      exiting={goalAnimDir === 1 ? FadeOutUp.duration(300).easing(Easing.out(Easing.cubic)) : FadeOutDown.duration(300).easing(Easing.out(Easing.cubic))}
+                      style={[typography.h2, { color: colors.textPrimary, position: 'absolute' }]}
+                    >
+                      {dailyGoal}
+                    </Animated.Text>
+                  </View>
+                  
+                  {/* Right Mechanical Grip */}
+                  <View style={{ gap: 4, paddingLeft: 12 }}>
+                    {[...Array(5)].map((_, i) => (
+                      <View key={`rg-${i}`} style={{ height: 2, width: 10, backgroundColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)', borderRadius: 1 }} />
+                    ))}
+                  </View>
+                </View>
+                
+                <TouchableOpacity onPress={decrementGoal} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                  <ChevronDown size={24} color={colors.textSecondary} />
+                </TouchableOpacity>
+              </View>
+
             </View>
           </BentoCard>
 
