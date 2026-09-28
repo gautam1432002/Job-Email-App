@@ -83,13 +83,36 @@ export default function ComposeScreen() {
   const themeIndicatorPos = useSharedValue(0);
   const themeIndicatorWidth = useSharedValue(0);
 
+  const THEME_COLORS: Record<string, string> = {
+    none: '#06B6D4',
+    theme1: '#8B5CF6',
+    theme2: '#1E293B',
+    theme3: '#10B981',
+    theme4: '#F59E0B',
+    theme5: '#3B82F6',
+    theme6: '#94A3B8'
+  };
+  const themeGlowColor = useSharedValue(THEME_COLORS[selectedTheme]);
+
   React.useEffect(() => {
+    themeGlowColor.value = withTiming(THEME_COLORS[selectedTheme] || '#06B6D4', { duration: 250 });
     const layout = themeLayouts[selectedTheme];
     if (layout) {
       themeIndicatorPos.value = withTiming(layout.x, { duration: 250, easing: Easing.out(Easing.cubic) });
       themeIndicatorWidth.value = withTiming(layout.width, { duration: 250, easing: Easing.out(Easing.cubic) });
     }
   }, [selectedTheme, themeLayouts]);
+
+  const themeIndicatorStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: themeIndicatorPos.value }],
+    width: themeIndicatorWidth.value,
+    shadowColor: themeGlowColor.value,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.6,
+    shadowRadius: 12,
+    elevation: 8,
+    borderColor: themeGlowColor.value,
+  }));
   // Pulse animation for AI Loader
   const pulseScale = useSharedValue(1);
   const pulseOpacity = useSharedValue(0.5);
@@ -125,8 +148,7 @@ export default function ComposeScreen() {
     },
     onSuccess: (data) => {
       setGeneratedDraft(data);
-      const cleanName = companyName.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-      setReceiverEmail(`hr@${cleanName || 'company'}.com`);
+      setReceiverEmail('');
     },
     onError: () => {
       Alert.alert("Generation Failed", "Could not connect to Gemini API. Ensure keys are set in Profile.");
@@ -329,10 +351,10 @@ export default function ComposeScreen() {
             
             <BentoCard style={{ padding: spacing.lg }}>
               <Text style={[styles.label, { color: colors.textSecondary }]}>TO EMAIL *</Text>
-              <TextInput style={inputStyle} keyboardType="email-address" autoCapitalize="none" value={receiverEmail} onChangeText={setReceiverEmail} />
+              <TextInput style={[styles.glassInput, { color: colors.textPrimary, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]} keyboardType="email-address" autoCapitalize="none" value={receiverEmail} onChangeText={setReceiverEmail} placeholder="Enter destination email" placeholderTextColor={colors.textSecondary} />
               
               <Text style={[styles.label, { color: colors.textSecondary }]}>SUBJECT</Text>
-              <TextInput style={inputStyle} value={generatedDraft.subject} onChangeText={(t) => setGeneratedDraft({...generatedDraft, subject: t})} />
+              <TextInput style={[styles.glassInput, { color: colors.textPrimary, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]} value={generatedDraft.subject} onChangeText={(t) => setGeneratedDraft({...generatedDraft, subject: t})} />
               
               <Text style={[styles.label, { color: colors.textSecondary }]}>SELECT THEME</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.themeScroll}>
@@ -345,8 +367,7 @@ export default function ComposeScreen() {
                         left: 0,
                         bottom: 0,
                         borderRadius: 12,
-                        backgroundColor: 'rgba(0, 240, 255, 0.15)',
-                        borderColor: colors.neonCyan,
+                        backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
                         borderWidth: 1,
                       },
                       themeIndicatorStyle
@@ -379,21 +400,31 @@ export default function ComposeScreen() {
               </ScrollView>
 
               <Text style={[styles.label, { color: colors.textSecondary }]}>HTML BODY</Text>
-              <TextInput style={[inputStyle, { height: 250, paddingTop: 16 }]} multiline value={generatedDraft.full_body} onChangeText={(t) => setGeneratedDraft({...generatedDraft, full_body: t})} />
+              <TextInput style={[styles.glassInput, { height: 250, paddingTop: 16, color: colors.textPrimary, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]} multiline value={generatedDraft.full_body} onChangeText={(t) => setGeneratedDraft({...generatedDraft, full_body: t})} />
               
               <TouchableOpacity 
-                style={[styles.outlineBtn, { borderColor: colors.border }]} 
+                style={{ paddingVertical: 12, alignItems: 'center', marginTop: 8, marginBottom: 8, flexDirection: 'row', justifyContent: 'center' }} 
                 onPress={() => previewMutation.mutate()} 
                 disabled={previewMutation.isPending}
               >
-                <Text style={[typography.button, { color: colors.textPrimary }]}>{previewMutation.isPending ? "LOADING PREVIEW..." : "PREVIEW HTML THEME"}</Text>
+                <Text style={[typography.button, { color: colors.accent }]}>{previewMutation.isPending ? "LOADING PREVIEW..." : "View Live Preview"}</Text>
               </TouchableOpacity>
               
               <View style={styles.actionRow}>
-                <TouchableOpacity style={[styles.outlineBtn, { flex: 1, marginRight: 8, borderColor: '#ef4444' }]} onPress={() => setGeneratedDraft(null)}>
+                <TouchableOpacity style={[styles.outlineBtn, { flex: 1, marginRight: 8, borderColor: isDark ? 'rgba(239, 68, 68, 0.4)' : 'rgba(239, 68, 68, 0.2)', backgroundColor: 'transparent' }]} onPress={() => setGeneratedDraft(null)}>
                   <Text style={[typography.button, { color: '#ef4444' }]}>DISCARD</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.button, { backgroundColor: colors.accent, flex: 2, marginLeft: 8, paddingVertical: 14 }]} onPress={() => sendMutation.mutate()} disabled={sendMutation.isPending}>
+                <TouchableOpacity 
+                  style={[styles.button, { backgroundColor: colors.accent, flex: 2, marginLeft: 8, paddingVertical: 14 }]} 
+                  onPress={() => {
+                    if (!receiverEmail.trim()) {
+                      Alert.alert("Missing Email", "Please provide a destination email address before dispatching.");
+                      return;
+                    }
+                    sendMutation.mutate();
+                  }} 
+                  disabled={sendMutation.isPending}
+                >
                   <Text style={[typography.button, { color: '#fff' }]}>{sendMutation.isPending ? "SENDING..." : "DISPATCH EMAIL"}</Text>
                 </TouchableOpacity>
               </View>
@@ -429,6 +460,7 @@ const styles = StyleSheet.create({
   resumeBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16 },
   label: { fontSize: 11, fontWeight: '700', marginBottom: 4, marginTop: 12, letterSpacing: 0.5 },
   input: { borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, fontSize: 16, borderWidth: 1, borderColor: 'transparent' },
+  glassInput: { borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, fontSize: 16, borderWidth: 0 },
   switchRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 24 },
   button: { flexDirection: 'row', padding: 16, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
   outlineBtn: { padding: 14, borderRadius: 16, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
