@@ -267,51 +267,63 @@ export default function SettingsScreen() {
               <View style={{ 
                 flexDirection: 'column', 
                 alignItems: 'center', 
-                backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', 
-                borderRadius: 20, 
-                paddingVertical: 8, 
-                paddingHorizontal: 16,
+                backgroundColor: isDark ? '#2C2C2E' : '#E5E5EA', 
+                borderRadius: 100, 
+                paddingVertical: 6, 
+                paddingHorizontal: 6,
                 borderWidth: 1,
-                borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: isDark ? 0.3 : 0.05,
-                shadowRadius: 4,
+                borderColor: isDark ? '#3A3A3C' : '#D1D1D6',
+                shadowColor: isDark ? '#000' : '#FFF',
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.8,
+                shadowRadius: 1,
+                elevation: 4,
               }}>
-                <TouchableOpacity onPress={incrementGoal} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                  <ChevronUp size={24} color={colors.textSecondary} />
-                </TouchableOpacity>
-                
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 8 }}>
-                  {/* Left Mechanical Grip */}
-                  <View style={{ gap: 4, paddingRight: 12 }}>
-                    {[...Array(5)].map((_, i) => (
-                      <View key={`lg-${i}`} style={{ height: 2, width: 10, backgroundColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)', borderRadius: 1 }} />
-                    ))}
-                  </View>
+                <View style={{
+                  flexDirection: 'column', 
+                  alignItems: 'center', 
+                  backgroundColor: isDark ? '#000000' : '#FFFFFF', 
+                  borderRadius: 100, 
+                  paddingVertical: 10, 
+                  paddingHorizontal: 10,
+                  borderWidth: 1,
+                  borderColor: isDark ? '#1C1C1E' : '#E5E5EA',
+                }}>
+                  <TouchableOpacity onPress={incrementGoal} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                    <ChevronUp size={24} color={isDark ? '#636366' : '#8E8E93'} />
+                  </TouchableOpacity>
+                  
+                  <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 8 }}>
+                    {/* Left Mechanical Grip */}
+                    <View style={{ gap: 4, paddingRight: 8 }}>
+                      {[...Array(5)].map((_, i) => (
+                        <View key={`lg-${i}`} style={{ height: 2, width: 8, backgroundColor: isDark ? '#3A3A3C' : '#C7C7CC', borderRadius: 1 }} />
+                      ))}
+                    </View>
 
-                  <View style={{ height: 36, width: 44, overflow: 'hidden', justifyContent: 'center', alignItems: 'center' }}>
-                    <Animated.Text
-                      key={dailyGoal}
-                      entering={goalAnimDir === 1 ? FadeInDown.duration(300).easing(Easing.out(Easing.cubic)) : FadeInUp.duration(300).easing(Easing.out(Easing.cubic))}
-                      exiting={goalAnimDir === 1 ? FadeOutUp.duration(300).easing(Easing.out(Easing.cubic)) : FadeOutDown.duration(300).easing(Easing.out(Easing.cubic))}
-                      style={[typography.h2, { color: colors.textPrimary, position: 'absolute' }]}
-                    >
-                      {dailyGoal}
-                    </Animated.Text>
+                    <View style={{ height: 36, width: 44, overflow: 'hidden', justifyContent: 'center', alignItems: 'center' }}>
+                      <Animated.Text
+                        key={dailyGoal}
+                        entering={goalAnimDir === 1 ? FadeInDown.duration(300).easing(Easing.out(Easing.cubic)) : FadeInUp.duration(300).easing(Easing.out(Easing.cubic))}
+                        exiting={goalAnimDir === 1 ? FadeOutUp.duration(300).easing(Easing.out(Easing.cubic)) : FadeOutDown.duration(300).easing(Easing.out(Easing.cubic))}
+                        style={[typography.h2, { color: isDark ? '#FFFFFF' : '#000000', position: 'absolute' }]}
+                      >
+                        {dailyGoal}
+                      </Animated.Text>
+                    </View>
+                    
+                    {/* Right Mechanical Grip */}
+                    <View style={{ gap: 4, paddingLeft: 8 }}>
+                      {[...Array(5)].map((_, i) => (
+                        <View key={`rg-${i}`} style={{ height: 2, width: 8, backgroundColor: isDark ? '#3A3A3C' : '#C7C7CC', borderRadius: 1 }} />
+                      ))}
+                    </View>
                   </View>
                   
-                  {/* Right Mechanical Grip */}
-                  <View style={{ gap: 4, paddingLeft: 12 }}>
-                    {[...Array(5)].map((_, i) => (
-                      <View key={`rg-${i}`} style={{ height: 2, width: 10, backgroundColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)', borderRadius: 1 }} />
-                    ))}
-                  </View>
+                  <TouchableOpacity onPress={decrementGoal} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                    <ChevronDown size={24} color={isDark ? '#636366' : '#8E8E93'} />
+                  </TouchableOpacity>
                 </View>
-                
-                <TouchableOpacity onPress={decrementGoal} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                  <ChevronDown size={24} color={colors.textSecondary} />
-                </TouchableOpacity>
               </View>
 
             </View>
