@@ -174,7 +174,8 @@ class GeneratePitchView(views.APIView):
                 about_company=serializer.validated_data.get('about_company', ''),
                 profile=profile,
                 api_key=api_key,
-                use_resume=serializer.validated_data.get('use_resume', True)
+                use_resume=serializer.validated_data.get('use_resume', True),
+                length=serializer.validated_data.get('length', 'Concise')
             )
             return Response(data)
         except Exception as e:

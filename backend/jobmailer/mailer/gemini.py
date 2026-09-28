@@ -88,7 +88,8 @@ def draft_email(
     about_company: str,
     profile,
     api_key: str,
-    use_resume: bool = True
+    use_resume: bool = True,
+    length: str = 'Concise'
 ) -> dict:
     """
     Main AI email drafting function.
@@ -134,11 +135,11 @@ def draft_email(
         # ── Build the mega-prompt ────────────────────────────────────────────
         if has_jd:
             prompt = _build_jd_prompt(
-                company_name, job_description, about_company, profile, resume_text
+                company_name, job_description, about_company, profile, resume_text, length
             )
         else:
             prompt = _build_company_only_prompt(
-                company_name, about_company, profile, resume_text
+                company_name, about_company, profile, resume_text, length
             )
 
         response = model.generate_content(prompt)
@@ -178,7 +179,7 @@ def draft_email(
 
 # ── PROMPT BUILDERS ──────────────────────────────────────────────────────────
 
-def _build_jd_prompt(company_name, job_description, about_company, profile, resume_text="") -> str:
+def _build_jd_prompt(company_name, job_description, about_company, profile, resume_text="", length="Concise") -> str:
     """
     Full JD-aware prompt. This is the powerful path.
     Gemini reads the JD, matches it to the profile, picks an angle,
@@ -193,6 +194,8 @@ def _build_jd_prompt(company_name, job_description, about_company, profile, resu
 
     return f"""You are an expert career coach and professional email writer.
 Your job is to write a complete, personalized job application email for a software developer.
+
+Draft the email strictly maintaining a {length} length. Do not count words, just adjust the depth and verbosity to match the requested size ({length}), while maintaining a {profile.default_tone} tone.
 
 You must follow a strict 4-step internal process before writing anything.
 The output must be a single valid JSON object — nothing else.
@@ -273,7 +276,7 @@ Return ONLY this JSON object with no extra text:
 }}"""
 
 
-def _build_company_only_prompt(company_name, about_company, profile, resume_text="") -> str:
+def _build_company_only_prompt(company_name, about_company, profile, resume_text="", length="Concise") -> str:
     """
     Fallback prompt when no JD is provided — uses only company name.
     Still produces a full email, just less targeted than the JD version.
@@ -288,6 +291,8 @@ def _build_company_only_prompt(company_name, about_company, profile, resume_text
     return f"""You are an expert career coach and professional email writer.
 Write a complete, personalized job application email for a software developer
 applying to {company_name}.
+
+Draft the email strictly maintaining a {length} length. Do not count words, just adjust the depth and verbosity to match the requested size ({length}), while maintaining a {profile.default_tone} tone.
 
 No JD was provided. Use your knowledge of {company_name}'s industry, tech stack,
 and engineering culture to write a relevant email.
@@ -307,7 +312,7 @@ About me:        {about_str}{resume_context}
 - Match the developer's skills to what {company_name} likely needs
 - Every sentence must be specific — no generic filler
 - Write like a confident, articulate young developer — not a formal HR robot
-- Total email length: professional but concise (not too short, not too long)
+- Write like a confident, articulate young developer — not a formal HR robot
 
 === OUTPUT FORMAT ===
 Return ONLY this JSON object:

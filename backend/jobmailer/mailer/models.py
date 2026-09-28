@@ -39,6 +39,7 @@ class Profile(models.Model):
     # Boolean status flags — safe to store, no secret value
     gmail_configured   = models.BooleanField(default=False)
     gemini_configured  = models.BooleanField(default=False)
+    default_tone       = models.CharField(max_length=50, default='Professional')
 
     created_at   = models.DateTimeField(auto_now_add=True)
     updated_at   = models.DateTimeField(auto_now=True)

@@ -27,26 +27,13 @@ export default function ComposeScreen() {
   const [selectedTheme, setSelectedTheme] = useState('none');
   const [previewModalVisible, setPreviewModalVisible] = useState(false);
   const [previewHtml, setPreviewHtml] = useState('');
-  const [tone, setTone] = useState(route.params?.initialTone || 'Professional');
+  const [length, setLength] = useState('Concise');
 
   React.useEffect(() => {
     if (route.params?.initialContext) {
       setAboutCompany(route.params.initialContext);
     }
-    if (route.params?.initialTone) {
-      setTone(route.params.initialTone);
-    } else {
-      const loadDefaultTone = async () => {
-        try {
-          const defaultTone = await AsyncStorage.getItem('defaultAiTone');
-          if (defaultTone) setTone(defaultTone);
-        } catch (e) {
-          console.log('Failed to load default tone', e);
-        }
-      };
-      loadDefaultTone();
-    }
-  }, [route.params?.initialContext, route.params?.initialTone]);
+  }, [route.params?.initialContext]);
 
   const [generatedDraft, setGeneratedDraft] = useState<{subject: string; full_body: string} | null>(null);
   const [sentSuccessData, setSentSuccessData] = useState<{id: number, companyName: string} | null>(null);
@@ -61,21 +48,21 @@ export default function ComposeScreen() {
     { id: 'theme5', name: 'Newsletter', icon: Mail, color: '#3B82F6' },
     { id: 'theme6', name: 'Minimal', icon: Maximize, color: '#94A3B8' },
   ];
-  // AI Tone slider
-  const TONES = ['Professional', 'Friendly', 'Direct'];
-  const [toneTrackWidth, setToneTrackWidth] = useState(0);
-  const toneIndex = Math.max(0, TONES.indexOf(tone));
-  const toneIndicatorPos = useSharedValue(toneIndex);
+  // AI Length slider
+  const LENGTHS = ['Short', 'Concise', 'Comprehensive'];
+  const [lengthTrackWidth, setLengthTrackWidth] = useState(0);
+  const lengthIndex = Math.max(0, LENGTHS.indexOf(length));
+  const lengthIndicatorPos = useSharedValue(lengthIndex);
   
   React.useEffect(() => {
-    toneIndicatorPos.value = withTiming(toneIndex, { duration: 250, easing: Easing.out(Easing.cubic) });
-  }, [toneIndex]);
+    lengthIndicatorPos.value = withTiming(lengthIndex, { duration: 250, easing: Easing.out(Easing.cubic) });
+  }, [lengthIndex]);
 
-  const toneIndicatorStyle = useAnimatedStyle(() => {
-    const width = toneTrackWidth > 0 ? (toneTrackWidth - 8) / 3 : 0; 
+  const lengthIndicatorStyle = useAnimatedStyle(() => {
+    const width = lengthTrackWidth > 0 ? (lengthTrackWidth - 8) / 3 : 0; 
     return {
       width,
-      transform: [{ translateX: toneIndicatorPos.value * width }]
+      transform: [{ translateX: lengthIndicatorPos.value * width }]
     };
   });
 
@@ -109,7 +96,7 @@ export default function ComposeScreen() {
         job_description: jobDescription,
         about_company: aboutCompany,
         use_resume: useResume,
-        tone: tone,
+        length: length,
       });
       return res.data;
     },
@@ -275,12 +262,12 @@ export default function ComposeScreen() {
               <Text style={[styles.label, { color: colors.textSecondary }]}>JOB DESCRIPTION / ROLE DETAILS</Text>
               <TextInput style={[inputStyle, { height: 80, paddingTop: 16 }]} multiline placeholderTextColor={colors.textSecondary} placeholder="Looking for a backend engineer..." value={jobDescription} onChangeText={setJobDescription} />
               
-              <Text style={[styles.label, { color: colors.textSecondary }]}>TONE</Text>
+              <Text style={[styles.label, { color: colors.textSecondary }]}>EMAIL LENGTH</Text>
               <View 
                 style={{ height: 48, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)', borderRadius: 24, flexDirection: 'row', padding: 4, position: 'relative', marginBottom: 16 }}
-                onLayout={(e) => setToneTrackWidth(e.nativeEvent.layout.width)}
+                onLayout={(e) => setLengthTrackWidth(e.nativeEvent.layout.width)}
               >
-                {toneTrackWidth > 0 && (
+                {lengthTrackWidth > 0 && (
                   <Animated.View 
                     style={[
                       {
@@ -296,18 +283,18 @@ export default function ComposeScreen() {
                         shadowRadius: 8,
                         elevation: 4,
                       },
-                      toneIndicatorStyle
+                      lengthIndicatorStyle
                     ]}
                   />
                 )}
-                {TONES.map((t) => (
+                {LENGTHS.map((l) => (
                    <TouchableOpacity
-                     key={t}
+                     key={l}
                      activeOpacity={1}
-                     onPress={() => setTone(t)}
+                     onPress={() => setLength(l)}
                      style={{ flex: 1, justifyContent: 'center', alignItems: 'center', zIndex: 1 }}
                    >
-                     <Text style={{ color: tone === t ? colors.textPrimary : colors.textSecondary, fontSize: 12, fontWeight: '600' }}>{t}</Text>
+                     <Text style={{ color: length === l ? colors.textPrimary : colors.textSecondary, fontSize: 12, fontWeight: '600' }}>{l}</Text>
                    </TouchableOpacity>
                 ))}
               </View>
