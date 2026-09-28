@@ -5,7 +5,7 @@ import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { WebView } from 'react-native-webview';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import Animated, { FadeInRight, FadeOut, Easing, withRepeat, withTiming, useSharedValue, useAnimatedStyle, runOnJS } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInRight, FadeOut, Easing, withRepeat, withTiming, useSharedValue, useAnimatedStyle, runOnJS } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as SecureStore from 'expo-secure-store';
@@ -14,6 +14,7 @@ import api from '../../services/api';
 import { useAppTheme, typography, spacing, borderRadius } from '../../utils/theme';
 import BentoCard from '../../components/BentoCard';
 import { Sparkles, Paperclip, Check, CheckCircle, FileText, Moon, PenTool, Layout, Square, Mail, Maximize, Wand2 } from 'lucide-react-native';
+import { BlurView } from 'expo-blur';
 
 export default function ComposeScreen() {
   const route = useRoute<RouteProp<Record<string, { initialContext?: string, initialTone?: string }>, string>>();
@@ -379,20 +380,44 @@ export default function ComposeScreen() {
                   const isActive = selectedTheme === theme.id;
                   const Icon = theme.icon;
                   return (
-                    <TouchableOpacity
-                      key={theme.id}
-                      style={[
-                        styles.themeBentoCard,
-                        { 
-                          backgroundColor: isActive ? theme.color : isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
-                          borderColor: isActive ? theme.color : 'transparent',
-                        }
-                      ]}
-                      onPress={() => setSelectedTheme(theme.id)}
-                    >
-                      <Icon color={isActive ? '#FFFFFF' : colors.textSecondary} size={20} style={{ marginBottom: 8 }} />
-                      <Text style={[styles.themeText, { color: isActive ? '#FFFFFF' : colors.textSecondary, textAlign: 'center' }]}>{theme.name}</Text>
-                    </TouchableOpacity>
+                    <View key={theme.id} style={{ width: '31%', position: 'relative', zIndex: isActive ? 10 : 1 }}>
+                      {isActive && (
+                        <Animated.View 
+                          entering={FadeIn.duration(200)}
+                          exiting={FadeOut.duration(200)}
+                          style={{
+                            position: 'absolute',
+                            top: -6, bottom: -6, left: -6, right: -6,
+                            borderRadius: 20,
+                            overflow: 'hidden',
+                            borderWidth: 1,
+                            borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)',
+                          }} 
+                        >
+                          <BlurView 
+                            intensity={isDark ? 30 : 50} 
+                            tint={isDark ? 'dark' : 'light'} 
+                            style={StyleSheet.absoluteFill} 
+                          />
+                        </Animated.View>
+                      )}
+                      
+                      <TouchableOpacity
+                        style={[
+                          styles.themeBentoCard,
+                          { 
+                            width: '100%',
+                            backgroundColor: isDark ? theme.color + '20' : theme.color + '15',
+                            borderColor: isActive ? theme.color : 'transparent',
+                            borderWidth: isActive ? 1 : 0,
+                          }
+                        ]}
+                        onPress={() => setSelectedTheme(theme.id)}
+                      >
+                        <Icon color={theme.color} size={22} style={{ marginBottom: 8 }} />
+                        <Text style={[styles.themeText, { color: theme.color, textAlign: 'center', fontWeight: '600' }]}>{theme.name}</Text>
+                      </TouchableOpacity>
+                    </View>
                   );
                 })}
               </View>
