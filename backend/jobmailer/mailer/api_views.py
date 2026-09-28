@@ -1,4 +1,5 @@
 import uuid
+import threading
 from rest_framework import generics, status, views
 from rest_framework.response import Response
 from rest_framework.authentication import BaseAuthentication
@@ -168,18 +169,13 @@ class GeneratePitchView(views.APIView):
             if not api_key:
                 return Response({"error": "Failed to decrypt Gemini API key"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-            length = request.data.get('length', 'Concise')
-            user_tone = getattr(profile, 'default_tone', 'Professional')
-
             data = draft_email(
                 company_name=serializer.validated_data['company_name'],
                 job_description=serializer.validated_data.get('job_description', ''),
                 about_company=serializer.validated_data.get('about_company', ''),
                 profile=profile,
                 api_key=api_key,
-                use_resume=serializer.validated_data.get('use_resume', True),
-                length=length,
-                tone=user_tone
+                use_resume=serializer.validated_data.get('use_resume', True)
             )
             return Response(data)
         except Exception as e:
@@ -216,17 +212,7 @@ class SendEmailView(views.APIView):
                 context = get_template_context(profile, serializer, html_body)
                 html_body = render_to_string(theme['template'], context)
 
-            success, msg = send_job_email(
-                receiver_email=serializer.validated_data['receiver_email'],
-                subject=serializer.validated_data['subject'],
-                html_body=html_body,
-                sender_gmail=sender_gmail,
-
-                app_password=app_password,
-                resume_path=resume_path
-            )
-            
-            # Log history
+            # Log history as 'sending' initially
             log = EmailLog.objects.create(
                 profile=profile,
                 receiver_email=serializer.validated_data['receiver_email'],
@@ -234,14 +220,28 @@ class SendEmailView(views.APIView):
                 theme_used=serializer.validated_data['theme_used'],
                 subject=serializer.validated_data['subject'],
                 ai_used=serializer.validated_data['ai_used'],
-                status='sent' if success else 'failed',
-                error_message='' if success else msg
+                status='sending',
+                error_message=''
             )
             
-            if success:
-                return Response({"status": "Email sent successfully", "message": msg, "id": log.id})
-            else:
-                return Response({"error": msg}, status=status.HTTP_502_BAD_GATEWAY)
+            def bg_send_email():
+                success, msg = send_job_email(
+                    receiver_email=serializer.validated_data['receiver_email'],
+                    subject=serializer.validated_data['subject'],
+                    html_body=html_body,
+                    sender_gmail=sender_gmail,
+                    app_password=app_password,
+                    resume_path=resume_path
+                )
+                log.status = 'sent' if success else 'failed'
+                log.error_message = '' if success else msg
+                log.save()
+
+            # Execute SMTP in background thread to unblock frontend
+            thread = threading.Thread(target=bg_send_email)
+            thread.start()
+            
+            return Response({"status": "Email dispatch initiated", "message": "Sending in background", "id": log.id})
             
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

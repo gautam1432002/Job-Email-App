@@ -24,7 +24,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'profile_name', 'full_name', 'phone', 'role', 'skills', 'experience_years',
             'location', 'college', 'grad_year', 'linkedin', 'github', 'portfolio',
-            'about_me', 'resume', 'gmail_configured', 'gemini_configured', 'default_tone',
+            'about_me', 'resume', 'gmail_configured', 'gemini_configured',
             'gmail', 'app_password', 'gemini_key'
         ]
         read_only_fields = ['id', 'gmail_configured', 'gemini_configured']
@@ -46,7 +46,6 @@ class GeneratePitchSerializer(serializers.Serializer):
     job_description = serializers.CharField(required=False, allow_blank=True)
     about_company = serializers.CharField(required=False, allow_blank=True)
     use_resume = serializers.BooleanField(default=True)
-    length = serializers.CharField(required=False, allow_blank=True, default='Concise')
 
 class SendEmailSerializer(serializers.Serializer):
     receiver_email = serializers.EmailField()

@@ -88,9 +88,7 @@ def draft_email(
     about_company: str,
     profile,
     api_key: str,
-    use_resume: bool = True,
-    length: str = 'Concise',
-    tone: str = 'Professional'
+    use_resume: bool = True
 ) -> dict:
     """
     Main AI email drafting function.
@@ -136,11 +134,11 @@ def draft_email(
         # ── Build the mega-prompt ────────────────────────────────────────────
         if has_jd:
             prompt = _build_jd_prompt(
-                company_name, job_description, about_company, profile, resume_text, length, tone
+                company_name, job_description, about_company, profile, resume_text
             )
         else:
             prompt = _build_company_only_prompt(
-                company_name, about_company, profile, resume_text, length, tone
+                company_name, about_company, profile, resume_text
             )
 
         response = model.generate_content(prompt)
@@ -180,7 +178,7 @@ def draft_email(
 
 # ── PROMPT BUILDERS ──────────────────────────────────────────────────────────
 
-def _build_jd_prompt(company_name, job_description, about_company, profile, resume_text="", length="Concise", tone="Professional") -> str:
+def _build_jd_prompt(company_name, job_description, about_company, profile, resume_text="") -> str:
     """
     Full JD-aware prompt. This is the powerful path.
     Gemini reads the JD, matches it to the profile, picks an angle,
@@ -192,17 +190,9 @@ def _build_jd_prompt(company_name, job_description, about_company, profile, resu
     )
     company_context = f"\nAbout the company (user's note): {about_company}" if about_company else ""
     resume_context = f"\n\n=== RESUME DETAILS (USE THIS FOR CONTEXT) ===\n{resume_text}" if resume_text else ""
-    
-    length_rules = {
-        'Short': 'Strictly limit to 2 to 3 brief sentences. Get straight to the point. No fluff.',
-        'Concise': 'Limit to 1 to 2 short paragraphs. Be punchy and highly readable.',
-        'Comprehensive': 'Write a detailed, 3-paragraph email. Thoroughly connect the context to the role.'
-    }
-    length_instruction = length_rules.get(length, length_rules['Concise'])
 
-    return f"""You are an expert executive assistant drafting a job application pitch.
-REQUIRED TONE: {tone}
-REQUIRED LENGTH: {length_instruction}
+    return f"""You are an expert career coach and professional email writer.
+Your job is to write a complete, personalized job application email for a software developer.
 
 You must follow a strict 4-step internal process before writing anything.
 The output must be a single valid JSON object — nothing else.
@@ -283,7 +273,7 @@ Return ONLY this JSON object with no extra text:
 }}"""
 
 
-def _build_company_only_prompt(company_name, about_company, profile, resume_text="", length="Concise", tone="Professional") -> str:
+def _build_company_only_prompt(company_name, about_company, profile, resume_text="") -> str:
     """
     Fallback prompt when no JD is provided — uses only company name.
     Still produces a full email, just less targeted than the JD version.
@@ -295,17 +285,7 @@ def _build_company_only_prompt(company_name, about_company, profile, resume_text
     company_context = f"Additional context about the company: {about_company}" if about_company else ""
     resume_context = f"\n\n=== RESUME DETAILS (USE THIS FOR CONTEXT) ===\n{resume_text}" if resume_text else ""
 
-    length_rules = {
-        'Short': 'Strictly limit to 2 to 3 brief sentences. Get straight to the point. No fluff.',
-        'Concise': 'Limit to 1 to 2 short paragraphs. Be punchy and highly readable.',
-        'Comprehensive': 'Write a detailed, 3-paragraph email. Thoroughly connect the context to the role.'
-    }
-    length_instruction = length_rules.get(length, length_rules['Concise'])
-
-    return f"""You are an expert executive assistant drafting a job application pitch.
-REQUIRED TONE: {tone}
-REQUIRED LENGTH: {length_instruction}
-
+    return f"""You are an expert career coach and professional email writer.
 Write a complete, personalized job application email for a software developer
 applying to {company_name}.
 
@@ -327,7 +307,7 @@ About me:        {about_str}{resume_context}
 - Match the developer's skills to what {company_name} likely needs
 - Every sentence must be specific — no generic filler
 - Write like a confident, articulate young developer — not a formal HR robot
-- Write like a confident, articulate young developer — not a formal HR robot
+- Total email length: professional but concise (not too short, not too long)
 
 === OUTPUT FORMAT ===
 Return ONLY this JSON object:
