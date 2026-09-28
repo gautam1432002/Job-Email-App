@@ -168,6 +168,9 @@ class GeneratePitchView(views.APIView):
             if not api_key:
                 return Response({"error": "Failed to decrypt Gemini API key"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+            length = request.data.get('length', 'Concise')
+            user_tone = getattr(profile, 'default_tone', 'Professional')
+
             data = draft_email(
                 company_name=serializer.validated_data['company_name'],
                 job_description=serializer.validated_data.get('job_description', ''),
@@ -175,7 +178,8 @@ class GeneratePitchView(views.APIView):
                 profile=profile,
                 api_key=api_key,
                 use_resume=serializer.validated_data.get('use_resume', True),
-                length=serializer.validated_data.get('length', 'Concise')
+                length=length,
+                tone=user_tone
             )
             return Response(data)
         except Exception as e:
