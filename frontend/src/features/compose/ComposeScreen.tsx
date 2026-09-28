@@ -5,14 +5,15 @@ import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { WebView } from 'react-native-webview';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import Animated, { FadeInRight, FadeOut, Easing, withRepeat, withTiming, useSharedValue, useAnimatedStyle } from 'react-native-reanimated';
+import Animated, { FadeInRight, FadeOut, Easing, withRepeat, withTiming, useSharedValue, useAnimatedStyle, runOnJS } from 'react-native-reanimated';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as SecureStore from 'expo-secure-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../../services/api';
 import { useAppTheme, typography, spacing, borderRadius } from '../../utils/theme';
 import BentoCard from '../../components/BentoCard';
-import { Sparkles, Paperclip, Check, CheckCircle } from 'lucide-react-native';
+import { Sparkles, Paperclip, Check, CheckCircle, FileText, Moon, PenTool, Layout, Square, Mail, Maximize } from 'lucide-react-native';
 
 export default function ComposeScreen() {
   const route = useRoute<RouteProp<Record<string, { initialContext?: string, initialTone?: string }>, string>>();
@@ -52,13 +53,13 @@ export default function ComposeScreen() {
   const [reminderDays, setReminderDays] = useState('7');
 
   const THEMES = [
-    { id: 'none', name: 'Plain Text' },
-    { id: 'theme1', name: 'Void Purple' },
-    { id: 'theme2', name: 'Editorial Ink' },
-    { id: 'theme3', name: 'Soft Bento' },
-    { id: 'theme4', name: 'Neobrutalist' },
-    { id: 'theme5', name: 'Newsletter' },
-    { id: 'theme6', name: 'Minimal' },
+    { id: 'none', name: 'Plain Text', icon: FileText, color: '#06B6D4' },
+    { id: 'theme1', name: 'Void Purple', icon: Moon, color: '#8B5CF6' },
+    { id: 'theme2', name: 'Editorial Ink', icon: PenTool, color: '#1E293B' },
+    { id: 'theme3', name: 'Soft Bento', icon: Layout, color: '#10B981' },
+    { id: 'theme4', name: 'Neobrutalist', icon: Square, color: '#F59E0B' },
+    { id: 'theme5', name: 'Newsletter', icon: Mail, color: '#3B82F6' },
+    { id: 'theme6', name: 'Minimal', icon: Maximize, color: '#94A3B8' },
   ];
   // AI Tone slider
   const TONES = ['Professional', 'Friendly', 'Direct'];
@@ -78,41 +79,7 @@ export default function ComposeScreen() {
     };
   });
 
-  // Theme slider
-  const [themeLayouts, setThemeLayouts] = useState<Record<string, { x: number, width: number }>>({});
-  const themeIndicatorPos = useSharedValue(0);
-  const themeIndicatorWidth = useSharedValue(0);
-
-  const THEME_COLORS: Record<string, string> = {
-    none: '#06B6D4',
-    theme1: '#8B5CF6',
-    theme2: '#1E293B',
-    theme3: '#10B981',
-    theme4: '#F59E0B',
-    theme5: '#3B82F6',
-    theme6: '#94A3B8'
-  };
-  const themeGlowColor = useSharedValue(THEME_COLORS[selectedTheme]);
-
-  React.useEffect(() => {
-    themeGlowColor.value = withTiming(THEME_COLORS[selectedTheme] || '#06B6D4', { duration: 250 });
-    const layout = themeLayouts[selectedTheme];
-    if (layout) {
-      themeIndicatorPos.value = withTiming(layout.x, { duration: 250, easing: Easing.out(Easing.cubic) });
-      themeIndicatorWidth.value = withTiming(layout.width, { duration: 250, easing: Easing.out(Easing.cubic) });
-    }
-  }, [selectedTheme, themeLayouts]);
-
-  const themeIndicatorStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: themeIndicatorPos.value }],
-    width: themeIndicatorWidth.value,
-    shadowColor: themeGlowColor.value,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.6,
-    shadowRadius: 12,
-    elevation: 8,
-    borderColor: themeGlowColor.value,
-  }));
+  // Removed Reanimated slider logic for Bento Grid layout
   // Pulse animation for AI Loader
   const pulseScale = useSharedValue(1);
   const pulseOpacity = useSharedValue(0.5);
@@ -170,9 +137,25 @@ export default function ComposeScreen() {
     },
     onSuccess: (htmlString) => {
       let finalHtml = htmlString;
-      if (!finalHtml.includes('name="viewport"')) {
+      
+      // Inject viewport meta tag if missing
+      if (finalHtml.includes('<head>') && !finalHtml.includes('name="viewport"')) {
         finalHtml = finalHtml.replace('<head>', '<head><meta name="viewport" content="width=device-width, initial-scale=1.0">');
       }
+
+      // Inject dynamic Light/Dark mode CSS for Plain Text theme
+      if (selectedTheme === 'none') {
+        const textColor = isDark ? '#F8FAFC' : '#0F172A';
+        const bgColor = isDark ? colors.background : '#FFFFFF';
+        const styleTag = `<style>body { color: ${textColor}; background-color: ${bgColor}; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 16px; margin: 0; }</style>`;
+        
+        if (finalHtml.includes('</head>')) {
+          finalHtml = finalHtml.replace('</head>', `${styleTag}</head>`);
+        } else {
+          finalHtml = styleTag + finalHtml;
+        }
+      }
+
       setPreviewHtml(finalHtml);
       setPreviewModalVisible(true);
     },
@@ -356,51 +339,34 @@ export default function ComposeScreen() {
               <Text style={[styles.label, { color: colors.textSecondary }]}>SUBJECT</Text>
               <TextInput style={[styles.glassInput, { color: colors.textPrimary, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]} value={generatedDraft.subject} onChangeText={(t) => setGeneratedDraft({...generatedDraft, subject: t})} />
               
-              <Text style={[styles.label, { color: colors.textSecondary }]}>SELECT THEME</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.themeScroll}>
-                <View style={{ flexDirection: 'row', position: 'relative' }}>
-                  <Animated.View 
-                    style={[
-                      {
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        bottom: 0,
-                        borderRadius: 12,
-                        backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
-                        borderWidth: 1,
-                      },
-                      themeIndicatorStyle
-                    ]}
-                  />
-                  {THEMES.map(theme => {
-                    const isActive = selectedTheme === theme.id;
-                    return (
-                      <TouchableOpacity
-                        key={theme.id}
-                        style={[
-                          styles.themeCard,
-                          { 
-                            borderColor: 'transparent',
-                            backgroundColor: 'transparent' 
-                          }
-                        ]}
-                        onPress={() => setSelectedTheme(theme.id)}
-                        onLayout={(e) => {
-                          const layout = e.nativeEvent.layout;
-                          setThemeLayouts(prev => ({...prev, [theme.id]: { x: layout.x, width: layout.width }}));
-                        }}
-                      >
-                        {isActive && <Check color={colors.neonCyan} size={14} style={{ marginRight: 6 }} />}
-                        <Text style={[styles.themeText, { color: isActive ? colors.neonCyan : colors.textSecondary }]}>{theme.name}</Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
-              </ScrollView>
-
               <Text style={[styles.label, { color: colors.textSecondary }]}>HTML BODY</Text>
               <TextInput style={[styles.glassInput, { height: 250, paddingTop: 16, color: colors.textPrimary, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]} multiline value={generatedDraft.full_body} onChangeText={(t) => setGeneratedDraft({...generatedDraft, full_body: t})} />
+            </BentoCard>
+
+            <BentoCard style={{ padding: spacing.lg, marginTop: 16 }}>
+              <Text style={[styles.label, { color: colors.textSecondary }]}>SELECT EMAIL THEME</Text>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8, marginBottom: 16, justifyContent: 'space-between' }}>
+                {THEMES.map(theme => {
+                  const isActive = selectedTheme === theme.id;
+                  const Icon = theme.icon;
+                  return (
+                    <TouchableOpacity
+                      key={theme.id}
+                      style={[
+                        styles.themeBentoCard,
+                        { 
+                          backgroundColor: isActive ? theme.color : isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+                          borderColor: isActive ? theme.color : 'transparent',
+                        }
+                      ]}
+                      onPress={() => setSelectedTheme(theme.id)}
+                    >
+                      <Icon color={isActive ? '#FFFFFF' : colors.textSecondary} size={20} style={{ marginBottom: 8 }} />
+                      <Text style={[styles.themeText, { color: isActive ? '#FFFFFF' : colors.textSecondary, textAlign: 'center' }]}>{theme.name}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
               
               <TouchableOpacity 
                 style={{ paddingVertical: 12, alignItems: 'center', marginTop: 8, marginBottom: 8, flexDirection: 'row', justifyContent: 'center' }} 
@@ -467,9 +433,8 @@ const styles = StyleSheet.create({
   actionRow: { flexDirection: 'row', marginTop: 16 },
   loadingContainer: { alignItems: 'center', paddingVertical: 24 },
   aiCore: { width: 40, height: 40, borderRadius: 20, marginBottom: 16 },
-  themeScroll: { marginBottom: 8, paddingBottom: 8 },
-  themeCard: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 16, borderRadius: 12, borderWidth: 1, marginRight: 8 },
-  themeText: { fontSize: 13, fontWeight: '600' },
+  themeBentoCard: { width: '31%', paddingVertical: 16, paddingHorizontal: 8, borderRadius: 16, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+  themeText: { fontSize: 12, fontWeight: '600' },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16 },
   divider: { height: 1, width: '100%' }
 });
