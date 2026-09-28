@@ -245,7 +245,7 @@ export default function ComposeScreen() {
             </BentoCard>
           </Animated.View>
         ) : !generatedDraft ? (
-          <Animated.View entering={FadeInRight.duration(250)} exiting={FadeOut}>
+          <Animated.View entering={FadeInRight.duration(250)}>
             <View style={styles.headerRow}>
               <Text style={[typography.h1, { color: colors.textPrimary }]}>Composer</Text>
               {profile?.resume && (

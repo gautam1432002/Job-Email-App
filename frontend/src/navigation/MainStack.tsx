@@ -2,6 +2,7 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MainTabs from './MainTabs';
 import ComposeScreen from '../features/compose/ComposeScreen';
+import { useAppTheme } from '../utils/theme';
 
 export type MainStackParamList = {
   MainTabs: undefined;
@@ -11,13 +12,16 @@ export type MainStackParamList = {
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
 export default function MainStack() {
+  const { colors } = useAppTheme();
+  
   return (
     <Stack.Navigator screenOptions={{ 
       headerShown: false, 
       animation: 'slide_from_right', 
       animationDuration: 280, 
       gestureEnabled: true, 
-      gestureDirection: 'horizontal' 
+      gestureDirection: 'horizontal',
+      contentStyle: { backgroundColor: colors.background }
     }}>
       <Stack.Screen name="MainTabs" component={MainTabs} />
       <Stack.Screen name="Compose" component={ComposeScreen} />
