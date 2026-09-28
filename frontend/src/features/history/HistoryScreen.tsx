@@ -52,6 +52,7 @@ export default function HistoryScreen() {
       const res = await api.get('history/');
       return res.data;
     },
+    refetchInterval: 2000,
   });
 
   const updateStatusMutation = useMutation({
@@ -133,7 +134,13 @@ export default function HistoryScreen() {
                   <Text style={[typography.h3, { color: colors.textPrimary, fontWeight: '700' }]}>{item.company_name}</Text>
                   <Text style={[typography.caption, { color: colors.textSecondary, marginTop: 4 }]}>{item.receiver_email}</Text>
                 </View>
-                <View style={[styles.dotIndicator, { backgroundColor: item.status === 'sent' ? '#10b981' : '#ef4444' }]} />
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  {item.status === 'sending' ? (
+                    <ActivityIndicator size="small" color="#F59E0B" />
+                  ) : (
+                    <View style={[styles.dotIndicator, { backgroundColor: item.status === 'sent' ? '#10b981' : '#ef4444' }]} />
+                  )}
+                </View>
               </View>
               
               <Text style={[typography.body2, { color: colors.textPrimary, marginVertical: spacing.md }]} numberOfLines={2}>
