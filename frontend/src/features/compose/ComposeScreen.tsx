@@ -13,7 +13,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../../services/api';
 import { useAppTheme, typography, spacing, borderRadius } from '../../utils/theme';
 import BentoCard from '../../components/BentoCard';
-import { Sparkles, Paperclip, Check, CheckCircle, FileText, Moon, PenTool, Layout, Square, Mail, Maximize } from 'lucide-react-native';
+import { Sparkles, Paperclip, Check, CheckCircle, FileText, Moon, PenTool, Layout, Square, Mail, Maximize, Wand2 } from 'lucide-react-native';
 
 export default function ComposeScreen() {
   const route = useRoute<RouteProp<Record<string, { initialContext?: string, initialTone?: string }>, string>>();
@@ -81,13 +81,31 @@ export default function ComposeScreen() {
 
   // Removed Reanimated slider logic for Bento Grid layout
   // Pulse animation for AI Loader
-  const pulseScale = useSharedValue(1);
-  const pulseOpacity = useSharedValue(0.5);
+  // Relaxing Wand & Sparkle Animation setup
+  const floatY = useSharedValue(0);
+  const sparkleScale = useSharedValue(0.8);
+  const sparkleRotate = useSharedValue(0);
 
   React.useEffect(() => {
-    pulseScale.value = withRepeat(withTiming(1.2, { duration: 1000, easing: Easing.inOut(Easing.ease) }), -1, true);
-    pulseOpacity.value = withRepeat(withTiming(1, { duration: 1000, easing: Easing.inOut(Easing.ease) }), -1, true);
+    // gentle float up and down for the wand
+    floatY.value = withRepeat(withTiming(-15, { duration: 1800, easing: Easing.inOut(Easing.sin) }), -1, true);
+    // sparkles breathing in size
+    sparkleScale.value = withRepeat(withTiming(1.3, { duration: 1500, easing: Easing.inOut(Easing.ease) }), -1, true);
+    // sparkles rotating continuously
+    sparkleRotate.value = withRepeat(withTiming(360, { duration: 6000, easing: Easing.linear }), -1, false);
   }, []);
+
+  const animatedWandStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: floatY.value }]
+  }));
+  
+  const animatedSparkleStyle = useAnimatedStyle(() => ({
+    transform: [
+      { scale: sparkleScale.value },
+      { rotate: `${sparkleRotate.value}deg` }
+    ],
+    opacity: sparkleScale.value > 1.1 ? 1 : 0.6
+  }));
 
   const { data: profile } = useQuery({
     queryKey: ['profile'],
@@ -96,11 +114,6 @@ export default function ComposeScreen() {
       return res.data;
     },
   });
-
-  const animatedPulseStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: pulseScale.value }],
-    opacity: pulseOpacity.value,
-  }));
 
   const generateMutation = useMutation({
     mutationFn: async () => {
@@ -321,9 +334,18 @@ export default function ComposeScreen() {
               </View>
 
               {generateMutation.isPending ? (
-                <View style={styles.loadingContainer}>
-                  <Animated.View style={[styles.aiCore, { backgroundColor: colors.accent }, animatedPulseStyle]} />
-                  <Text style={[typography.caption, { color: colors.accent }]}>AGENTIC AI DRAFTING...</Text>
+                <View style={[styles.loadingContainer, { paddingVertical: 40 }]}>
+                   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                      <Animated.View style={animatedSparkleStyle}>
+                         <Sparkles color={colors.accent} size={36} />
+                      </Animated.View>
+                      <Animated.View style={[animatedWandStyle, { marginLeft: -12, marginTop: 12 }]}>
+                         <Wand2 color={colors.textPrimary} size={42} />
+                      </Animated.View>
+                   </View>
+                   <Text style={[typography.body2, { color: colors.textSecondary, marginTop: 32, letterSpacing: 2 }]}>
+                     CRAFTING INTELLIGENT PITCH...
+                   </Text>
                 </View>
               ) : (
                 <TouchableOpacity onPress={() => generateMutation.mutate()} disabled={!companyName}>
