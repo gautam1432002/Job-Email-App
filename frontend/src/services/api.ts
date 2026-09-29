@@ -2,8 +2,8 @@ import axios from 'axios';
 import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 
-// Using the local network IP so the physical device (Expo Go) can reach the host
-const BASE_URL = 'http://10.68.101.154:8000/api/v1/';
+// Using env var for production, falling back to local network IP for Expo Go development
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://10.68.101.154:8000/api/v1/';
 
 const api = axios.create({
   baseURL: BASE_URL,

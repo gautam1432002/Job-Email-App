@@ -7,7 +7,7 @@ import api from '../../services/api';
 import { useAppTheme, typography, spacing } from '../../utils/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BentoCard from '../../components/BentoCard';
-import { Sun, Moon, Laptop, ChevronUp, ChevronDown } from 'lucide-react-native';
+import { Sun, Moon, Laptop, ChevronUp, ChevronDown, Eye, EyeOff } from 'lucide-react-native';
 
 export default function SettingsScreen() {
   const { deleteProfile, activeProfileId } = useContext(ProfileContext);
@@ -17,6 +17,7 @@ export default function SettingsScreen() {
   const [gmail, setGmail] = useState('');
   const [appPassword, setAppPassword] = useState('');
   const [geminiKey, setGeminiKey] = useState('');
+  const [showCredentials, setShowCredentials] = useState(false);
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ['profile'],
@@ -131,20 +132,29 @@ export default function SettingsScreen() {
     }
   };
 
+  useEffect(() => {
+    if (profile) {
+      if (profile.gmail_configured) {
+        setGmail(g => g ? g : '********');
+        setAppPassword(p => p ? p : '********');
+      }
+      if (profile.gemini_configured) {
+        setGeminiKey(k => k ? k : '********');
+      }
+    }
+  }, [profile]);
+
   const updateMutation = useMutation({
     mutationFn: async () => {
       const payload: any = {};
-      if (gmail) payload.gmail = gmail;
-      if (appPassword) payload.app_password = appPassword;
-      if (geminiKey) payload.gemini_key = geminiKey;
+      if (gmail && gmail !== '********') payload.gmail = gmail;
+      if (appPassword && appPassword !== '********') payload.app_password = appPassword;
+      if (geminiKey && geminiKey !== '********') payload.gemini_key = geminiKey;
       const res = await api.patch('profiles/me/', payload);
       return res.data;
     },
     onSuccess: () => {
       Alert.alert("Success", "Integrations updated!");
-      setGmail('');
-      setAppPassword('');
-      setGeminiKey('');
       queryClient.invalidateQueries({ queryKey: ['profile'] });
     },
     onError: () => {
@@ -355,8 +365,20 @@ export default function SettingsScreen() {
             <Text style={[typography.caption, { color: colors.textSecondary, marginTop: spacing.md, marginBottom: spacing.md }]}>UPDATE CREDENTIALS (ENCRYPTED LOCALLY)</Text>
             
             <TextInput style={[styles.input, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border }]} placeholderTextColor={colors.textSecondary} placeholder="Gmail Address" autoCapitalize="none" value={gmail} onChangeText={setGmail} />
-            <TextInput style={[styles.input, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border }]} placeholderTextColor={colors.textSecondary} placeholder="Gmail App Password" secureTextEntry value={appPassword} onChangeText={setAppPassword} />
-            <TextInput style={[styles.input, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border }]} placeholderTextColor={colors.textSecondary} placeholder="Gemini API Key" secureTextEntry value={geminiKey} onChangeText={setGeminiKey} />
+            
+            <View style={{ position: 'relative', marginBottom: 16 }}>
+              <TextInput style={[styles.input, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border, marginBottom: 0, paddingRight: 48 }]} placeholderTextColor={colors.textSecondary} placeholder="Gmail App Password" secureTextEntry={!showCredentials} value={appPassword} onChangeText={setAppPassword} />
+              <TouchableOpacity onPress={() => setShowCredentials(!showCredentials)} style={{ position: 'absolute', right: 16, top: 12, zIndex: 10 }}>
+                {showCredentials ? <EyeOff color={colors.textSecondary} size={20} /> : <Eye color={colors.textSecondary} size={20} />}
+              </TouchableOpacity>
+            </View>
+            
+            <View style={{ position: 'relative', marginBottom: 16 }}>
+              <TextInput style={[styles.input, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border, marginBottom: 0, paddingRight: 48 }]} placeholderTextColor={colors.textSecondary} placeholder="Gemini API Key" secureTextEntry={!showCredentials} value={geminiKey} onChangeText={setGeminiKey} />
+              <TouchableOpacity onPress={() => setShowCredentials(!showCredentials)} style={{ position: 'absolute', right: 16, top: 12, zIndex: 10 }}>
+                {showCredentials ? <EyeOff color={colors.textSecondary} size={20} /> : <Eye color={colors.textSecondary} size={20} />}
+              </TouchableOpacity>
+            </View>
             
             <TouchableOpacity 
               style={[styles.button, { backgroundColor: colors.textPrimary, marginTop: spacing.md }]} 

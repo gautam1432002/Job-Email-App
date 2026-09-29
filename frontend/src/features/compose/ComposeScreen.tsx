@@ -56,7 +56,7 @@ export default function ComposeScreen() {
   const THEMES = [
     { id: 'none', name: 'Plain Text', icon: FileText, color: '#06B6D4' },
     { id: 'theme1', name: 'Void Purple', icon: Moon, color: '#8B5CF6' },
-    { id: 'theme2', name: 'Editorial Ink', icon: PenTool, color: '#1E293B' },
+    { id: 'theme2', name: 'Editorial Ink', icon: PenTool, color: isDark ? '#E2E8F0' : '#1E293B' },
     { id: 'theme3', name: 'Soft Bento', icon: Layout, color: '#10B981' },
     { id: 'theme4', name: 'Neobrutalist', icon: Square, color: '#F59E0B' },
     { id: 'theme5', name: 'Newsletter', icon: Mail, color: '#3B82F6' },
