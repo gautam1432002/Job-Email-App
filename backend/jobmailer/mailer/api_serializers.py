@@ -15,14 +15,15 @@ class ProfileSerializer(serializers.ModelSerializer):
     linkedin = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     github = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     
-    experience_years = serializers.IntegerField(required=False, allow_null=True)
+    experience = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     location = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     about_me = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    tech_stack = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
     class Meta:
         model = Profile
         fields = [
-            'id', 'profile_name', 'full_name', 'phone', 'role', 'skills', 'experience_years',
+            'id', 'profile_name', 'full_name', 'phone', 'role', 'skills', 'experience', 'tech_stack',
             'location', 'college', 'grad_year', 'linkedin', 'github', 'portfolio',
             'about_me', 'resume', 'gmail_configured', 'gemini_configured',
             'gmail', 'app_password', 'gemini_key'

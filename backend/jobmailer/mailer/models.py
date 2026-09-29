@@ -19,7 +19,8 @@ class Profile(models.Model):
     skills       = models.TextField(
         default='Python, Django, REST APIs, JavaScript, HTML/CSS, SQL, Git'
     )
-    experience_years = models.IntegerField(default=0, null=True, blank=True)
+    experience   = models.CharField(max_length=100, default='Fresher', blank=True)
+    tech_stack   = models.TextField(blank=True, help_text='e.g. React, Django, Python')
     location     = models.CharField(max_length=150, blank=True)
     college      = models.CharField(max_length=200, blank=True)
     grad_year    = models.CharField(max_length=10, blank=True)

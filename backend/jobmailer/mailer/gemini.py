@@ -202,12 +202,17 @@ No markdown. No explanation. No code fences. Just raw JSON.
 Name:            {profile.display_name}
 Applying for:    {profile.role}
 Skills:          {skills_str}
+Tech Stack:      {profile.tech_stack}
+Experience:      {profile.experience}
 College:         {profile.college}
 Graduation Year: {profile.grad_year}
 LinkedIn:        {profile.linkedin or 'not provided'}
 GitHub:          {profile.github or 'not provided'}
 Portfolio:       {profile.portfolio or 'not provided'}
 About me:        {about_str}{resume_context}
+
+The candidate's experience level is: {profile.experience}. Their core technical expertise includes: {profile.tech_stack}. Naturally highlight these skills in the email body.
+
 
 === TARGET COMPANY ===
 Company Name: {company_name}{company_context}
@@ -297,9 +302,14 @@ and engineering culture to write a relevant email.
 Name:            {profile.display_name}
 Applying for:    {profile.role}
 Skills:          {skills_str}
+Tech Stack:      {profile.tech_stack}
+Experience:      {profile.experience}
 College:         {profile.college}
 Graduation Year: {profile.grad_year}
 About me:        {about_str}{resume_context}
+
+The candidate's experience level is: {profile.experience}. Their core technical expertise includes: {profile.tech_stack}. Naturally highlight these skills in the email body.
+
 
 === RULES ===
 - Use what you know about {company_name} to write specific, relevant content

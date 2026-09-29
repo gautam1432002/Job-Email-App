@@ -17,10 +17,11 @@ export default function ProfileScreen() {
   const [fullName, setFullName] = useState('');
   const [role, setRole] = useState('');
   const [location, setLocation] = useState('');
-  const [experienceYears, setExperienceYears] = useState('');
+  const [experience, setExperience] = useState('');
   const [college, setCollege] = useState('');
   const [gradYear, setGradYear] = useState('');
   const [skills, setSkills] = useState('');
+  const [techStack, setTechStack] = useState('');
   const [portfolio, setPortfolio] = useState('');
   const [linkedin, setLinkedin] = useState('');
   const [github, setGithub] = useState('');
@@ -42,10 +43,11 @@ export default function ProfileScreen() {
       setFullName(profile.full_name || '');
       setRole(profile.role || '');
       setLocation(profile.location || '');
-      setExperienceYears(profile.experience_years?.toString() || '');
+      setExperience(profile.experience || '');
       setCollege(profile.college || '');
       setGradYear(profile.grad_year?.toString() || '');
       setSkills(profile.skills || '');
+      setTechStack(profile.tech_stack || '');
       setPortfolio(profile.portfolio || '');
       setLinkedin(profile.linkedin || '');
       setGithub(profile.github || '');
@@ -72,14 +74,13 @@ export default function ProfileScreen() {
       formData.append('full_name', fullName);
       formData.append('role', role);
       formData.append('location', location);
-      if (experienceYears !== '') {
-        formData.append('experience_years', experienceYears);
-      }
+      formData.append('experience', experience);
       formData.append('college', college);
       if (gradYear !== '') {
         formData.append('grad_year', gradYear);
       }
       formData.append('skills', skills);
+      formData.append('tech_stack', techStack);
       formData.append('portfolio', portfolio);
       formData.append('linkedin', linkedin);
       formData.append('github', github);
@@ -146,7 +147,7 @@ export default function ProfileScreen() {
           <BentoCard style={styles.groupCard}>
             <TextInput style={getInputStyle('location')} onFocus={() => setFocusedInput('location')} onBlur={() => setFocusedInput(null)} placeholderTextColor={colors.textSecondary} placeholder="Location (e.g. Indore, India)" value={location} onChangeText={setLocation} />
             <View style={dividerStyle} />
-            <TextInput style={getInputStyle('experienceYears')} onFocus={() => setFocusedInput('experienceYears')} onBlur={() => setFocusedInput(null)} placeholderTextColor={colors.textSecondary} placeholder="Years of Experience" value={experienceYears} onChangeText={setExperienceYears} keyboardType="numeric" />
+            <TextInput style={getInputStyle('experience')} onFocus={() => setFocusedInput('experience')} onBlur={() => setFocusedInput(null)} placeholderTextColor={colors.textSecondary} placeholder="Experience (e.g. Fresher, 2 Years)" value={experience} onChangeText={setExperience} />
           </BentoCard>
 
           <Text style={[styles.sectionHeader, { color: colors.textSecondary }]}>EDUCATION</Text>
@@ -220,6 +221,17 @@ export default function ProfileScreen() {
               placeholder="Skills (comma separated)" 
               value={skills} 
               onChangeText={setSkills} 
+            />
+            <View style={dividerStyle} />
+            <TextInput 
+              style={[getInputStyle('techStack'), { paddingHorizontal: 16, height: 100, textAlignVertical: 'top' }]} 
+              onFocus={() => setFocusedInput('techStack')} 
+              onBlur={() => setFocusedInput(null)} 
+              placeholderTextColor={colors.textSecondary} 
+              placeholder="Tech Stack / Expertise (e.g. React, Django, Python)" 
+              value={techStack} 
+              onChangeText={setTechStack} 
+              multiline
             />
           </BentoCard>
 
