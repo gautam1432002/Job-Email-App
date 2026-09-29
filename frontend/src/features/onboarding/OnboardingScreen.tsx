@@ -2,42 +2,49 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import Animated, { FadeInRight, FadeOutLeft, Easing, SlideInDown } from 'react-native-reanimated';
 import { useAppTheme, typography, spacing } from '../../utils/theme';
+import { Sparkles, KeyRound, Mail, ShieldCheck, Zap } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
 
 const slides = [
   {
     id: 1,
-    title: 'Agentic AI Outreach',
-    description: 'ProReach automates professional communication with personalized AI drafting and native SMTP sending.',
+    title: 'Welcome to ProReach',
+    description: 'Automate your professional outreach with hyper-personalized AI drafting and direct email delivery.',
+    Icon: Sparkles,
   },
   {
     id: 2,
-    title: 'Local Privacy First',
-    description: 'Your data, your device. We replaced cloud accounts with Local Profiles. Your keys and history stay with you.',
+    title: 'How It Works',
+    description: 'ProReach analyzes job descriptions, crafts the perfect pitch using AI, and sends it directly via SMTP from your own inbox.',
+    Icon: Zap,
   },
   {
     id: 3,
-    title: 'Intelligent Drafting',
-    description: 'Connect your Gemini API key and let our AI engine analyze job descriptions to generate the perfect pitch.',
+    title: 'Your Credentials',
+    description: 'To begin, you\'ll need to enter three things in Settings: your Email ID, a Gmail App Password (for secure sending), and a Gemini API Key.',
+    Icon: KeyRound,
   },
   {
     id: 4,
-    title: 'Direct SMTP Delivery',
-    description: 'Bypass generic email clients. Send beautifully formatted HTML emails directly from your Gmail account.',
+    title: 'Local Privacy First',
+    description: 'Your sensitive API keys and App Passwords never touch our servers. They are encrypted and stored safely on your device.',
+    Icon: ShieldCheck,
   },
   {
     id: 5,
     title: 'Ready for Launch',
-    description: 'Create your first professional identity profile and step into the future of outreach.',
+    description: 'Create your first professional identity profile and step into the future of automated outreach.',
+    Icon: Mail,
   }
 ];
 
 export default function OnboardingScreen() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
-  const { colors } = useAppTheme();
+  const { colors, isDark } = useAppTheme();
 
   const handleNext = () => {
     if (currentSlide < slides.length - 1) {
@@ -52,22 +59,36 @@ export default function OnboardingScreen() {
   };
 
   const slide = slides[currentSlide];
+  const IconComponent = slide.Icon;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.content}>
-        {/* Mocked Illustration Area for futuristic aesthetic */}
-        <View style={[styles.illustration, { borderColor: colors.accent, backgroundColor: colors.cardSurface }]}>
-          <Text style={{ color: colors.accent, fontSize: 40 }}>★</Text>
+      <Animated.View 
+        key={currentSlide}
+        entering={FadeInRight.duration(400).easing(Easing.out(Easing.cubic))}
+        exiting={FadeOutLeft.duration(300)}
+        style={styles.content}
+      >
+        <View style={[styles.illustrationContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)' }]}>
+          <View style={[styles.illustration, { borderColor: colors.accent, backgroundColor: colors.cardSurface, shadowColor: colors.accent }]}>
+            <IconComponent color={colors.accent} size={64} strokeWidth={1.5} />
+          </View>
         </View>
 
-        <Text style={[typography.h1, { color: colors.textPrimary, marginBottom: spacing.md, textAlign: 'center' }]}>
+        <Animated.Text 
+          entering={SlideInDown.duration(500).delay(100)}
+          style={[typography.h1, { color: colors.textPrimary, marginBottom: spacing.md, textAlign: 'center' }]}
+        >
           {slide.title}
-        </Text>
-        <Text style={[typography.body1, { color: colors.textSecondary, textAlign: 'center', paddingHorizontal: spacing.xl }]}>
+        </Animated.Text>
+        
+        <Animated.Text 
+          entering={SlideInDown.duration(500).delay(200)}
+          style={[typography.body1, { color: colors.textSecondary, textAlign: 'center', paddingHorizontal: spacing.xl, lineHeight: 26 }]}
+        >
           {slide.description}
-        </Text>
-      </View>
+        </Animated.Text>
+      </Animated.View>
 
       <View style={styles.footer}>
         <View style={styles.pagination}>
@@ -76,13 +97,16 @@ export default function OnboardingScreen() {
               key={index}
               style={[
                 styles.dot,
-                { backgroundColor: currentSlide === index ? colors.accent : colors.border }
+                { 
+                  backgroundColor: currentSlide === index ? colors.accent : colors.border,
+                  width: currentSlide === index ? 24 : 8
+                }
               ]}
             />
           ))}
         </View>
         <View style={styles.buttonRow}>
-          <TouchableOpacity onPress={handleSkip}>
+          <TouchableOpacity onPress={handleSkip} style={{ padding: 10 }}>
             <Text style={[typography.button, { color: colors.textSecondary }]}>SKIP</Text>
           </TouchableOpacity>
           <TouchableOpacity 
@@ -90,7 +114,7 @@ export default function OnboardingScreen() {
             onPress={handleNext}
           >
             <Text style={[typography.button, { color: '#000000' }]}>
-              {currentSlide === slides.length - 1 ? "CREATE PROFILE" : "NEXT"}
+              {currentSlide === slides.length - 1 ? "GET STARTED" : "NEXT"}
             </Text>
           </TouchableOpacity>
         </View>
@@ -102,18 +126,29 @@ export default function OnboardingScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  illustration: {
-    width: width * 0.6,
-    height: width * 0.6,
-    borderRadius: width * 0.3,
-    borderWidth: 2,
+  illustrationContainer: {
+    width: width * 0.7,
+    height: width * 0.7,
+    borderRadius: width * 0.35,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 50,
+  },
+  illustration: {
+    width: width * 0.45,
+    height: width * 0.45,
+    borderRadius: width * 0.225,
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 10,
   },
   footer: { padding: 30, paddingBottom: 50 },
-  pagination: { flexDirection: 'row', justifyContent: 'center', marginBottom: 30 },
-  dot: { width: 8, height: 8, borderRadius: 4, marginHorizontal: 4 },
+  pagination: { flexDirection: 'row', justifyContent: 'center', marginBottom: 40 },
+  dot: { height: 8, borderRadius: 4, marginHorizontal: 4, transition: 'all 0.3s ease' },
   buttonRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  nextButton: { paddingHorizontal: 24, paddingVertical: 12, borderRadius: 24 }
+  nextButton: { paddingHorizontal: 30, paddingVertical: 14, borderRadius: 30, shadowColor: '#00ffcc', shadowOpacity: 0.2, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 5 }
 });
