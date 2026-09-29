@@ -10,15 +10,16 @@
       "supportsTablet": true
     },
     "splash": {
-      "image": "./assets/icon.png",
+      "image": "./assets/splash-new.png",
       "resizeMode": "contain",
       "backgroundColor": "#121212"
     },
     "android": {
       "package": "com.yourname.proreach",
       "adaptiveIcon": {
-        "backgroundColor": "#121212",
-        "foregroundImage": "./assets/icon.png"
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false
     },

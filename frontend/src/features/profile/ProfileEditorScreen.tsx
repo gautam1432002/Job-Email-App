@@ -5,6 +5,8 @@ import axios from 'axios';
 import { useAppTheme, typography, spacing } from '../../utils/theme';
 import { ProfileContext } from '../../store/ProfileContext';
 
+import api from '../../services/api';
+
 export default function ProfileEditorScreen() {
   const { colors, isDark } = useAppTheme();
   const { createProfile } = useContext(ProfileContext);
@@ -12,9 +14,7 @@ export default function ProfileEditorScreen() {
 
   const mutation = useMutation({
     mutationFn: async (name: string) => {
-      // Must match the BASE_URL in api.ts
-      const BASE_URL = 'http://10.68.101.154:8000/api/v1/';
-      const res = await axios.post(`${BASE_URL}profiles/create/`, { profile_name: name });
+      const res = await api.post('profiles/create/', { profile_name: name });
       return res.data;
     },
     onSuccess: async (data) => {
