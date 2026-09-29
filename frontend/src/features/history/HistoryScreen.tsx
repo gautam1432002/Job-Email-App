@@ -84,28 +84,28 @@ export default function HistoryScreen() {
     );
   }
 
-  if (isError) {
-    return (
-      <View style={[styles.center, { backgroundColor: colors.background }]}>
-        <Text style={{ color: '#ef4444' }}>Failed to load history.</Text>
-      </View>
-    );
-  }
-
   return (
     <Animated.View 
       style={[styles.container, { backgroundColor: colors.background }]}
       entering={SlideInRight.duration(280).easing(Easing.out(Easing.cubic))}
     >
       <FlatList
-        data={logs}
+        data={logs || []}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={{ padding: spacing.md, paddingTop: 60, paddingBottom: 140 }}
         ListHeaderComponent={
           <Text style={[typography.h1, { color: colors.textPrimary, marginBottom: spacing.lg, paddingHorizontal: spacing.sm }]}>History</Text>
         }
         ListEmptyComponent={
-          <Text style={[typography.body1, { color: colors.textSecondary, textAlign: 'center', marginTop: spacing.xxl }]}>No emails sent yet.</Text>
+          <View style={{ alignItems: 'center', marginTop: 100, paddingHorizontal: spacing.lg }}>
+            <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', justifyContent: 'center', alignItems: 'center', marginBottom: spacing.lg }}>
+              <Bot color={colors.textSecondary} size={40} />
+            </View>
+            <Text style={[typography.h2, { color: colors.textPrimary, marginBottom: spacing.sm, textAlign: 'center' }]}>Your Journey Begins Here</Text>
+            <Text style={[typography.body1, { color: colors.textSecondary, textAlign: 'center', lineHeight: 24 }]}>
+              You haven't sent any pitches yet. We wish you the best of luck with your outreach! Your future opportunities await.
+            </Text>
+          </View>
         }
         renderItem={({ item, index }) => {
           const isSelected = selectedIds.has(item.id);
