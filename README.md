@@ -109,4 +109,4 @@ npx expo start --clear
 *Scan the QR code with your Expo Go app to start testing!*
 
 ---
-<p align="center">Made with ❤️ by an AI Innovator</p>
+<p align="center">Made with ❤️ by Gautam</p>
