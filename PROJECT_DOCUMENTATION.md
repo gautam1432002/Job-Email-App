@@ -1,38 +1,112 @@
-# 📚 ProReach - Project Documentation
+<div align="center">
+  <img src="https://raw.githubusercontent.com/gautam1432002/Job-Email-App/main/frontend/assets/icon.png" width="100" />
+  <h1>📚 ProReach: Core Architecture & Systems</h1>
+  <p><i>A deep dive into frictionless multi-tenant architecture and dynamic cryptography.</i></p>
+</div>
 
-This document serves as the technical and architectural documentation for **ProReach**. It explains the internal systems, data flows, and security measures used throughout the application.
+---
+
+## 🚀 1. Frictionless Onboarding (Device-Bound Auth)
+
+Traditional apps force users through tedious sign-up forms. ProReach removes **all friction** by using a hardware-linked, device-bound profile system. 
+
+When a user opens the app, a secure handshake happens silently in the background:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as 👤 User
+    participant App as 📱 Mobile (React Native)
+    participant API as ⚙️ Backend (Django)
+    participant DB as 🗄️ PostgreSQL
+    
+    User->>App: Opens App for the first time
+    App->>API: Silent POST /profiles/create/
+    API->>DB: INSERT New Profile row
+    DB-->>API: Generates Unique UUID
+    API-->>App: Returns UUID to Device
+    App->>App: Saves UUID in Hardware SecureStore 🔒
+    
+    Note over App, API: All future requests attach this UUID in the X-Profile-ID Header
+```
+
+<details>
+<summary><b>💡 Click to see the technical advantages of this approach:</b></summary>
+<br>
+<ul>
+  <li><b>Zero Friction:</b> The user is immediately dropped into the app experience.</li>
+  <li><b>Stateless Auth:</b> No JWTs or session cookies to manage or expire.</li>
+  <li><b>High Privacy:</b> No personal emails or phone numbers are stored in the database just to use the app.</li>
+</ul>
+</details>
 
 ---
 
-## 👥 Multi-User Architecture & Authentication
+## 🛡️ 2. Total Data Isolation
 
-ProReach is designed to handle hundreds or thousands of users simultaneously. However, instead of using traditional email/password login screens, the architecture relies on a **frictionless, device-bound profile system**.
+Because the system is strictly bound to the `UUID`, every user operates in a completely isolated environment on the server. The `ProfileAuthentication` middleware acts as a firewall between users.
 
-### 1. Device-Bound Profiles (Frictionless Onboarding)
-The app removes login friction entirely. Here is how a user session is established:
-* When a user opens the app for the very first time, the React Native frontend silently communicates with the Django backend.
-* The backend generates a unique `Profile ID` (a standard UUID, e.g., `123e4567-e89b-12d3...`) and registers a new profile row in the PostgreSQL database.
-* The mobile app receives this UUID and saves it securely inside the device's hardware-encrypted local storage using `Expo SecureStore`.
-* For every subsequent network request (generating pitches, viewing history, sending emails), the Axios interceptor automatically attaches this UUID inside an `X-Profile-ID` network header.
-* The backend reads this header via a custom `ProfileAuthentication` middleware to identify exactly which user is making the request.
+```mermaid
+graph TD
+    subgraph Device A
+        A_App[React Native] -->|Header: X-Profile-ID: 111| A_Req(API Request)
+    end
+    
+    subgraph Device B
+        B_App[React Native] -->|Header: X-Profile-ID: 999| B_Req(API Request)
+    end
 
-### 2. Complete Data Isolation
-Because the system is strictly bound to the `UUID`, every user operates in a completely isolated environment on the server:
-* **Company Lists:** User A cannot query or see User B's saved target companies.
-* **Email History:** All sent pitches are tied to the UUID via foreign keys, keeping history separate.
-* **Credentials:** Third-party credentials (like Google Gemini API keys and Gmail App Passwords) are strictly isolated to the user's UUID.
+    A_Req --> Middleware
+    B_Req --> Middleware
 
-### 3. Unique User-Level Encryption 🔐
-Security is paramount because the app handles sensitive credentials (API keys and SMTP passwords). 
-Instead of encrypting all passwords with a single global database key, ProReach uses **User-Specific Encryption Key Derivation**.
+    subgraph Django REST Framework
+        Middleware{Profile Auth Middleware}
+        Middleware -->|Filters by 111| ViewA[User A Views]
+        Middleware -->|Filters by 999| ViewB[User B Views]
+    end
 
-* The encryption key for each user is dynamically derived using PBKDF2 HMAC SHA-256.
-* We combine the Django global `SECRET_KEY` with the user's specific `Profile ID` (`SECRET_KEY | profile_id`) to generate the encryption seed.
-* This means every single user's secrets are locked with a *different* mathematical key. 
-* **Security Benefit:** Even in the unlikely event of a database leak, an attacker cannot write a single decryption script to extract all passwords. They would need to derive unique keys for every single user row individually.
-
-### Limitations & Design Trade-offs
-* **No Cloud Syncing:** Because there is no central email/password login, if a user uninstalls the app or changes their physical phone, their locally stored UUID is deleted. Reinstalling the app will generate a brand new UUID, acting as a clean slate. This trade-off was intentionally chosen to maximize privacy and remove user-onboarding friction.
+    ViewA --> DB_A[(User A Saved Companies)]
+    ViewB --> DB_B[(User B Saved Companies)]
+```
 
 ---
-*(More documentation will be added here as the project evolves...)*
+
+## 🔐 3. User-Specific Dynamic Encryption
+
+Handling user credentials (like Google Gemini API keys and Gmail App Passwords) requires extreme security. **We do not use a single master key to encrypt the database.** Instead, ProReach uses **Dynamic Key Derivation**.
+
+Every single user has their own unique encryption lock.
+
+```mermaid
+flowchart LR
+    Global[Django Global SECRET_KEY] --> KDF
+    User[User's Unique UUID] --> KDF
+    
+    subgraph Security Layer
+        KDF{PBKDF2 HMAC SHA-256}
+    end
+    
+    KDF -->|Derives| Key[Unique 32-byte Encryption Key]
+    
+    Key -->|Encrypts| Plaintext(Plaintext Gemini API Key)
+    Plaintext --> DB[(Encrypted Ciphertext in DB)]
+```
+
+> **Why is this so secure?** <br>
+> Even in the catastrophic event of a database leak, an attacker cannot write a single decryption script to extract all passwords. Because the encryption key relies on the `UUID` of the specific row, the attacker would have to dynamically derive unique keys for every single user individually.
+
+---
+
+## ⚠️ Limitations & Trade-offs
+
+To achieve this level of privacy and zero-friction onboarding, we made an intentional architectural trade-off:
+
+| Feature | Trade-off Explained |
+| :--- | :--- |
+| **No Cloud Syncing** | Because there is no central email/password login, if a user uninstalls the app or changes their physical phone, their locally stored UUID is deleted. |
+| **Clean Slates** | Reinstalling the app will generate a brand new UUID, acting as a complete reset. This maximizes privacy (data isn't lingering attached to an email address forever). |
+
+<br>
+<div align="center">
+  <i>ProReach was designed to prioritize speed, execution, and local-first security.</i>
+</div>
