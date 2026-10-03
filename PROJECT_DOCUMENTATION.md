@@ -92,8 +92,21 @@ flowchart LR
     Plaintext --> DB[(Encrypted Ciphertext in DB)]
 ```
 
-> **Why is this so secure?** <br>
-> Even in the catastrophic event of a database leak, an attacker cannot write a single decryption script to extract all passwords. Because the encryption key relies on the `UUID` of the specific row, the attacker would have to dynamically derive unique keys for every single user individually.
+---
+
+## 🛑 4. Google Play Store Compliance Protocol
+
+Preparing an app for public distribution requires strict adherence to privacy and data deletion policies. To ensure ProReach is 100% compliant with Google Play Store regulations, we implemented a dedicated **Compliance Architecture**.
+
+<div align="center">
+  <!-- This SVG contains embedded CSS animations, gradients, and cyberpunk aesthetics! -->
+  <img src="frontend/assets/compliance_animated.svg" alt="Animated Cyberpunk Compliance Flow" width="100%">
+</div>
+
+### Core Compliance Features:
+1. **The "Right to be Forgotten" API:** We upgraded the "Wipe Profile" feature. It doesn't just clear local storage—it actively fires a `DELETE` request to the Django backend to totally erase the user's UUID and all encrypted data from the PostgreSQL database, satisfying GDPR and Google Play's strict data deletion requirements.
+2. **Transparent Privacy Policy:** Links directly to a hosted privacy page to explain exactly how device-bound UUIDs work.
+3. **Gmail App Password Clarity:** Explicitly guiding users to generate secure Google App Passwords instead of entering primary Google Account passwords to avoid "Deceptive Behavior" flags during app review.
 
 ---
 
