@@ -94,19 +94,20 @@ flowchart LR
 
 ---
 
-## 🛑 4. Google Play Store Compliance Protocol
+## 🛑 4. Automated Full-Stack Workflow
 
-Preparing an app for public distribution requires strict adherence to privacy and data deletion policies. To ensure ProReach is 100% compliant with Google Play Store regulations, we implemented a dedicated **Compliance Architecture**.
+To fully understand the power of ProReach, here is a visual representation of how data flows from the user's device, through our orchestrating Django API, to Google Gemini, and finally to the recruiter's inbox.
 
 <div align="center">
-  <!-- This SVG contains embedded CSS animations, gradients, and cyberpunk aesthetics! -->
-  <img src="frontend/assets/compliance_animated.svg" alt="Animated Cyberpunk Compliance Flow" width="100%">
+  <!-- This SVG contains embedded CSS animations and gradients! -->
+  <img src="frontend/assets/workflow_animated.svg" alt="Animated ProReach Workflow" width="100%">
 </div>
 
-### Core Compliance Features:
-1. **The "Right to be Forgotten" API:** We upgraded the "Wipe Profile" feature. It doesn't just clear local storage—it actively fires a `DELETE` request to the Django backend to totally erase the user's UUID and all encrypted data from the PostgreSQL database, satisfying GDPR and Google Play's strict data deletion requirements.
-2. **Transparent Privacy Policy:** Links directly to a hosted privacy page to explain exactly how device-bound UUIDs work.
-3. **Gmail App Password Clarity:** Explicitly guiding users to generate secure Google App Passwords instead of entering primary Google Account passwords to avoid "Deceptive Behavior" flags during app review.
+### Workflow Breakdown:
+1. **User Input:** The user pastes a company name and job description in the React Native UI.
+2. **Context Enrichment:** The Django API receives the payload and automatically appends the user's saved Tech Stack and Experience level.
+3. **AI Generation:** The payload is sent to the Google Gemini LLM, which returns a highly personalized pitch.
+4. **Background Dispatch:** Instead of freezing the mobile UI, Django spins up a background thread that connects to Gmail SMTP, wraps the pitch in an HTML theme, and fires it off to the recruiter.
 
 ---
 
