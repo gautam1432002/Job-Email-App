@@ -120,6 +120,25 @@ To achieve this level of privacy and zero-friction onboarding, we made an intent
 | **No Cloud Syncing** | Because there is no central email/password login, if a user uninstalls the app or changes their physical phone, their locally stored UUID is deleted. |
 | **Clean Slates** | Reinstalling the app will generate a brand new UUID, acting as a complete reset. This maximizes privacy (data isn't lingering attached to an email address forever). |
 
+---
+
+## ✨ 5. Core Application Features
+
+Beyond the core architecture, ProReach implements several complex features to enhance the user experience and the final product delivered to recruiters:
+
+### 🎨 Dynamic HTML Email Themes
+ProReach does not send boring plain-text emails. Before dispatching the email via SMTP, the Django backend wraps the Gemini-generated pitch into one of several professionally designed, responsive HTML templates (e.g., *Void Purple*, *Soft Bento*, *Minimal Resume*). This ensures the application instantly stands out in a crowded inbox.
+
+### 📎 Automated Resume Attachments
+Users can upload their PDF resume once. The backend securely stores this file, and the background SMTP dispatcher automatically attaches the PDF to every outgoing pitch email, removing the need for the user to manually attach files every time they apply.
+
+### 📊 History & Goal Tracking
+The application features a robust history logging system. Every generated pitch and sent email is logged to the PostgreSQL database via a foreign key linked to the user's UUID. 
+On the frontend, users have a highly interactive mechanical dial to set "Daily Pitch Goals" (e.g., 5 pitches a day), encouraging consistency in their job hunt.
+
+### ⚡ TanStack Query State Management
+To ensure a buttery smooth mobile experience, the React Native frontend utilizes **TanStack Query (React Query)**. This provides aggressive local caching of the user's profile and company history. When the app is opened, UI elements render instantly from the cache while background re-validation occurs, completely hiding any network latency from the user.
+
 <br>
 <div align="center">
   <i>ProReach was designed to prioritize speed, execution, and local-first security.</i>
