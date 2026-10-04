@@ -139,6 +139,21 @@ On the frontend, users have a highly interactive mechanical dial to set "Daily P
 ### ⚡ TanStack Query State Management
 To ensure a buttery smooth mobile experience, the React Native frontend utilizes **TanStack Query (React Query)**. This provides aggressive local caching of the user's profile and company history. When the app is opened, UI elements render instantly from the cache while background re-validation occurs, completely hiding any network latency from the user.
 
+---
+
+## 🔮 6. Future Ecosystem Expansion
+
+Because ProReach relies on a headless **Django REST API** architecture, the backend is entirely decoupled from the frontend. This opens the door for massive ecosystem expansion without needing to rewrite any backend logic.
+
+### Web Application Port
+The API can seamlessly support a web-based frontend (e.g., built with Next.js or React). A web client would simply interact with the exact same endpoints (`https://job-email-app.onrender.com/api/v1/`). Instead of using mobile `SecureStore`, the web app would store the generated `UUID` inside the browser's `localStorage` to maintain the frictionless, password-less authentication flow.
+
+### Cross-Device Syncing (Mobile ↔ Web)
+To bridge the gap between a mobile app and a web platform, a "Sync Device" feature is planned:
+1. The mobile app can generate a secure QR code or display the user's raw `UUID`.
+2. On the web app, the user selects "Link Existing Account" and inputs this code.
+3. The web app stores the UUID in `localStorage`, instantly synchronizing company history, pitches, and settings across both devices, since both clients are querying the same backend database row.
+
 <br>
 <div align="center">
   <i>ProReach was designed to prioritize speed, execution, and local-first security.</i>
