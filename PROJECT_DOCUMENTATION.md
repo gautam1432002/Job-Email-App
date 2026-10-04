@@ -145,6 +145,11 @@ To ensure a buttery smooth mobile experience, the React Native frontend utilizes
 
 Because ProReach relies on a headless **Django REST API** architecture, the backend is entirely decoupled from the frontend. This opens the door for massive ecosystem expansion without needing to rewrite any backend logic.
 
+<div align="center">
+  <!-- CSS/SVG Mockup of the Future Web App -->
+  <img src="frontend/assets/webapp_preview.svg" alt="Web Dashboard Mockup" width="100%">
+</div>
+
 ### Web Application Port
 The API can seamlessly support a web-based frontend (e.g., built with Next.js or React). A web client would simply interact with the exact same endpoints (`https://job-email-app.onrender.com/api/v1/`). Instead of using mobile `SecureStore`, the web app would store the generated `UUID` inside the browser's `localStorage` to maintain the frictionless, password-less authentication flow.
 
