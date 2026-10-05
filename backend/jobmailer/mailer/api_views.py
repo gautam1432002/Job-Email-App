@@ -225,17 +225,22 @@ class SendEmailView(views.APIView):
             )
             
             def bg_send_email():
+                from django.db import close_old_connections
+                # Close any stale connections copied from the main thread
+                close_old_connections()
+                
                 success, msg = send_job_email(
                     receiver_email=serializer.validated_data['receiver_email'],
                     subject=serializer.validated_data['subject'],
                     html_body=html_body,
-                    sender_gmail=sender_gmail,
-                    app_password=app_password,
+                    sender_gmail=sender_gmail.strip(),
+                    app_password=app_password.replace(" ", ""),
                     resume_path=resume_path
                 )
                 log.status = 'sent' if success else 'failed'
                 log.error_message = '' if success else msg
                 log.save()
+                close_old_connections()
 
             # Execute SMTP in background thread to unblock frontend
             thread = threading.Thread(target=bg_send_email)
