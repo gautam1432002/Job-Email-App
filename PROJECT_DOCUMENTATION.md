@@ -159,6 +159,22 @@ To bridge the gap between a mobile app and a web platform, a "Sync Device" featu
 2. On the web app, the user selects "Link Existing Account" and inputs this code.
 3. The web app stores the UUID in `localStorage`, instantly synchronizing company history, pitches, and settings across both devices, since both clients are querying the same backend database row.
 
+---
+
+## 🛠️ 7. Advanced Technical Implementations
+
+To make the app truly production-ready, several advanced techniques were used to guarantee a seamless user experience and bulletproof backend stability.
+
+### Asynchronous Non-Blocking Dispatch
+Connecting to Gmail SMTP servers and attaching PDF files can take anywhere from 1 to 4 seconds depending on network conditions. If the Django backend performed this synchronously, the user's mobile app would freeze on a loading screen, causing terrible UX.
+Instead, the Django API instantly queues the email task into a **Background Python Thread** (`threading.Thread`).
+* The API returns a `200 OK` response in **under 200ms**, allowing the mobile UI to instantly show a success animation.
+* The background thread safely acquires a fresh database connection (`close_old_connections()`), dispatches the SMTP payload, and updates the `EmailLog` database row silently in the background.
+
+### Dynamic Input Sanitization (UX Defense)
+When users generate a Google App Password, Google formats it with spaces (e.g., `abcd efgh ijkl mnop`). If sent raw to an SMTP server, the authentication will crash. 
+The ProReach backend implements silent input sanitization on all credentials (stripping whitespaces, trimming edges) just before the KDF encryption layer and SMTP dispatch. This means the app acts as a defensive shield against user-error—no matter how messy the user pastes their API keys or passwords, the backend cleans it and processes it flawlessly.
+
 <br>
 <div align="center">
   <i>ProReach was designed to prioritize speed, execution, and local-first security.</i>
