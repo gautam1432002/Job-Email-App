@@ -179,17 +179,21 @@ The ProReach backend implements silent input sanitization on all credentials (st
 
 ## 🏗️ 8. Infrastructure Scaling & Data Persistence Plan
 
-Currently, during the MVP and testing phase, the backend is hosted on a free-tier cloud service (Render). You may notice that **every time backend code is updated and deployed, all user profile data gets wiped out.** 
+> [!WARNING]
+> **Current MVP Limitation:** During the testing phase on Render's free tier, you may notice that **every time backend code is updated and deployed, all user profile data gets wiped out.**
 
-### Why does the data get wiped?
-This happens because free-tier cloud servers use an **Ephemeral Filesystem**. When a new deployment occurs, the cloud provider destroys the old server container and creates a brand new one. If the database is stored locally inside that container (like a local `db.sqlite3` file), it is completely erased. 
-The mobile app, however, still has the old `UUID` saved in its hardware `SecureStore`. When the app tries to talk to the fresh backend, the backend rejects it because the UUID no longer exists in its wiped database, resulting in a broken profile state.
+### 🚨 The Root Cause: Ephemeral Filesystems
+Free-tier cloud servers utilize an **Ephemeral Filesystem**. 
+- 🔄 **The Wipe:** When a new deployment occurs, the cloud provider destroys the old server container and creates a brand new one. Because the database is stored locally inside that container (`db.sqlite3`), it is permanently erased.
+- 💥 **The Conflict:** The mobile app retains the old `UUID` in its hardware `SecureStore`. When it attempts to communicate with the newly spun-up backend, the server rejects it (since the UUID no longer exists in its fresh database), resulting in a broken profile state.
 
-### The Production Migration Plan
-To guarantee absolute data safety and prevent data loss during future backend updates, the following infrastructure upgrades are planned before public scaling:
+### 🚀 The Production Migration Plan
+To guarantee absolute data safety and prevent data loss during future backend updates, the following infrastructure upgrades are planned for the production release:
 
-1. **Migrate to Managed PostgreSQL:** We will decouple the database from the application server by migrating to a managed Cloud PostgreSQL provider (like Supabase, Neon, or Render Managed DB). Because the database will live on a completely separate server, it will **never** be affected or wiped during application code updates.
-2. **Graceful Mobile Recovery (Resilience):** The React Native app will be updated to handle "Orphaned UUIDs". If the backend ever returns a `404 Profile Not Found` error, the mobile app will catch this gracefully, wipe its local SecureStore, and silently generate a brand new profile without crashing, ensuring the user is never stuck on a broken screen.
+| Objective | Implementation Plan | End Result |
+| :--- | :--- | :--- |
+| **1. Database Decoupling** | Migrate to a managed Cloud PostgreSQL provider (e.g., Supabase, Neon). | The database lives on an independent server and is **never** wiped during application code updates. |
+| **2. Graceful App Resilience** | Update React Native to automatically detect "Orphaned UUIDs" (404 Not Found). | The app catches the error, wipes its local memory, and silently generates a new profile without crashing. |
 
 <br>
 <div align="center">
