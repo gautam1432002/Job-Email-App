@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Platform } from 'react-native';
+import { Platform, Alert } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 
 // Using env var for production, falling back to local network IP for Expo Go development
@@ -24,10 +24,23 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response Interceptor
+// Response Interceptor: Handle Orphaned UUIDs (Database Wipes)
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
+    if (error.response && (error.response.status === 401 || error.response.status === 403 || error.response.status === 404)) {
+      console.warn("Backend rejected Profile ID (likely DB wipe). Wiping local SecureStore...");
+      
+      // Delete the orphaned UUID so the app doesn't stay stuck in a broken state
+      await SecureStore.deleteItemAsync('jobmailer_active_profile_id');
+      
+      // Notify the user gently
+      Alert.alert(
+        "Session Expired", 
+        "Your profile data was cleared by the server (Backend Update). Please restart the app to create a new profile.",
+        [{ text: "OK" }]
+      );
+    }
     return Promise.reject(error);
   }
 );
