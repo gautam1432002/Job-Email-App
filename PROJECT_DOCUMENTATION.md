@@ -146,6 +146,13 @@ To ensure a buttery smooth mobile experience, the React Native frontend utilizes
 Because ProReach relies on a headless **Django REST API** architecture, the backend is entirely decoupled from the frontend. This opens the door for massive ecosystem expansion without needing to rewrite any backend logic.
 
 <div align="center">
+  <!-- CSS/SVG Diagram of the overall Architecture -->
+  <img src="frontend/assets/ecosystem.svg" alt="ProReach Ecosystem Map" width="100%">
+</div>
+
+<br>
+
+<div align="center">
   <!-- CSS/SVG Mockup of the Future Web App -->
   <img src="frontend/assets/webapp_preview.svg" alt="Web Dashboard Mockup" width="100%">
 </div>

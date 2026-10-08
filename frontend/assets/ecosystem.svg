@@ -1,0 +1,150 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" width="100%" height="600">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#050505" />
+      <stop offset="100%" stop-color="#111115" />
+    </linearGradient>
+
+    <!-- Glowing Accents -->
+    <linearGradient id="blueGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+    <linearGradient id="purpleGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8b5cf6" />
+      <stop offset="100%" stop-color="#ec4899" />
+    </linearGradient>
+    <linearGradient id="greenGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#3b82f6" />
+    </linearGradient>
+
+    <filter id="neonBlur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="15" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <style>
+      .bg { fill: url(#bgGrad); }
+      .grid { stroke: rgba(255, 255, 255, 0.03); stroke-width: 1; }
+      
+      .node-card { fill: rgba(255, 255, 255, 0.04); stroke: rgba(255, 255, 255, 0.1); stroke-width: 1; rx: 12; }
+      .node-title { font-family: -apple-system, sans-serif; font-weight: 700; font-size: 16px; fill: #f8fafc; }
+      .node-sub { font-family: -apple-system, sans-serif; font-weight: 500; font-size: 12px; fill: #94a3b8; }
+      
+      .line { fill: none; stroke: rgba(255, 255, 255, 0.15); stroke-width: 2; }
+      .line-anim { 
+        fill: none; stroke: url(#blueGlow); stroke-width: 2; 
+        stroke-dasharray: 10 20; 
+        animation: dash 3s linear infinite; 
+      }
+      .line-anim-purple { 
+        fill: none; stroke: url(#purpleGlow); stroke-width: 2; 
+        stroke-dasharray: 10 20; 
+        animation: dash 3s linear infinite reverse; 
+      }
+
+      @keyframes dash {
+        to { stroke-dashoffset: -100; }
+      }
+    </style>
+  </defs>
+
+  <!-- Background & Grid -->
+  <rect width="1000" height="600" class="bg" />
+  <pattern id="gridPattern" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M 40 0 L 0 0 0 40" fill="none" class="grid" />
+  </pattern>
+  <rect width="1000" height="600" fill="url(#gridPattern)" />
+
+  <!-- Ambient Glows -->
+  <circle cx="500" cy="300" r="100" fill="#8b5cf6" opacity="0.1" filter="blur(60px)" />
+  <circle cx="200" cy="200" r="100" fill="#3b82f6" opacity="0.1" filter="blur(60px)" />
+  <circle cx="800" cy="400" r="100" fill="#10b981" opacity="0.1" filter="blur(60px)" />
+
+  <!-- Connecting Lines -->
+  <!-- Mobile to Backend -->
+  <path d="M 280 200 L 400 200 L 400 280 L 430 280" class="line" />
+  <path d="M 280 200 L 400 200 L 400 280 L 430 280" class="line-anim" />
+  
+  <!-- Web to Backend -->
+  <path d="M 280 400 L 400 400 L 400 320 L 430 320" class="line" />
+  <path d="M 280 400 L 400 400 L 400 320 L 430 320" class="line-anim" />
+
+  <!-- Backend to DB -->
+  <path d="M 570 300 L 720 300" class="line" />
+  <path d="M 570 300 L 720 300" class="line-anim-purple" />
+
+  <!-- Backend to Gemini -->
+  <path d="M 570 280 L 650 280 L 650 160 L 720 160" class="line" />
+  <path d="M 570 280 L 650 280 L 650 160 L 720 160" class="line-anim" />
+
+  <!-- Backend to Gmail -->
+  <path d="M 570 320 L 650 320 L 650 440 L 720 440" class="line" />
+  <path d="M 570 320 L 650 320 L 650 440 L 720 440" class="line-anim" />
+
+  <!-- NODES -->
+  
+  <!-- Client: Mobile App -->
+  <g transform="translate(100, 150)">
+    <rect width="180" height="100" class="node-card" />
+    <rect x="0" y="0" width="4" height="100" fill="url(#blueGlow)" rx="2" />
+    <text x="20" y="40" class="node-title">iOS &amp; Android App</text>
+    <text x="20" y="60" class="node-sub">React Native (Expo)</text>
+    <text x="20" y="80" class="node-sub">SecureStore UUID</text>
+  </g>
+
+  <!-- Client: Web App -->
+  <g transform="translate(100, 350)">
+    <rect width="180" height="100" class="node-card" />
+    <rect x="0" y="0" width="4" height="100" fill="url(#blueGlow)" rx="2" />
+    <text x="20" y="40" class="node-title">Web Dashboard</text>
+    <text x="20" y="60" class="node-sub">Next.js / React</text>
+    <text x="20" y="80" class="node-sub">QR Syncing</text>
+  </g>
+
+  <!-- Server: Django Backend -->
+  <g transform="translate(430, 240)">
+    <rect width="140" height="120" class="node-card" filter="url(#neonBlur)" stroke="#8b5cf6" stroke-width="2" />
+    <rect width="140" height="120" class="node-card" fill="#18181b" />
+    <text x="70" y="45" text-anchor="middle" class="node-title">Django API</text>
+    <text x="70" y="65" text-anchor="middle" class="node-sub">Python Server</text>
+    <text x="70" y="85" text-anchor="middle" class="node-sub">KDF Encryption</text>
+    <text x="70" y="105" text-anchor="middle" class="node-sub">Async Threads</text>
+  </g>
+
+  <!-- Service: Gemini -->
+  <g transform="translate(720, 110)">
+    <rect width="180" height="100" class="node-card" />
+    <rect x="0" y="0" width="4" height="100" fill="url(#greenGlow)" rx="2" />
+    <text x="20" y="40" class="node-title">Google Gemini</text>
+    <text x="20" y="60" class="node-sub">LLM API</text>
+    <text x="20" y="80" class="node-sub">Pitch Generation</text>
+  </g>
+
+  <!-- Service: PostgreSQL DB -->
+  <g transform="translate(720, 250)">
+    <rect width="180" height="100" class="node-card" />
+    <rect x="0" y="0" width="4" height="100" fill="url(#purpleGlow)" rx="2" />
+    <text x="20" y="40" class="node-title">PostgreSQL DB</text>
+    <text x="20" y="60" class="node-sub">Managed Database</text>
+    <text x="20" y="80" class="node-sub">Persistent Profiles</text>
+  </g>
+
+  <!-- Service: Gmail SMTP -->
+  <g transform="translate(720, 390)">
+    <rect width="180" height="100" class="node-card" />
+    <rect x="0" y="0" width="4" height="100" fill="#ef4444" rx="2" />
+    <text x="20" y="40" class="node-title">Gmail SMTP</text>
+    <text x="20" y="60" class="node-sub">App Password Dispatch</text>
+    <text x="20" y="80" class="node-sub">PDF Attachments</text>
+  </g>
+
+  <!-- Title -->
+  <text x="500" y="50" text-anchor="middle" font-family="-apple-system, sans-serif" font-weight="900" font-size="28" fill="#ffffff" letter-spacing="1">ProReach Ecosystem Architecture</text>
+
+</svg>
