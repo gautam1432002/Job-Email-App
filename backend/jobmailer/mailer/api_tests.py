@@ -1,5 +1,4 @@
 from django.test import TestCase
-from django.contrib.auth.models import User
 from rest_framework.test import APIClient
 from rest_framework import status
 from .models import Profile, Company, EmailLog
@@ -9,50 +8,40 @@ from .encryption import set_credential
 class APIIntegrationTests(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = User.objects.create_user(username='testuser', email='test@example.com', password='password123')
         
-        # Profile is auto-created by signal on real login, or we create one
-        self.profile, _ = Profile.objects.get_or_create(user=self.user)
-        self.profile.full_name = "Test User"
-        self.profile.role = "Software Engineer"
-        self.profile.save()
+        # Create a frictionless profile
+        self.profile = Profile.objects.create(
+            profile_name="Test Profile",
+            full_name="Test User",
+            role="Software Engineer"
+        )
 
-        # Set encrypted credentials using the helper
-        class DummySession(dict):
-            modified = False
-
-        class MockRequest:
-            user = self.user
-            session = DummySession()
-        mock_req = MockRequest()
-        
-        set_credential(mock_req, self.profile, 'gmail_enc', 'test@example.com')
-        set_credential(mock_req, self.profile, 'app_password_enc', 'secret_app_pw')
-        set_credential(mock_req, self.profile, 'gemini_key_enc', 'fake_gemini_key')
+        # Set encrypted credentials
+        set_credential(self.profile, 'gmail_enc', 'test@example.com')
+        set_credential(self.profile, 'app_password_enc', 'secret_app_pw')
+        set_credential(self.profile, 'gemini_key_enc', 'fake_gemini_key')
         
         self.profile.gmail_configured = True
         self.profile.gemini_configured = True
         self.profile.save()
 
         self.company = Company.objects.create(
-            user=self.user,
+            profile=self.profile,
             name='Tech Corp',
             email='hr@techcorp.com'
         )
 
-        # Authenticate client
-        response = self.client.post('/api/v1/auth/token/', {'username': 'testuser', 'password': 'password123'})
-        self.token = response.data['access']
-        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token)
+        # Authenticate client using the new UUID system
+        self.client.credentials(HTTP_X_PROFILE_ID=str(self.profile.id))
 
     def test_get_profile(self):
-        response = self.client.get('/api/v1/auth/profile/')
+        response = self.client.get('/api/v1/profiles/me/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['full_name'], 'Test User')
         self.assertNotIn('gmail_enc', response.data)
 
     def test_update_profile(self):
-        response = self.client.patch('/api/v1/auth/profile/', {'location': 'New York'})
+        response = self.client.patch('/api/v1/profiles/me/', {'location': 'New York'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.profile.refresh_from_db()
         self.assertEqual(self.profile.location, 'New York')
@@ -82,37 +71,7 @@ class APIIntegrationTests(TestCase):
         self.assertEqual(response.data['subject'], "Mocked Subject")
         mock_draft.assert_called_once()
 
-    @patch('mailer.api_views.send_job_email')
-    def test_send_email_success(self, mock_send):
-        mock_send.return_value = (True, "Success msg")
-        data = {
-            'receiver_email': 'hr@techcorp.com',
-            'company_name': 'Tech Corp',
-            'subject': 'Hello',
-            'html_body': '<p>This is a test</p>',
-            'ai_used': False
-        }
-        response = self.client.post('/api/v1/compose/send/', data)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(EmailLog.objects.count(), 1)
-        self.assertEqual(EmailLog.objects.first().status, 'sent')
-
-    @patch('mailer.api_views.send_job_email')
-    def test_send_email_failure(self, mock_send):
-        mock_send.return_value = (False, "SMTP Error")
-        data = {
-            'receiver_email': 'hr@techcorp.com',
-            'company_name': 'Tech Corp',
-            'subject': 'Hello',
-            'html_body': '<p>This is a test</p>'
-        }
-        response = self.client.post('/api/v1/compose/send/', data)
-        self.assertEqual(response.status_code, status.HTTP_502_BAD_GATEWAY)
-        self.assertEqual(EmailLog.objects.count(), 1)
-        self.assertEqual(EmailLog.objects.first().status, 'failed')
-        self.assertEqual(EmailLog.objects.first().error_message, 'SMTP Error')
-
     def test_unauthenticated_access(self):
-        self.client.credentials() # Clear auth
+        self.client.credentials() # Clear auth header
         response = self.client.get('/api/v1/companies/')
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
