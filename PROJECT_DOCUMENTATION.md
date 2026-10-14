@@ -16,20 +16,23 @@
 
 ## 📑 Table of Contents
 
-1. [Executive Summary & System Vision](#-1-executive-summary--system-vision)
-2. [End-to-End Architectural Blueprint](#-2-end-to-end-architectural-blueprint)
-3. [Frictionless Onboarding & Hardware-Anchored Identity](#-3-frictionless-onboarding--hardware-anchored-identity)
-4. [Cryptographic Vault: Dynamic Key Derivation](#-4-cryptographic-vault-dynamic-key-derivation)
-5. [AI Orchestration Engine (Google Gemini 1.5)](#-5-ai-orchestration-engine-google-gemini-15)
-6. [Responsive HTML Templating Engine](#-6-responsive-html-templating-engine)
-7. [Asynchronous Non-Blocking Dispatch & Concurrency](#-7-asynchronous-non-blocking-dispatch--concurrency)
-8. [Application Lifecycle & Funnel State Machine](#-8-application-lifecycle--funnel-state-machine)
-9. [Complete REST API Specification](#-9-complete-rest-api-specification)
-10. [Relational Data Model & Entity Specifications](#-10-relational-data-model--entity-specifications)
-11. [Mobile Client Architecture & UX System](#-11-mobile-client-architecture--ux-system)
-12. [Cross-Platform Ecosystem & Strategic Roadmap](#-12-cross-platform-ecosystem--strategic-roadmap)
-13. [Infrastructure Scaling & Persistence Migration Plan](#-13-infrastructure-scaling--persistence-migration-plan)
-14. [Local Development & Environment Setup](#-14-local-development--environment-setup)
+1. [Executive Summary & System Vision](#1-executive-summary--system-vision)
+2. [End-to-End Architectural Blueprint](#2-end-to-end-architectural-blueprint)
+3. [Frictionless Onboarding & Hardware-Anchored Identity](#3-frictionless-onboarding--hardware-anchored-identity)
+4. [Cryptographic Vault: Dynamic Key Derivation](#4-cryptographic-vault-dynamic-key-derivation)
+5. [AI Orchestration Engine (Google Gemini 1.5)](#5-ai-orchestration-engine-google-gemini-15)
+6. [Responsive HTML Templating Engine](#6-responsive-html-templating-engine)
+7. [Asynchronous Non-Blocking Dispatch & Concurrency](#7-asynchronous-non-blocking-dispatch--concurrency)
+8. [Application Lifecycle & Funnel State Machine](#8-application-lifecycle--funnel-state-machine)
+9. [Complete REST API Specification](#9-complete-rest-api-specification)
+10. [Relational Data Model & Entity Specifications](#10-relational-data-model--entity-specifications)
+11. [Mobile Client Architecture & UX System](#11-mobile-client-architecture--ux-system)
+12. [Cross-Platform Ecosystem & Strategic Roadmap](#12-cross-platform-ecosystem--strategic-roadmap)
+    * [12.1 Multi-Client Ecosystem Topology](#121-multi-client-ecosystem-topology)
+    * [12.2 Detailed Breakdown of Ecosystem Options (Options 1–7)](#122-detailed-breakdown-of-ecosystem-options)
+    * [12.3 Strategic Phased Roadmap & Execution Matrix](#123-strategic-phased-roadmap--execution-matrix)
+13. [Infrastructure Scaling & Persistence Migration Plan](#13-infrastructure-scaling--persistence-migration-plan)
+14. [Local Development & Environment Setup](#14-local-development--environment-setup)
 
 ---
 
@@ -464,6 +467,7 @@ Mandatory Header for Protected Endpoints: `X-Profile-ID: <UUID>`
 
 | Method | Endpoint | Description | Auth Required |
 | :--- | :--- | :--- | :--- |
+| `GET` | `/health/` | Server health check & uptime probe | No |
 | `POST` | `/profiles/create/` | Provision a new device-bound UUID profile | No |
 | `GET` | `/profiles/me/` | Retrieve candidate profile, skills, & credential status | Yes |
 | `PATCH` | `/profiles/me/` | Update candidate bio, skills, credentials, or resume | Yes |
@@ -479,9 +483,133 @@ Mandatory Header for Protected Endpoints: `X-Profile-ID: <UUID>`
 | `POST` | `/compose/preview/` | Render full responsive HTML email theme | Yes |
 | `POST` | `/compose/send/` | Initiate background asynchronous SMTP dispatch | Yes |
 
+---
+
 ### Endpoint Schemas & Payloads
 
-#### 1. Generate Pitch (`POST /api/v1/compose/generate/`)
+#### 1. Server Health Check (`GET /api/v1/health/`)
+* **Headers**: None required.
+* **Response Payload (200 OK)**:
+```json
+{
+  "status": "ok",
+  "message": "Backend is alive!"
+}
+```
+
+#### 2. Provision Anonymous Profile (`POST /api/v1/profiles/create/`)
+* **Headers**: None required.
+* **Request Payload**:
+```json
+{
+  "profile_name": "My Profile"
+}
+```
+* **Response Payload (201 Created)**:
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "profile_name": "My Profile"
+}
+```
+
+#### 3. Retrieve Candidate Profile (`GET /api/v1/profiles/me/`)
+* **Headers**: `X-Profile-ID: 3fa85f64-5717-4562-b3fc-2c963f66afa6`
+* **Response Payload (200 OK)**:
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "profile_name": "My Profile",
+  "full_name": "Gautam Verma",
+  "phone": "+91 9876543210",
+  "role": "Software Developer",
+  "skills": "Python, Django, REST APIs, React Native, TypeScript, PostgreSQL",
+  "experience": "Fresher",
+  "tech_stack": "React Native, Django, Python",
+  "location": "New Delhi, India",
+  "college": "Delhi Technological University",
+  "grad_year": "2025",
+  "linkedin": "https://linkedin.com/in/gautam1432",
+  "github": "https://github.com/gautam1432002",
+  "portfolio": "https://gautam.dev",
+  "about_me": "Full-stack engineer passionate about building frictionless developer tools.",
+  "resume": "https://job-email-app.onrender.com/media/resumes/2026/10/resume.pdf",
+  "gmail_configured": true,
+  "gemini_configured": true
+}
+```
+
+#### 4. Update Profile & Encrypted Credentials (`PATCH /api/v1/profiles/me/`)
+* **Headers**: `X-Profile-ID: <UUID>`, `Content-Type: multipart/form-data` or `application/json`
+* **Request Payload**:
+```json
+{
+  "full_name": "Gautam Verma",
+  "role": "Backend Engineer",
+  "skills": "Python, Django, FastAPI, Celery, PostgreSQL",
+  "gmail": "candidate@gmail.com",
+  "app_password": "abcd efgh ijkl mnop",
+  "gemini_key": "AIzaSyD-sampleGeminiApiKey12345"
+}
+```
+> [!NOTE]
+> `gmail`, `app_password`, and `gemini_key` are write-only fields. The server immediately derives tenant-isolated Fernet keys and writes encrypted blobs to `gmail_enc`, `app_password_enc`, and `gemini_key_enc`. Plaintext credentials are never returned in responses.
+
+#### 5. Company Address Book (`GET|POST /api/v1/companies/`)
+* **List Companies (`GET /api/v1/companies/`) Response (200 OK)**:
+```json
+[
+  {
+    "id": 12,
+    "name": "Stripe",
+    "email": "recruiting@stripe.com",
+    "notes": "Met recruiter at Tech Summit; focus on API performance.",
+    "added_at": "2026-10-12T14:30:00Z"
+  }
+]
+```
+* **Add Company (`POST /api/v1/companies/`) Request Payload**:
+```json
+{
+  "name": "Linear",
+  "email": "careers@linear.app",
+  "notes": "Product-led growth, frontend engineering opening."
+}
+```
+
+#### 6. Outreach History & Funnel Management (`GET /api/v1/history/`)
+* **List History Logs (`GET /api/v1/history/`) Response (200 OK)**:
+```json
+[
+  {
+    "id": 104,
+    "receiver_email": "recruiting@stripe.com",
+    "company_name": "Stripe",
+    "theme_used": "theme1",
+    "subject": "Application for Software Engineer — Gautam Verma",
+    "opening_para": "Dear Stripe Engineering Team...",
+    "ai_used": true,
+    "status": "sent",
+    "application_status": "Applied",
+    "error_message": "",
+    "sent_at": "2026-10-12T17:15:30Z"
+  }
+]
+```
+* **Update Funnel Milestone (`PATCH /api/v1/history/<id>/`) Request**:
+```json
+{
+  "application_status": "Interview"
+}
+```
+* **Bulk Delete History Logs (`DELETE /api/v1/compose/history/bulk/`) Request**:
+```json
+{
+  "ids": [101, 102, 103]
+}
+```
+
+#### 7. Synthesize Pitch (`POST /api/v1/compose/generate/`)
 * **Request Payload**:
 ```json
 {
@@ -494,7 +622,7 @@ Mandatory Header for Protected Endpoints: `X-Profile-ID: <UUID>`
 * **Response Payload (200 OK)**:
 ```json
 {
-  "subject": "Application for Software Engineer — Gautam",
+  "subject": "Application for Software Engineer — Gautam Verma",
   "greeting": "Dear Stripe Engineering Team,",
   "hook": "I have long admired Stripe's developer-first API design and want to bring my backend engineering background to your core infrastructure.",
   "body": "Having built production-grade Django APIs with dynamic cryptography...",
@@ -508,13 +636,32 @@ Mandatory Header for Protected Endpoints: `X-Profile-ID: <UUID>`
 }
 ```
 
-#### 2. Dispatch Email (`POST /api/v1/compose/send/`)
+#### 8. Preview HTML Email Theme (`POST /api/v1/compose/preview/`)
 * **Request Payload**:
 ```json
 {
   "company_name": "Stripe",
   "receiver_email": "recruiting@stripe.com",
-  "subject": "Application for Software Engineer — Gautam",
+  "subject": "Application for Software Engineer — Gautam Verma",
+  "html_body": "Dear Stripe Engineering Team,\n\n...",
+  "theme_used": "theme1",
+  "ai_used": true
+}
+```
+* **Response Payload (200 OK)**:
+```json
+{
+  "html": "<!DOCTYPE html><html lang=\"en\"><head><style>...</style></head><body><div class=\"container\">...</div></body></html>"
+}
+```
+
+#### 9. Asynchronous SMTP Dispatch (`POST /api/v1/compose/send/`)
+* **Request Payload**:
+```json
+{
+  "company_name": "Stripe",
+  "receiver_email": "recruiting@stripe.com",
+  "subject": "Application for Software Engineer — Gautam Verma",
   "html_body": "Dear Stripe Engineering Team,\n\n...",
   "theme_used": "theme1",
   "ai_used": true
@@ -546,12 +693,18 @@ erDiagram
         uuid id PK "UUID4 Hardware Identifier"
         string profile_name "Display identifier"
         string full_name "Candidate legal name"
+        string phone "Contact phone number"
         string role "Target job title"
         text skills "Comma-delimited skills"
         string experience "Experience seniority"
         text tech_stack "Primary stack tags"
+        string location "Geographic location"
         string college "Alma mater"
         string grad_year "Graduation year"
+        url linkedin "LinkedIn profile URL"
+        url github "GitHub profile URL"
+        url portfolio "Portfolio URL"
+        text about_me "Bio narrative & summary"
         url resume "Uploaded PDF binary path"
         text gmail_enc "Encrypted Gmail address"
         text app_password_enc "Encrypted App Password"
@@ -598,8 +751,12 @@ The client is built with **React Native** and **Expo**, engineered to deliver a 
 2. **Dual-Theme Design System**: Supports both dark and light modes through a custom token-based provider (`useAppTheme()`).
 3. **Gesture-Driven Interactions**:
    * **Swipe-to-Send**: A custom swipe slider built with `react-native-gesture-handler` and `react-native-reanimated` spring physics prevents accidental dispatches.
-   * **Animated Tone Slider**: An interactive segmented track smoothly transitions between *Professional*, *Friendly*, and *Direct* tones.
-4. **Resilient Local Caching**: Powered by **TanStack Query**, cached profiles and logs render instantly upon app launch while network revalidation runs quietly in the background.
+   * **Dynamic Tone Controller**: An interactive 3-step segmented track (*Professional*, *Friendly*, *Direct*) built with `PanResponder` and spring physics.
+4. **Interactive SVG Outreach Dial**: Real-time daily goal tracker on the home dashboard using SVG `strokeDashoffset` mathematics, with target preferences persisted via `AsyncStorage`.
+5. **Follow-Up Reminder & Overdue Tracking Engine**: Local reminder scheduling persisted in hardware `SecureStore`. The engine evaluates due dates on screen focus (`useFocusEffect`) and alerts candidates to stale applications.
+6. **Pre-Configured Outreach Frameworks**: Fast-start cards on the home dashboard (*Standard Application*, *Aggressive Follow-Up*, *Networking*) pre-populate prompt context and target tone.
+7. **Multi-Select Bulk History Management**: Batch selection mode allows deleting outdated or rejected applications in bulk with optimistic TanStack Query cache updates.
+8. **Resilient Local Caching**: Powered by **TanStack Query**, cached profiles and logs render instantly upon app launch while network revalidation runs quietly in the background.
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
@@ -753,6 +910,15 @@ To transform ProReach from a single mobile utility into an all-encompassing outr
     * Candidates can download a full, password-encrypted backup file (`.proreach-vault`) containing their complete history, profile, and address book.
     * Instantly restorable on any new device or clean browser installation without database dependence.
 
+#### ⚡ Option 7: Lightweight Desktop Menu Bar & System Tray App (Tauri + Rust)
+* **The Problem:** When developers are immersed in deep coding workflows (e.g., inside VS Code or debugging in the terminal), switching context to a mobile phone or opening heavy web browser tabs to draft a quick cold pitch breaks flow state.
+* **Architecture & Mechanics:**
+  * **Tauri 2.0 + Rust Engine:** Delivers a native desktop client consuming less than 15 MB of RAM and launching instantaneously (<100ms), bypassing Electron memory overhead.
+  * **Global Hotkey Daemon:** Registered global keyboard shortcut (`Cmd+Shift+P` on macOS, `Ctrl+Shift+P` on Windows/Linux) invokes a sleek glassmorphic popover HUD over any active IDE or browser window.
+  * **Clipboard AI Auto-Ingestion:** Actively inspects clipboard content upon hotkey activation to auto-detect pasted job descriptions or recruiter emails, immediately pre-populating the pitch compose form.
+  * **Native OS Keystore Integration:** Persists `X-Profile-ID` in the local operating system's secure vault (macOS Keychain, Windows Credential Manager, Linux Secret Service).
+  * **System Tray Follow-Up Alerts:** Dispatches native OS notifications when outreach reminders are due or when delivery status transitions from `sending` to `sent`.
+
 ---
 
 ### 🗺️ 12.3 Strategic Phased Roadmap & Execution Matrix
@@ -769,10 +935,11 @@ gantt
     QR-Based Device Pairing Protocol         :         p1_3, 2026-04-01, 2026-05-15
     Multi-Resume Portfolio Management        :         p1_4, 2026-05-01, 2026-06-15
 
-    section Phase 2: Browser Co-Pilot
+    section Phase 2: Browser Co-Pilot & Desktop
     Manifest V3 Chrome Extension Engine      :         p2_1, 2026-06-01, 2026-07-31
     LinkedIn & Indeed DOM Scraping Script    :         p2_2, 2026-07-15, 2026-08-31
     ATS Keyword Matcher & Gap Analyzer       :         p2_3, 2026-08-15, 2026-09-30
+    Desktop Menu Bar App (Tauri / Rust)      :         p2_4, 2026-08-01, 2026-09-30
 
     section Phase 3: Multi-Channel & Sequencer
     Celery + Redis Distributed Worker Queue  :         p3_1, 2026-09-15, 2026-10-31
@@ -790,7 +957,7 @@ gantt
 | Phase & Milestone | Target Horizon | Core Deliverables | Technology Stack | Architectural & Security Impact |
 | :--- | :--- | :--- | :--- | :--- |
 | **Phase 1: Web Command Center & Cloud Persistence** | **Q1 – Q2** | • Managed Cloud PostgreSQL migration (Neon/Supabase)<br>• Next.js 14 Desktop Web Dashboard<br>• Visual Kanban Application Board<br>• QR-based cross-device profile pairing<br>• Multi-resume portfolio storage | Next.js 14, React Server Components, Tailwind CSS, Shadcn UI, PostgreSQL, Cloudflare | Decouples persistence from ephemeral containers; enables high-volume desktop job application management. |
-| **Phase 2: Browser Co-Pilot & ATS Matcher** | **Q2 – Q3** | • Manifest V3 Chrome/Edge/Brave Extension<br>• 1-Click DOM scraping for LinkedIn & Indeed<br>• In-page floating composer drawer<br>• ATS Resume Match Score & Keyword Gap Analyzer | Chrome Extension API (MV3), TypeScript, Webpack, Vector Cosine Similarity | Eliminates tab switching; allows candidates to pitch directly from job postings with real-time keyword feedback. |
+| **Phase 2: Browser Co-Pilot & Desktop Menu Bar App** | **Q2 – Q3** | • Manifest V3 Chrome/Edge/Brave Extension<br>• 1-Click DOM scraping for LinkedIn & Indeed<br>• In-page floating composer drawer<br>• ATS Resume Match Score & Keyword Gap Analyzer<br>• Native Menu Bar App (Tauri + Rust) with global hotkey (`Cmd+Shift+P`) | Chrome Extension API (MV3), Tauri 2.0, Rust, TypeScript, Webpack, OS Keyring | Eliminates tab switching; allows candidates to pitch directly from job postings or hotkeys without leaving their IDE. |
 | **Phase 3: Multi-Channel Outreach & Sequencer** | **Q3 – Q4** | • Distributed background worker queue (Celery + Redis)<br>• Microsoft 365 (Graph API) & Custom SMTP<br>• 3-Stage automated follow-up drip sequence<br>• Inbound IMAP reply detection to auto-cancel follow-ups | Celery, Redis, Microsoft Graph API, Python `imaplib`, SPF/DKIM validation | Converts single-shot outreach into structured high-converting campaigns; removes background thread scaling bottlenecks. |
 | **Phase 4: Advanced Intelligence & Portable Vault** | **Q4+** | • Multi-model LLM failover (Gemini, Claude 3.5, Local Ollama)<br>• Recruiter email discovery API (Hunter/Apollo)<br>• Portable encrypted JSON backup & restore (`.proreach-vault`) | Anthropic Claude SDK, Ollama WebAssembly, Web Crypto API, Apollo.io API | Enables 100% offline private pitch generation and zero-vendor-lock-in data portability. |
 

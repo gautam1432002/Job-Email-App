@@ -10,10 +10,11 @@
 
 <p align="center">
   <a href="#the-problem--the-solution">The Solution</a> •
-  <a href="#-workflow-diagram">How It Works</a> •
-  <a href="#-developers-diary-why-i-built-this">Developer's Diary</a> •
-  <a href="#-architecture">Architecture</a> •
-  <a href="#-tech-stack">Tech Stack</a>
+  <a href="#workflow-diagram">How It Works</a> •
+  <a href="#developers-diary-why-i-built-this">Developer's Diary</a> •
+  <a href="#system-architecture">Architecture</a> •
+  <a href="#tech-stack">Tech Stack</a> •
+  <a href="PROJECT_DOCUMENTATION.md"><b>📚 Full Specification</b></a>
 </p>
 
 ![ProReach Banner](https://img.shields.io/badge/Status-Live-success?style=for-the-badge)
@@ -21,8 +22,13 @@
 ![React Native](https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![Django](https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=django&logoColor=green)
 ![Gemini AI](https://img.shields.io/badge/Google_Gemini-4285F4?style=for-the-badge&logo=google&logoColor=white)
+<a href="PROJECT_DOCUMENTATION.md"><img src="https://img.shields.io/badge/Documentation-Complete_Spec-8B5CF6?style=for-the-badge&logo=gitbook&logoColor=white" alt="Full Documentation" /></a>
 
 ---
+
+> [!TIP]
+> 📚 **Deep Dive Architecture & Engineering Specification:**  
+> For complete architectural blueprints, dynamic per-tenant cryptographic formulas, complete REST API schemas, relational entity models, and the multi-client ecosystem expansion roadmap, explore [**`PROJECT_DOCUMENTATION.md`**](PROJECT_DOCUMENTATION.md).
 
 ## 🛑 The Problem & The Solution
 
