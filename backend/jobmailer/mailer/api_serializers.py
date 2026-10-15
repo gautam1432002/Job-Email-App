@@ -36,17 +36,29 @@ class CompanySerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'email', 'notes', 'added_at']
         read_only_fields = ['id', 'added_at']
 
+    def validate_name(self, value):
+        return value.strip() if value else value
+
+    def validate_email(self, value):
+        return value.strip().lower() if value else value
+
+
 class EmailLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = EmailLog
         fields = '__all__'
         read_only_fields = ['id', 'profile', 'sent_at']
 
+
 class GeneratePitchSerializer(serializers.Serializer):
     company_name = serializers.CharField(max_length=200)
     job_description = serializers.CharField(required=False, allow_blank=True)
     about_company = serializers.CharField(required=False, allow_blank=True)
     use_resume = serializers.BooleanField(default=True)
+
+    def validate_company_name(self, value):
+        return value.strip() if value else value
+
 
 class SendEmailSerializer(serializers.Serializer):
     receiver_email = serializers.EmailField()
@@ -55,3 +67,12 @@ class SendEmailSerializer(serializers.Serializer):
     html_body = serializers.CharField()
     ai_used = serializers.BooleanField(default=False)
     theme_used = serializers.CharField(max_length=60, default='none')
+
+    def validate_receiver_email(self, value):
+        return value.strip().lower() if value else value
+
+    def validate_company_name(self, value):
+        return value.strip() if value else value
+
+    def validate_subject(self, value):
+        return value.strip() if value else value

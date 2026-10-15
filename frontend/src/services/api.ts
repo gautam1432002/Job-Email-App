@@ -28,7 +28,11 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response && (error.response.status === 401 || error.response.status === 403 || error.response.status === 404)) {
+    const status = error.response?.status;
+    const isProfileEndpoint = error.config?.url?.includes('profiles/');
+
+    // Only wipe local profile if auth explicitly fails or profile endpoint returns 404
+    if (status === 401 || status === 403 || (status === 404 && isProfileEndpoint)) {
       console.warn("Backend rejected Profile ID (likely DB wipe). Wiping local SecureStore...");
       
       // Delete the orphaned UUID so the app doesn't stay stuck in a broken state
